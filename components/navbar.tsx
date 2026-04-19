@@ -86,7 +86,6 @@ export function NavbarDemo() {
           </MobileNavMenu>
         </MobileNav>
       </Navbar>
-      <DummyContent />
 
       {/* Navbar */}
     </div>

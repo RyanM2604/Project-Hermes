@@ -13,11 +13,15 @@ import {
   Bell,
   Globe
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import BackgroundGlobe from '../components/puslate-globe'
 
 export default function App() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
   const [activeTab, setActiveTab] = useState(0);
+
+  const router = useRouter();
 
   const features = [
     { 
@@ -54,6 +58,9 @@ export default function App() {
       return;
     }
     setStatus('loading');
+
+    router.push(`/auth?email=${encodeURIComponent(email)}`);
+
     setTimeout(() => setStatus('success'), 1500);
   };
 
@@ -62,9 +69,7 @@ export default function App() {
       
       {/* 1. Animated Background Map Pings */}
       <div className="absolute inset-0 opacity-20 pointer-events-none">
-        <div className="absolute top-1/4 left-1/3 w-2 h-2 bg-blue-500 rounded-full animate-ping"></div>
-        <div className="absolute top-1/2 left-1/2 w-2 h-2 bg-indigo-500 rounded-full animate-ping [animation-delay:1s]"></div>
-        <div className="absolute top-1/3 right-1/4 w-2 h-2 bg-blue-400 rounded-full animate-ping [animation-delay:2s]"></div>
+        <BackgroundGlobe /> 
         
         {/* Subtle Map Outline (SVG) */}
         <svg className="absolute inset-0 w-full h-full opacity-10" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
@@ -183,15 +188,6 @@ export default function App() {
           font-family: 'Inter', system-ui, -apple-system, sans-serif;
         }
 
-        .animate-ping {
-          animation: ping 3s cubic-bezier(0, 0, 0.2, 1) infinite;
-        }
-
-        @keyframes ping {
-          75%, 100% {
-            transform: scale(3);
-            opacity: 0;
-          }
         }
       `}} />
     </div>

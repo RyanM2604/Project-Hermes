@@ -67,7 +67,7 @@ export default function App() {
     <div className="min-h-screen bg-[#050505] text-zinc-300 font-sans antialiased selection:bg-blue-500/30 overflow-hidden relative">
       
       {/* 1. Animated Background Map Pings */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none">
+      <div className="absolute inset-0 opacity-45 max-md:pointer-events-none">
         <BackgroundGlobe /> 
         
         {/* Subtle Map Outline (SVG) */}

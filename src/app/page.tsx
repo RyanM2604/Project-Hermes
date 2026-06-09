@@ -1,23 +1,25 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { 
   ArrowRight, 
   Mail, 
   CheckCircle2, 
-  Sparkles, 
   Map as MapIcon, 
   Video, 
-  Users,
   Pizza,
-  Bell,
   Globe
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import BackgroundGlobe from '@/components/puslate-globe'
 
 export default function App() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
   const [activeTab, setActiveTab] = useState(0);
+
+  const router = useRouter();
 
   const features = [
     { 
@@ -54,6 +56,9 @@ export default function App() {
       return;
     }
     setStatus('loading');
+
+    router.push(`/auth?email=${encodeURIComponent(email)}`);
+
     setTimeout(() => setStatus('success'), 1500);
   };
 
@@ -62,9 +67,7 @@ export default function App() {
       
       {/* 1. Animated Background Map Pings */}
       <div className="absolute inset-0 opacity-20 pointer-events-none">
-        <div className="absolute top-1/4 left-1/3 w-2 h-2 bg-blue-500 rounded-full animate-ping"></div>
-        <div className="absolute top-1/2 left-1/2 w-2 h-2 bg-indigo-500 rounded-full animate-ping [animation-delay:1s]"></div>
-        <div className="absolute top-1/3 right-1/4 w-2 h-2 bg-blue-400 rounded-full animate-ping [animation-delay:2s]"></div>
+        <BackgroundGlobe /> 
         
         {/* Subtle Map Outline (SVG) */}
         <svg className="absolute inset-0 w-full h-full opacity-10" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
@@ -82,8 +85,14 @@ export default function App() {
       {/* Nav */}
       <nav className="relative z-10 flex justify-between items-center px-6 md:px-12 py-8 max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
-          <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(37,99,235,0.3)]">
-            <span className="text-white font-bold text-lg italic">H</span>
+          <div className="w-12 h-9 flex items-center justify-center">
+            <Image
+              src="/hermes-logo.svg"
+              alt="Hermes winged sandal"
+              width={48}
+              height={36}
+              priority
+            />
           </div>
           <span className="text-xl font-bold text-white tracking-tight">Hermes</span>
         </div>
@@ -103,7 +112,7 @@ export default function App() {
 
         {/* Improved Typography: Using font-sans with heavy weights */}
         <h1 className="text-6xl md:text-[100px] font-extrabold text-white tracking-tighter mb-8 leading-[0.85]">
-          See what's <br />
+          See what&apos;s <br />
           <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-blue-500 bg-clip-text text-transparent">
             happening at UW.
           </span>
@@ -183,15 +192,6 @@ export default function App() {
           font-family: 'Inter', system-ui, -apple-system, sans-serif;
         }
 
-        .animate-ping {
-          animation: ping 3s cubic-bezier(0, 0, 0.2, 1) infinite;
-        }
-
-        @keyframes ping {
-          75%, 100% {
-            transform: scale(3);
-            opacity: 0;
-          }
         }
       `}} />
     </div>

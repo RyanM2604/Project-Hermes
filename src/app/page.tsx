@@ -85,12 +85,13 @@ export default function App() {
       {/* Nav */}
       <nav className="relative z-10 flex justify-between items-center px-6 md:px-12 py-8 max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
-          <div className="w-12 h-9 flex items-center justify-center">
+          <div className="flex h-10 w-14 items-center justify-center">
             <Image
-              src="/hermes-logo.svg"
+              src="/hermes-logo.png"
               alt="Hermes winged sandal"
-              width={48}
+              width={64}
               height={36}
+              className="scale-[1.8] brightness-0 invert"
               priority
             />
           </div>

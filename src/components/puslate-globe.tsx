@@ -5,12 +5,11 @@ import * as THREE from 'three';
 // --- Types & Interfaces ---
 
 interface GlobeUniforms {
-    uTime: { value: number };
-    uColor: { value: THREE.Color };
-    uFrequency: { value: number };
-    // Add this index signature:
-    [key: string]: THREE.IUniform<any>; 
-  }
+  uTime: { value: number };
+  uColor: { value: THREE.Color };
+  uFrequency: { value: number };
+  [key: string]: THREE.IUniform<unknown>;
+}
 
 interface NetworkGlobeProps {
   nodeCount?: number;
@@ -85,8 +84,8 @@ const NetworkGlobe: React.FC<NetworkGlobeProps> = ({
         radius * Math.cos(phi)
       ));
       
-      // Random phase offset for the pulsating effect
-      offsets[i] = Math.random() * Math.PI * 2;
+      // Deterministic phase offset keeps render-time geometry generation pure.
+      offsets[i] = (i / nodeCount) * Math.PI * 2;
     }
 
     // 2. Generate Edges

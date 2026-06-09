@@ -14,7 +14,7 @@ export default function EmailPassword({ user }: Props) {
   return (
     <div>
       <h1>Email Password</h1>
-      <p>{email}</p>
+      <p>{user?.email ?? email}</p>
     </div>
   );
 }

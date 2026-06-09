@@ -1,20 +1,18 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { 
   ArrowRight, 
   Mail, 
   CheckCircle2, 
-  Sparkles, 
   Map as MapIcon, 
   Video, 
-  Users,
   Pizza,
-  Bell,
   Globe
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import BackgroundGlobe from '../components/puslate-globe'
+import BackgroundGlobe from '@/components/puslate-globe'
 
 export default function App() {
   const [email, setEmail] = useState('');
@@ -87,8 +85,14 @@ export default function App() {
       {/* Nav */}
       <nav className="relative z-10 flex justify-between items-center px-6 md:px-12 py-8 max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
-          <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(37,99,235,0.3)]">
-            <span className="text-white font-bold text-lg italic">H</span>
+          <div className="w-12 h-9 flex items-center justify-center">
+            <Image
+              src="/hermes-logo.svg"
+              alt="Hermes winged sandal"
+              width={48}
+              height={36}
+              priority
+            />
           </div>
           <span className="text-xl font-bold text-white tracking-tight">Hermes</span>
         </div>
@@ -108,7 +112,7 @@ export default function App() {
 
         {/* Improved Typography: Using font-sans with heavy weights */}
         <h1 className="text-6xl md:text-[100px] font-extrabold text-white tracking-tighter mb-8 leading-[0.85]">
-          See what's <br />
+          See what&apos;s <br />
           <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-blue-500 bg-clip-text text-transparent">
             happening at UW.
           </span>

@@ -9,7 +9,7 @@ import {
   Map as MapIcon, 
   Video, 
   Pizza,
-  Globe
+  Menu
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import BackgroundGlobe from '@/components/puslate-globe'
@@ -18,6 +18,7 @@ export default function App() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
   const [activeTab, setActiveTab] = useState(0);
+  const [isNavOpen, setIsNavOpen] = useState(false);
 
   const router = useRouter();
 
@@ -83,33 +84,92 @@ export default function App() {
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-600/10 blur-[120px] rounded-full"></div>
 
       {/* Nav */}
-      <nav className="relative z-10 flex justify-between items-center px-6 md:px-12 py-8 max-w-7xl mx-auto">
-        <div className="flex items-center gap-2">
-          <div className="flex h-10 w-14 items-center justify-center">
-            <Image
-              src="/hermes-logo.png"
-              alt="Hermes winged sandal"
-              width={64}
-              height={36}
-              className="scale-[1.8] brightness-0 invert"
-              priority
-            />
-          </div>
-          <span className="text-xl font-bold text-white tracking-tight">Hermes</span>
-        </div>
-        <div className="hidden md:flex items-center gap-3 px-4 py-2 rounded-full border border-zinc-800 bg-zinc-900/40 backdrop-blur-md text-[11px] font-bold text-zinc-400 tracking-wider">
-          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-          LIVE: 42 CAMPUS EVENTS
-        </div>
-      </nav>
+      <header className="fixed inset-x-0 top-0 z-50 px-5 py-5 md:px-10 md:py-7">
+        <nav className="relative mx-auto flex max-w-7xl items-center justify-between">
+          <a href="#" className="flex items-center gap-2.5" aria-label="Hermes home">
+            <span className="flex h-10 w-14 items-center justify-center">
+              <Image
+                src="/hermes-logo.png"
+                alt=""
+                width={64}
+                height={36}
+                className="scale-[1.8] brightness-0 invert"
+                priority
+              />
+            </span>
+            <span className="text-xl font-bold tracking-tight text-white">Hermes</span>
+          </a>
 
-      <main className="relative z-10 max-w-5xl mx-auto px-6 pt-20 md:pt-32 pb-32 flex flex-col items-center text-center">
-        
-        {/* Badge */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-zinc-800 bg-zinc-900/50 text-zinc-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-12 cursor-default hover:border-zinc-700 transition-colors">
-          <Globe size={12} className="text-blue-500" />
-          UWaterloo Discovery Network
-        </div>
+          <div className="absolute left-1/2 hidden -translate-x-1/2 md:block">
+            <div className="rounded-full border border-white/20 bg-black/40 px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(255,255,255,0.08),0_18px_50px_rgba(0,0,0,0.32)] backdrop-blur-xl">
+              <div className="flex items-center gap-1">
+                {[
+                  { label: "Home", href: "#" },
+                  { label: "Events", href: "#events" },
+                  { label: "Clubs", href: "#clubs" },
+                  { label: "Map", href: "#map" },
+                ].map((item) => (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    className="rounded-full px-4 py-2 text-sm font-medium text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
+                  >
+                    {item.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <a
+            href="#join"
+            className="hidden rounded-full border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-xl transition-colors hover:bg-white/15 md:inline-flex"
+          >
+            Join Hermes
+          </a>
+
+          <button
+            type="button"
+            aria-label="Open navigation"
+            aria-expanded={isNavOpen}
+            onClick={() => setIsNavOpen((isOpen) => !isOpen)}
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] backdrop-blur-xl md:hidden"
+          >
+            <Menu size={18} />
+          </button>
+
+          {isNavOpen && (
+            <div className="absolute inset-x-0 top-14 rounded-3xl border border-white/20 bg-black/70 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_18px_50px_rgba(0,0,0,0.4)] backdrop-blur-xl md:hidden">
+              <div className="flex flex-col">
+                {[
+                  { label: "Home", href: "#" },
+                  { label: "Events", href: "#events" },
+                  { label: "Clubs", href: "#clubs" },
+                  { label: "Map", href: "#map" },
+                ].map((item) => (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    onClick={() => setIsNavOpen(false)}
+                    className="rounded-2xl px-4 py-3 text-sm font-medium text-zinc-200 transition-colors hover:bg-white/10 hover:text-white"
+                  >
+                    {item.label}
+                  </a>
+                ))}
+                <a
+                  href="#join"
+                  onClick={() => setIsNavOpen(false)}
+                  className="mt-2 rounded-2xl bg-white px-4 py-3 text-center text-sm font-semibold text-black"
+                >
+                  Join Hermes
+                </a>
+              </div>
+            </div>
+          )}
+        </nav>
+      </header>
+
+      <main className="relative z-10 max-w-5xl mx-auto px-6 pt-40 md:pt-48 pb-32 flex flex-col items-center text-center">
 
         {/* Improved Typography: Using font-sans with heavy weights */}
         <h1 className="text-6xl md:text-[100px] font-extrabold text-white tracking-tighter mb-8 leading-[0.85]">

@@ -1,0 +1,35 @@
+name: Main Promotion Policy
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - edited
+      - ready_for_review
+
+permissions:
+  contents: read
+
+jobs:
+  require-dev-source:
+    name: Require dev as source branch
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Verify pull request source
+        env:
+          HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+          HEAD_BRANCH: ${{ github.head_ref }}
+          BASE_REPOSITORY: ${{ github.repository }}
+        run: |
+          if [ "$HEAD_REPOSITORY" != "$BASE_REPOSITORY" ] || [ "$HEAD_BRANCH" != "dev" ]; then
+            echo "::error::Pull requests into main must originate from the dev branch in this repository."
+            exit 1
+          fi
+
+          echo "Promotion source verified: dev -> main"
+

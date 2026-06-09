@@ -105,7 +105,7 @@ export default function App() {
               <div className="flex items-center gap-1">
                 {[
                   { label: "Home", href: "#" },
-                  { label: "Events", href: "#events" },
+                  { label: "Events", href: "/events" },
                   { label: "Clubs", href: "#clubs" },
                   { label: "Map", href: "#map" },
                 ].map((item) => (
@@ -143,7 +143,7 @@ export default function App() {
               <div className="flex flex-col">
                 {[
                   { label: "Home", href: "#" },
-                  { label: "Events", href: "#events" },
+                  { label: "Events", href: "/events" },
                   { label: "Clubs", href: "#clubs" },
                   { label: "Map", href: "#map" },
                 ].map((item) => (

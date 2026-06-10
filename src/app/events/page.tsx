@@ -2,15 +2,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { CalendarDays, Home, Map, Plus, UserRound } from "lucide-react";
 
-import { EventFeed, StartingSoonCarousel } from "@/components/feed";
-import { mockEvents } from "@/lib/events";
+import { EventFeed, EventFilters, StartingSoonCarousel } from "@/components/feed";
+import { filterEventsByTag, mockEvents, parseEventTag } from "@/lib/events";
 
 const sortedEvents = [...mockEvents].sort(
   (left, right) =>
     new Date(left.startTime).getTime() - new Date(right.startTime).getTime(),
 );
 
-export default function EventsPage() {
+export default async function EventsPage({ searchParams }: PageProps<"/events">) {
+  const selectedTag = parseEventTag((await searchParams).tag);
+  const filteredEvents = filterEventsByTag(sortedEvents, selectedTag);
+
   return (
     <div className="min-h-screen bg-[#050505] text-white">
       <header className="sticky top-0 z-40 border-b border-white/10 bg-black/55 px-5 py-4 backdrop-blur-xl sm:px-8">
@@ -67,7 +70,8 @@ export default function EventsPage() {
         <StartingSoonCarousel events={sortedEvents.slice(0, 5)} />
 
         <div id="event-feed" className="mt-16 scroll-mt-28">
-          <EventFeed events={sortedEvents} />
+          <EventFilters selectedTag={selectedTag} />
+          <EventFeed events={filteredEvents} />
         </div>
       </main>
 

@@ -70,10 +70,10 @@ export function SiteNavbar() {
         </div>
 
         <Link
-          href="/#join"
+          href="/login"
           className="hidden rounded-full border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-xl transition-colors hover:bg-white/15 md:inline-flex"
         >
-          Join Hermes
+          Login
         </Link>
 
         <button
@@ -100,11 +100,11 @@ export function SiteNavbar() {
                 </Link>
               ))}
               <Link
-                href="/#join"
+                href="/login"
                 onClick={() => setIsNavOpen(false)}
                 className="mt-2 rounded-2xl bg-white px-4 py-3 text-center text-sm font-semibold text-black"
               >
-                Join Hermes
+                Login
               </Link>
             </div>
           </div>

@@ -11,6 +11,18 @@ describe("createSourceFingerprint", () => {
     );
     expect(fingerprint).toMatch(/^[a-f0-9]{64}$/);
   });
+
+  it("rejects blank source IDs", () => {
+    expect(() => createSourceFingerprint("wusa-events", " \n\t")).toThrow(
+      "Source ID must not be blank",
+    );
+  });
+
+  it("namespaces the same source ID by source", () => {
+    expect(createSourceFingerprint("wusa-events", "event-123")).not.toBe(
+      createSourceFingerprint("uwaterloo-events", "event-123"),
+    );
+  });
 });
 
 describe("parseRequiredDate", () => {
@@ -22,5 +34,13 @@ describe("parseRequiredDate", () => {
 
   it("returns null for a malformed date", () => {
     expect(parseRequiredDate("not-a-date")).toBeNull();
+  });
+
+  it("returns null for a timezone-less date", () => {
+    expect(parseRequiredDate("2026-09-14T18:00:00")).toBeNull();
+  });
+
+  it("returns null for an impossible calendar date", () => {
+    expect(parseRequiredDate("2026-02-30T18:00:00Z")).toBeNull();
   });
 });

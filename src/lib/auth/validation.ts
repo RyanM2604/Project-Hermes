@@ -2,6 +2,10 @@ export function isUWaterlooEmail(email: string) {
   return /^[^@\s]+@uwaterloo\.ca$/i.test(email.trim());
 }
 
+export function isValidPassword(password: string) {
+  return password.length >= 8;
+}
+
 export function getSafeRedirectPath(value: string | null) {
   if (!value || !value.startsWith("/") || value.includes("\\")) {
     return "/events";

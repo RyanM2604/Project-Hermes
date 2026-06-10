@@ -78,6 +78,11 @@ describe("uwaterlooEventsAdapter", () => {
     });
   });
 
+  it("normalizes records when passed directly as an array callback", () => {
+    expect(() => records.map(uwaterlooEventsAdapter.normalize)).not.toThrow();
+    expect(records.map(uwaterlooEventsAdapter.normalize)).toHaveLength(3);
+  });
+
   it("creates stable source fingerprints", () => {
     const fingerprint = uwaterlooEventsAdapter.sourceFingerprint(records[0]);
 
@@ -114,4 +119,25 @@ describe("uwaterlooEventsAdapter", () => {
       });
     },
   );
+
+  it("rejects non-http source URLs as missing required fields", () => {
+    const record = { ...records[0], url: "javascript:alert('unsafe')" };
+
+    expect(uwaterlooEventsAdapter.normalize(record)).toEqual({
+      ok: false,
+      rejection: {
+        source: "uwaterloo-events",
+        recordId: "uw-101",
+        reason: "missing-required-field",
+      },
+    });
+  });
+
+  it("ignores non-http image URLs", () => {
+    const record = { ...records[0], image: "javascript:alert('unsafe')" };
+    const result = uwaterlooEventsAdapter.normalize(record);
+
+    expect(result).toMatchObject({ ok: true });
+    expect(result.ok && result.event.imageUrl).toBeUndefined();
+  });
 });

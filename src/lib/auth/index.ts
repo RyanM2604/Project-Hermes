@@ -1,1 +1,1 @@
-export {};
+export { requireUser } from "./require-user";

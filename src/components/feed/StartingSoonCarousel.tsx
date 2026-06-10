@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import type { HermesEvent } from "@/types/event";
 
 interface StartingSoonCarouselProps {
@@ -32,11 +34,9 @@ export function StartingSoonCarousel({ events }: StartingSoonCarouselProps) {
 
       <div className="no-scrollbar -mx-5 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-3 sm:-mx-8 sm:px-8 lg:mx-0 lg:px-0">
         {events.map((event) => (
-          <a
+          <Link
             key={event.id}
-            href={event.sourceUrl}
-            target="_blank"
-            rel="noreferrer"
+            href={`/events/${event.id}`}
             className="group relative min-h-44 w-[82vw] max-w-sm shrink-0 snap-start overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-blue-500/25 via-white/[0.05] to-zinc-950 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_20px_60px_rgba(0,0,0,0.25)] backdrop-blur-xl transition hover:-translate-y-1 hover:border-white/20 sm:w-80"
           >
             <div className="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-blue-400/20 blur-3xl" />
@@ -64,7 +64,7 @@ export function StartingSoonCarousel({ events }: StartingSoonCarouselProps) {
                 </p>
               </div>
             </div>
-          </a>
+          </Link>
         ))}
       </div>
     </section>

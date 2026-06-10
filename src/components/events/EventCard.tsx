@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import type { HermesEvent } from "@/types/event";
 
 interface EventCardProps {
@@ -23,7 +25,11 @@ function formatTag(tag: HermesEvent["tags"][number]) {
 export function EventCard({ event }: EventCardProps) {
   return (
     <article className="group overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_24px_70px_rgba(0,0,0,0.28)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.06]">
-      <div className="relative flex aspect-[16/9] items-end overflow-hidden border-b border-white/10 bg-gradient-to-br from-blue-500/30 via-indigo-500/15 to-zinc-950 p-5">
+      <Link
+        href={`/events/${event.id}`}
+        aria-label={`View ${event.title}`}
+        className="relative flex aspect-[16/9] items-end overflow-hidden border-b border-white/10 bg-gradient-to-br from-blue-500/30 via-indigo-500/15 to-zinc-950 p-5"
+      >
         <div className="absolute -right-10 -top-12 h-40 w-40 rounded-full bg-blue-400/20 blur-3xl" />
         <div className="absolute -bottom-16 -left-8 h-36 w-36 rounded-full bg-indigo-500/20 blur-3xl" />
 
@@ -37,15 +43,20 @@ export function EventCard({ event }: EventCardProps) {
             </span>
           )}
         </div>
-      </div>
+      </Link>
 
       <div className="flex flex-col gap-5 p-5 sm:p-6">
         <div>
           <p className="mb-2 text-sm font-medium text-blue-300">
             {event.clubName}
           </p>
-          <h2 className="text-2xl font-bold leading-tight tracking-tight text-white sm:text-3xl">
-            {event.title}
+          <h2>
+            <Link
+              href={`/events/${event.id}`}
+              className="text-2xl font-bold leading-tight tracking-tight text-white transition-colors hover:text-blue-200 sm:text-3xl"
+            >
+              {event.title}
+            </Link>
           </h2>
         </div>
 

@@ -1,5 +1,3 @@
-import Image from "next/image";
-import Link from "next/link";
 import { CalendarDays, Home, Map, Plus, UserRound } from "lucide-react";
 
 import { EventFeed, EventFilters, StartingSoonCarousel } from "@/components/feed";
@@ -16,44 +14,7 @@ export default async function EventsPage({ searchParams }: PageProps<"/events">)
 
   return (
     <div className="min-h-screen bg-[#050505] text-white">
-      <header className="sticky top-0 z-40 border-b border-white/10 bg-black/55 px-5 py-4 backdrop-blur-xl sm:px-8">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5" aria-label="Hermes landing page">
-            <span className="flex h-9 w-12 items-center justify-center">
-              <Image
-                src="/hermes-logo.png"
-                alt=""
-                width={56}
-                height={31}
-                className="scale-[1.8] brightness-0 invert"
-                priority
-              />
-            </span>
-            <span className="text-lg font-bold tracking-tight">Hermes</span>
-          </Link>
-
-          <div className="hidden items-center gap-1 rounded-full border border-white/20 bg-white/[0.06] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] md:flex">
-            <Link
-              href="/events"
-              className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-black"
-            >
-              Events
-            </Link>
-            <a
-              href="#event-feed"
-              className="rounded-full px-4 py-2 text-sm font-medium text-zinc-300 hover:bg-white/10 hover:text-white"
-            >
-              Browse
-            </a>
-          </div>
-
-          <span className="hidden text-sm font-medium text-zinc-500 sm:block">
-            Waterloo campus feed
-          </span>
-        </nav>
-      </header>
-
-      <main className="mx-auto max-w-6xl px-5 pb-32 pt-10 sm:px-8 sm:pt-14">
+      <main className="mx-auto max-w-6xl px-5 pb-32 pt-32 sm:px-8 sm:pt-36">
         <div className="mb-12 max-w-2xl">
           <div className="mb-4 flex items-center gap-2 text-sm font-medium text-blue-300">
             <CalendarDays size={16} />

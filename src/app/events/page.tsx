@@ -67,10 +67,11 @@ export default async function EventsPage({ searchParams }: PageProps<"/events">)
           </p>
         </div>
 
+        <EventFilters selectedTag={selectedTag} />
+
         <StartingSoonCarousel events={sortedEvents.slice(0, 5)} />
 
         <div id="event-feed" className="mt-16 scroll-mt-28">
-          <EventFilters selectedTag={selectedTag} />
           <EventFeed events={filteredEvents} />
         </div>
       </main>

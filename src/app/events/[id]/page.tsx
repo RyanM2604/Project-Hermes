@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, CalendarDays, Clock, MapPin } from "lucide-react";
 
+import { SaveEventButton } from "@/components/events";
 import { mockEvents } from "@/lib/events";
 import type { HermesEvent } from "@/types/event";
 
@@ -172,6 +173,7 @@ export default async function EventDetailPage({
               >
                 Login to RSVP
               </button>
+              <SaveEventButton eventId={event.id} />
             </aside>
           </div>
         </article>

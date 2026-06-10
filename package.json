@@ -2,6 +2,9 @@
   "name": "project_hermes",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.18.1"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -40,6 +43,6 @@
     "eslint-config-next": "16.2.1",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.6"
   }
 }

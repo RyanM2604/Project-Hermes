@@ -6,4 +6,5 @@ export type {
   NormalizedEventCandidate,
 } from "./types";
 export { uwaterlooEventsAdapter } from "./uwaterloo-events";
+export { wusaEventsAdapter } from "./wusa-events";
 export { createSourceFingerprint, parseRequiredDate } from "./utils";

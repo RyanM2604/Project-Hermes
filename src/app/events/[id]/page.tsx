@@ -60,7 +60,7 @@ export default async function EventDetailPage({
   const endTime = new Date(event.endTime);
 
   return (
-    <main className="min-h-screen bg-[#050505] px-5 py-8 text-white sm:px-8 sm:py-12">
+    <main className="min-h-screen bg-[#050505] px-5 pb-8 pt-32 text-white sm:px-8 sm:pb-12 sm:pt-36">
       <div className="mx-auto max-w-5xl">
         <Link
           href="/events"

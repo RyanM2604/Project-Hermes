@@ -62,6 +62,19 @@ describe("wusaClubsAdapter", () => {
     });
   });
 
+  it("maps a Startup label on a valid event", () => {
+    const record = { ...records[0], labels: ["Startup"] };
+    const result = wusaClubsAdapter.normalize(record);
+
+    expect(result).toMatchObject({
+      ok: true,
+      event: {
+        tags: ["startup-pitch"],
+        isFreeFood: false,
+      },
+    });
+  });
+
   it("rejects a missing organizer without preventing valid records from normalizing", () => {
     const results = records.map(wusaClubsAdapter.normalize);
 
@@ -77,11 +90,15 @@ describe("wusaClubsAdapter", () => {
     });
   });
 
-  it("normalizes records with a detached receiver-independent method", () => {
-    const { normalize } = wusaClubsAdapter;
+  it("supports detached receiver-independent methods", () => {
+    const { normalize, sourceFingerprint } = wusaClubsAdapter;
 
-    expect(() => records.map(normalize)).not.toThrow();
-    expect(records.map(normalize)).toHaveLength(3);
+    expect(records.map(normalize)).toEqual(
+      records.map((record) => wusaClubsAdapter.normalize(record)),
+    );
+    expect(records.map(sourceFingerprint)).toEqual(
+      records.map((record) => wusaClubsAdapter.sourceFingerprint(record)),
+    );
   });
 
   it("creates stable source-namespaced fingerprints", () => {

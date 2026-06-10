@@ -1,11 +1,32 @@
 import { EventCard } from "@/components/events";
 import type { HermesEvent } from "@/types/event";
+import { EmptyFeedState } from "./EmptyFeedState";
 
 interface EventFeedProps {
   events: HermesEvent[];
 }
 
 export function EventFeed({ events }: EventFeedProps) {
+  if (events.length === 0) {
+    return (
+      <section aria-labelledby="event-feed-heading">
+        <div className="mb-6">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-blue-300">
+            Explore campus
+          </p>
+          <h2
+            id="event-feed-heading"
+            className="text-2xl font-bold tracking-tight text-white sm:text-3xl"
+          >
+            All Events
+          </h2>
+        </div>
+
+        <EmptyFeedState />
+      </section>
+    );
+  }
+
   return (
     <section aria-labelledby="event-feed-heading">
       <div className="mb-6">

@@ -6,11 +6,11 @@ const ISO_DATE_TIME_PATTERN =
 export function createSourceFingerprint(
   source: string,
   sourceId: string,
-): string {
+): string | null {
   const trimmedSourceId = sourceId.trim();
 
   if (!trimmedSourceId) {
-    throw new Error("Source ID must not be blank");
+    return null;
   }
 
   return createHash("sha256")

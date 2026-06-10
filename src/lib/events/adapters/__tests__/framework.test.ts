@@ -12,10 +12,8 @@ describe("createSourceFingerprint", () => {
     expect(fingerprint).toMatch(/^[a-f0-9]{64}$/);
   });
 
-  it("rejects blank source IDs", () => {
-    expect(() => createSourceFingerprint("wusa-events", " \n\t")).toThrow(
-      "Source ID must not be blank",
-    );
+  it("returns null for blank source IDs", () => {
+    expect(createSourceFingerprint("wusa-events", " \n\t")).toBeNull();
   });
 
   it("namespaces the same source ID by source", () => {

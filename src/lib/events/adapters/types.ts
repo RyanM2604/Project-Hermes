@@ -35,5 +35,5 @@ export interface EventSourceAdapter<TRawRecord> {
   readonly source: EventSourceId;
   parseRaw(raw: string): TRawRecord[];
   normalize(record: TRawRecord): NormalizationResult;
-  sourceFingerprint(record: TRawRecord): string;
+  sourceFingerprint(record: TRawRecord): string | null;
 }

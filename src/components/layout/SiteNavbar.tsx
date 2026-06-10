@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Menu } from "lucide-react";
+import { Menu, UserRound } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
@@ -13,7 +13,11 @@ const navItems = [
   { label: "Map", href: "/#map" },
 ];
 
-export function SiteNavbar() {
+interface SiteNavbarProps {
+  isAuthenticated: boolean;
+}
+
+export function SiteNavbar({ isAuthenticated }: SiteNavbarProps) {
   const pathname = usePathname();
   const [isNavOpen, setIsNavOpen] = useState(false);
 
@@ -69,12 +73,22 @@ export function SiteNavbar() {
           </div>
         </div>
 
-        <Link
-          href="/login"
-          className="hidden rounded-full border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-xl transition-colors hover:bg-white/15 md:inline-flex"
-        >
-          Login
-        </Link>
+        {isAuthenticated ? (
+          <button
+            type="button"
+            aria-label="Open profile"
+            className="hidden h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-xl md:inline-flex"
+          >
+            <UserRound size={19} />
+          </button>
+        ) : (
+          <Link
+            href="/signup"
+            className="hidden rounded-full border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-xl transition-colors hover:bg-white/15 md:inline-flex"
+          >
+            Sign up
+          </Link>
+        )}
 
         <button
           type="button"
@@ -99,13 +113,24 @@ export function SiteNavbar() {
                   {item.label}
                 </Link>
               ))}
-              <Link
-                href="/login"
-                onClick={() => setIsNavOpen(false)}
-                className="mt-2 rounded-2xl bg-white px-4 py-3 text-center text-sm font-semibold text-black"
-              >
-                Login
-              </Link>
+              {isAuthenticated ? (
+                <button
+                  type="button"
+                  onClick={() => setIsNavOpen(false)}
+                  className="mt-2 flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-black"
+                >
+                  <UserRound size={17} />
+                  Profile
+                </button>
+              ) : (
+                <Link
+                  href="/signup"
+                  onClick={() => setIsNavOpen(false)}
+                  className="mt-2 rounded-2xl bg-white px-4 py-3 text-center text-sm font-semibold text-black"
+                >
+                  Sign up
+                </Link>
+              )}
             </div>
           </div>
         )}

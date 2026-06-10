@@ -54,7 +54,7 @@ export default function App() {
     }
     setStatus('loading');
 
-    router.push(`/login?email=${encodeURIComponent(email)}`);
+    router.push(`/signup?email=${encodeURIComponent(email)}`);
 
     setTimeout(() => setStatus('success'), 1500);
   };

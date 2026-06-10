@@ -1,2 +1,6 @@
 export { requireUser } from "./require-user";
-export { getSafeRedirectPath, isUWaterlooEmail } from "./validation";
+export {
+  getSafeRedirectPath,
+  isUWaterlooEmail,
+  isValidPassword,
+} from "./validation";

@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { getSafeRedirectPath, isUWaterlooEmail } from "../validation";
+import {
+  getSafeRedirectPath,
+  isUWaterlooEmail,
+  isValidPassword,
+} from "../validation";
 
 describe("auth validation", () => {
   it("accepts Waterloo email addresses", () => {
@@ -12,6 +16,11 @@ describe("auth validation", () => {
     expect(isUWaterlooEmail("student@gmail.com")).toBe(false);
     expect(isUWaterlooEmail("@uwaterloo.ca")).toBe(false);
     expect(isUWaterlooEmail("student@uwaterloo.ca.example.com")).toBe(false);
+  });
+
+  it("requires passwords to be at least eight characters", () => {
+    expect(isValidPassword("12345678")).toBe(true);
+    expect(isValidPassword("short")).toBe(false);
   });
 
   it("allows local redirect paths", () => {

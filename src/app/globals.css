@@ -139,6 +139,7 @@
   html {
     @apply font-sans;
     background-color: #000;
+    scroll-behavior: smooth;
   }
 }
 
@@ -173,4 +174,10 @@
 
 .animate-ping-slow {
   animation: ping-slow 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }

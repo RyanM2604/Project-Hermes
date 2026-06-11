@@ -2,28 +2,14 @@
 
 import { useEffect, useRef } from "react";
 
+import { logClientInteraction } from "@/lib/interactions/log-client-interaction";
+
 interface TrackImpressionProps {
   children: React.ReactNode;
   eventId: string;
 }
 
 const trackedImpressions = new Set<string>();
-const anonymousSessionStorageKey = "hermes_anonymous_session_id";
-
-function getAnonymousSessionId() {
-  const existingSessionId = window.sessionStorage.getItem(
-    anonymousSessionStorageKey,
-  );
-
-  if (existingSessionId) {
-    return existingSessionId;
-  }
-
-  const sessionId = crypto.randomUUID().replaceAll("-", "");
-  window.sessionStorage.setItem(anonymousSessionStorageKey, sessionId);
-
-  return sessionId;
-}
 
 export function TrackImpression({ children, eventId }: TrackImpressionProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -44,22 +30,12 @@ export function TrackImpression({ children, eventId }: TrackImpressionProps) {
         trackedImpressions.add(eventId);
         observer.disconnect();
 
-        void fetch("/api/interactions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
+        logClientInteraction({
+          action: "impression",
+          eventId,
+          metadata: {
+            surface: "event_feed",
           },
-          body: JSON.stringify({
-            action: "impression",
-            anonymousSessionId: getAnonymousSessionId(),
-            eventId,
-            metadata: {
-              surface: "event_feed",
-            },
-          }),
-          keepalive: true,
-        }).catch(() => {
-          // Interaction logging must not disrupt feed browsing.
         });
       },
       { threshold: 0.5 },
@@ -73,7 +49,7 @@ export function TrackImpression({ children, eventId }: TrackImpressionProps) {
   }, [eventId]);
 
   return (
-    <div ref={containerRef} className="min-w-0">
+    <div ref={containerRef} className="min-w-0 empty:hidden">
       {children}
     </div>
   );

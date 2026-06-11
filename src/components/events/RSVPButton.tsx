@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import type { RsvpStatus } from "@/lib/events/rsvp-event";
+import { logClientInteraction } from "@/lib/interactions/log-client-interaction";
 
 interface RSVPButtonProps {
   eventId: string;
@@ -111,6 +112,15 @@ export function RSVPButton({ eventId, isAuthenticated }: RSVPButtonProps) {
     const body = (await response.json()) as { status: RsvpStatus | null };
     setStatus(body.status ?? null);
     setIsLoading(false);
+
+    logClientInteraction({
+      action: "rsvp",
+      eventId,
+      metadata: {
+        status: body.status ?? nextStatus,
+        surface: "event_detail",
+      },
+    });
   }
 
   if (!isAuthenticated) {

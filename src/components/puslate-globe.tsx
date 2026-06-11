@@ -312,7 +312,7 @@ function NetworkGlobe({
 
 export default function BackgroundGlobe() {
   return (
-    <div className="fixed inset-0 bg-[#050505]">
+    <div className="globe-zoom-stage fixed inset-0 bg-[#050505]">
       <Canvas
         camera={{ fov: 43, position: [0, 0, 6] }}
         dpr={[1, 1.6]}

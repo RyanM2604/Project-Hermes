@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { ArrowLeft, CalendarDays, Clock, MapPin } from "lucide-react";
 
-import { SaveEventButton } from "@/components/events";
+import { RSVPButton, SaveEventButton } from "@/components/events";
 import { mockEvents } from "@/lib/events";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { HermesEvent } from "@/types/event";
 
 const dateFormatter = new Intl.DateTimeFormat("en-CA", {
@@ -34,6 +35,10 @@ export default async function EventDetailPage({
   params,
 }: PageProps<"/events/[id]">) {
   const { id } = await params;
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const event = mockEvents.find((candidate) => candidate.id === id);
 
   if (!event) {
@@ -166,13 +171,7 @@ export default async function EventDetailPage({
                 </div>
               </dl>
 
-              <button
-                type="button"
-                disabled
-                className="mt-6 w-full cursor-not-allowed rounded-2xl bg-white px-4 py-3 text-sm font-bold text-black opacity-50"
-              >
-                Login to RSVP
-              </button>
+              <RSVPButton eventId={event.id} isAuthenticated={Boolean(user)} />
               <SaveEventButton eventId={event.id} />
             </aside>
           </div>

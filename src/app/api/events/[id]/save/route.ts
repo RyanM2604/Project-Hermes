@@ -35,7 +35,9 @@ async function handleRequest(
         );
 
       if (error) {
-        throw error;
+        const failure = new Error(error.message) as Error & { code?: string };
+        failure.code = error.code;
+        throw failure;
       }
     },
     async unsave(userId, eventId) {
@@ -46,7 +48,9 @@ async function handleRequest(
         .eq("event_id", eventId);
 
       if (error) {
-        throw error;
+        const failure = new Error(error.message) as Error & { code?: string };
+        failure.code = error.code;
+        throw failure;
       }
     },
   };
@@ -66,8 +70,23 @@ async function handleRequest(
     });
 
     return Response.json(result.body, { status: result.status });
-  } catch {
-    return Response.json({ error: "Unable to update saved event" }, { status: 500 });
+  } catch (error) {
+    const message =
+      error instanceof Error && error.message
+        ? error.message
+        : "Unable to update saved event";
+    const code =
+      error && typeof error === "object" && "code" in error
+        ? String(error.code)
+        : undefined;
+
+    return Response.json(
+      {
+        error: message,
+        ...(code ? { code } : {}),
+      },
+      { status: 500 },
+    );
   }
 }
 

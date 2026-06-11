@@ -1,0 +1,49 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - link "Hermes home" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e6]: Hermes
+      - generic [ref=e9]:
+        - link "Home" [ref=e10] [cursor=pointer]:
+          - /url: /
+        - link "Events" [ref=e11] [cursor=pointer]:
+          - /url: /events
+        - link "Clubs" [ref=e12] [cursor=pointer]:
+          - /url: /#clubs
+        - link "Map" [ref=e13] [cursor=pointer]:
+          - /url: /#map
+      - link "Sign up" [ref=e14] [cursor=pointer]:
+        - /url: /signup
+  - generic [ref=e15]:
+    - img [ref=e21]
+    - main [ref=e28]:
+      - heading "See what's happening at UW." [level=1] [ref=e29]:
+        - generic [ref=e30]: See what's
+        - generic [ref=e31]: happening at UW.
+      - paragraph [ref=e32]:
+        - text: The central feed for Waterloo campus life.
+        - text: Clubs, events, and free food alerts, synced in real-time.
+      - generic [ref=e34]:
+        - generic [ref=e35]:
+          - img [ref=e36]
+          - textbox "your.email@uwaterloo.ca" [ref=e39]
+        - button "Get Access" [ref=e40]:
+          - text: Get Access
+          - img [ref=e41]
+      - generic [ref=e43]:
+        - generic [ref=e44]:
+          - img [ref=e46]
+          - heading "Free Food Alerts" [level=3] [ref=e52]
+          - paragraph [ref=e53]: Never miss a MathSoc pizza night or EngSoc BBQ again.
+        - generic [ref=e54]:
+          - img [ref=e56]
+          - heading "The Reels Feed" [level=3] [ref=e59]
+          - paragraph [ref=e60]: See exactly what the vibe is before you walk across campus.
+        - generic [ref=e61]:
+          - img [ref=e63]
+          - heading "Smart Map" [level=3] [ref=e65]
+          - paragraph [ref=e66]: Find exactly which room in MC or E7 the event is in.
+  - button "Open Next.js Dev Tools" [ref=e72] [cursor=pointer]:
+    - img [ref=e73]
+  - alert [ref=e76]

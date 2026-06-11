@@ -1,6 +1,7 @@
 import { EventCard } from "@/components/events";
 import type { HermesEvent } from "@/types/event";
 import { EmptyFeedState } from "./EmptyFeedState";
+import { TrackImpression } from "./TrackImpression";
 
 interface EventFeedProps {
   events: HermesEvent[];
@@ -43,7 +44,9 @@ export function EventFeed({ events }: EventFeedProps) {
 
       <div className="grid gap-6 lg:grid-cols-2">
         {events.map((event) => (
-          <EventCard key={event.id} event={event} />
+          <TrackImpression key={event.id} eventId={event.id}>
+            <EventCard event={event} />
+          </TrackImpression>
         ))}
       </div>
     </section>

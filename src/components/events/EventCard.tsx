@@ -1,5 +1,10 @@
-import Link from "next/link";
+"use client";
 
+import { X } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
+
+import { logClientInteraction } from "@/lib/interactions/log-client-interaction";
 import type { HermesEvent } from "@/types/event";
 
 interface EventCardProps {
@@ -23,10 +28,43 @@ function formatTag(tag: HermesEvent["tags"][number]) {
 }
 
 export function EventCard({ event }: EventCardProps) {
+  const [isDismissed, setIsDismissed] = useState(false);
+
+  function logOpen() {
+    logClientInteraction({
+      action: "open",
+      eventId: event.id,
+      metadata: { surface: "event_feed" },
+    });
+  }
+
+  function dismissEvent() {
+    setIsDismissed(true);
+    logClientInteraction({
+      action: "dismiss",
+      eventId: event.id,
+      metadata: { surface: "event_feed" },
+    });
+  }
+
+  if (isDismissed) {
+    return null;
+  }
+
   return (
-    <article className="group overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_24px_70px_rgba(0,0,0,0.28)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.06]">
+    <article className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_24px_70px_rgba(0,0,0,0.28)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.06]">
+      <button
+        type="button"
+        onClick={dismissEvent}
+        aria-label={`Hide ${event.title}`}
+        className="absolute right-4 top-4 z-10 rounded-full border border-white/15 bg-black/55 p-2 text-zinc-300 backdrop-blur-md transition hover:border-white/30 hover:bg-black/75 hover:text-white"
+      >
+        <X size={16} />
+      </button>
+
       <Link
         href={`/events/${event.id}`}
+        onClick={logOpen}
         aria-label={`View ${event.title}`}
         className="relative flex aspect-[16/9] items-end overflow-hidden border-b border-white/10 bg-gradient-to-br from-blue-500/30 via-indigo-500/15 to-zinc-950 p-5"
       >
@@ -53,6 +91,7 @@ export function EventCard({ event }: EventCardProps) {
           <h2>
             <Link
               href={`/events/${event.id}`}
+              onClick={logOpen}
               className="text-2xl font-bold leading-tight tracking-tight text-white transition-colors hover:text-blue-200 sm:text-3xl"
             >
               {event.title}

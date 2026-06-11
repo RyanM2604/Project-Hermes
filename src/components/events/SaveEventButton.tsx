@@ -4,6 +4,8 @@ import { Bookmark } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { logClientInteraction } from "@/lib/interactions/log-client-interaction";
+
 interface SaveEventButtonProps {
   eventId: string;
 }
@@ -82,6 +84,14 @@ export function SaveEventButton({ eventId }: SaveEventButtonProps) {
     const body = (await response.json()) as { saved: boolean };
     setIsSaved(body.saved);
     setIsLoading(false);
+
+    if (body.saved) {
+      logClientInteraction({
+        action: "save",
+        eventId,
+        metadata: { saved: true, surface: "event_detail" },
+      });
+    }
   }
 
   return (

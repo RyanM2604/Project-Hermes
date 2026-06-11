@@ -1,13 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   ArrowRight, 
   Mail, 
-  CheckCircle2, 
-  Map as MapIcon, 
-  Video, 
-  Pizza
+  CheckCircle2
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import BackgroundGlobe from '@/components/puslate-globe'
@@ -15,36 +12,7 @@ import BackgroundGlobe from '@/components/puslate-globe'
 export default function App() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
-  const [activeTab, setActiveTab] = useState(0);
   const router = useRouter();
-
-  const features = [
-    { 
-      title: "Free Food Alerts", 
-      desc: "Never miss a MathSoc pizza night or EngSoc BBQ again.",
-      icon: <Pizza className="text-orange-400" size={20} />,
-      color: "from-orange-500/20"
-    },
-    { 
-      title: "The Reels Feed", 
-      desc: "See exactly what the vibe is before you walk across campus.",
-      icon: <Video className="text-purple-400" size={20} />,
-      color: "from-purple-500/20"
-    },
-    { 
-      title: "Smart Map", 
-      desc: "Find exactly which room in MC or E7 the event is in.",
-      icon: <MapIcon className="text-blue-400" size={20} />,
-      color: "from-blue-500/20"
-    }
-  ];
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveTab((prev) => (prev + 1) % features.length);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, [features.length]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -134,28 +102,6 @@ export default function App() {
               </div>
             </div>
           )}
-        </div>
-
-        {/* Feature Grid */}
-        <div id="clubs" className="w-full scroll-mt-32 grid grid-cols-1 md:grid-cols-3 gap-4">
-          {features.map((f, i) => (
-            <div 
-              key={i}
-              className={`text-left p-8 rounded-3xl border transition-all duration-700 ${
-                activeTab === i 
-                ? `bg-zinc-900/80 border-zinc-700 shadow-2xl scale-[1.02] translate-y-[-4px]` 
-                : 'bg-transparent border-zinc-900 opacity-40 grayscale'
-              }`}
-            >
-              <div className="w-10 h-10 rounded-xl bg-zinc-800 flex items-center justify-center mb-6">
-                {f.icon}
-              </div>
-              <h3 className="text-white text-lg font-bold mb-2">{f.title}</h3>
-              <p className="text-zinc-500 text-sm leading-relaxed font-medium">
-                {f.desc}
-              </p>
-            </div>
-          ))}
         </div>
 
       </main>

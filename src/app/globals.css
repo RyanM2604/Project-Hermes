@@ -176,6 +176,31 @@
   animation: ping-slow 3s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
+@keyframes globe-zoom-reveal {
+  0% {
+    opacity: 0;
+    transform: translate3d(-22vw, -18vh, 0) scale(1.75);
+  }
+
+  68% {
+    opacity: 0.45;
+    transform: translate3d(1.5vw, 1vh, 0) scale(0.985);
+  }
+
+  100% {
+    opacity: 0.45;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.globe-zoom-reveal {
+  opacity: 0;
+  transform-origin: top left;
+  animation: globe-zoom-reveal 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  backface-visibility: hidden;
+  will-change: opacity, transform;
+}
+
 @keyframes hero-reveal {
   from {
     opacity: 0;
@@ -217,6 +242,12 @@
 
   .hero-reveal {
     opacity: 1;
+    animation: none;
+    transform: none;
+  }
+
+  .globe-zoom-reveal {
+    opacity: 0.45;
     animation: none;
     transform: none;
   }

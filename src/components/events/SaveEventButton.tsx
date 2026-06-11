@@ -66,7 +66,15 @@ export function SaveEventButton({ eventId }: SaveEventButtonProps) {
     }
 
     if (!response.ok) {
-      setErrorMessage("Unable to update saved event.");
+      try {
+        const body = (await response.json()) as {
+          error?: string;
+          code?: string;
+        };
+        setErrorMessage(body.error ?? "Unable to update saved event.");
+      } catch {
+        setErrorMessage("Unable to update saved event.");
+      }
       setIsLoading(false);
       return;
     }

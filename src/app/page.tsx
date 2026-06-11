@@ -82,20 +82,25 @@ export default function App() {
       <main className="relative z-10 max-w-5xl mx-auto px-6 pt-40 md:pt-48 pb-32 flex flex-col items-center text-center">
 
         {/* Improved Typography: Using font-sans with heavy weights */}
-        <h1 className="text-6xl md:text-[100px] font-extrabold text-white tracking-tighter mb-8 leading-[0.85]">
-          See what&apos;s <br />
-          <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-blue-500 bg-clip-text text-transparent">
-            happening at UW.
+        <h1 className="text-6xl md:text-[100px] font-extrabold text-white tracking-tighter mb-8 leading-[0.98]">
+          <span className="hero-reveal hero-reveal-delay-1 inline-block pb-[0.12em] -mb-[0.12em]">
+            <span>See what&apos;s</span>
+          </span>{" "}
+          <br />
+          <span className="hero-reveal hero-reveal-delay-2 inline-block pb-[0.16em] -mb-[0.16em]">
+            <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-blue-500 bg-clip-text text-transparent">
+              happening at UW.
+            </span>
           </span>
         </h1>
 
-        <p className="max-w-xl text-zinc-500 text-lg leading-relaxed mb-12 font-medium">
+        <p className="hero-reveal hero-reveal-delay-3 max-w-xl text-zinc-500 text-lg leading-relaxed mb-12 font-medium">
           The central feed for Waterloo campus life. <br className="hidden md:block" />
           Clubs, events, and free food alerts, synced in real-time.
         </p>
 
         {/* CTA Container */}
-        <div id="join" className="w-full max-w-lg scroll-mt-32 bg-zinc-900/30 border border-zinc-800/50 p-2 rounded-2xl backdrop-blur-xl mb-24 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+        <div id="join" className="hero-reveal hero-reveal-delay-4 w-full max-w-lg scroll-mt-32 bg-zinc-900/30 border border-zinc-800/50 p-2 rounded-2xl backdrop-blur-xl mb-24 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
           {status !== 'success' ? (
             <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-2">
               <div className="flex-1 relative">

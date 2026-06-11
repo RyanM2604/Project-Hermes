@@ -1,0 +1,67 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - link "Hermes home" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e6]: Hermes
+      - generic [ref=e9]:
+        - link "Home" [ref=e10] [cursor=pointer]:
+          - /url: /
+        - link "Events" [ref=e11] [cursor=pointer]:
+          - /url: /events
+        - link "Clubs" [ref=e12] [cursor=pointer]:
+          - /url: /#clubs
+        - link "Map" [ref=e13] [cursor=pointer]:
+          - /url: /#map
+      - link "Sign up" [ref=e14] [cursor=pointer]:
+        - /url: /signup
+  - main [ref=e15]:
+    - generic [ref=e16]:
+      - link "Back to events" [ref=e17] [cursor=pointer]:
+        - /url: /events
+        - img [ref=e18]
+        - text: Back to events
+      - article [ref=e20]:
+        - generic [ref=e24]:
+          - generic [ref=e25]:
+            - generic [ref=e26]: 🍕 Free Food
+            - generic [ref=e27]: MC
+          - generic [ref=e28]:
+            - paragraph [ref=e29]: Mathematics Society
+            - heading "MathSoc Pizza and Board Games" [level=1] [ref=e30]
+        - generic [ref=e31]:
+          - generic [ref=e32]:
+            - heading "About this event" [level=2] [ref=e33]
+            - paragraph [ref=e34]: Drop in for pizza, board games, and a relaxed evening with students from across the Math faculty.
+            - generic [ref=e35]:
+              - generic [ref=e36]: Free Food
+              - generic [ref=e37]: Chill Social
+            - link "View original source" [ref=e38] [cursor=pointer]:
+              - /url: https://mathsoc.uwaterloo.ca/events
+          - complementary [ref=e39]:
+            - generic [ref=e40]:
+              - generic [ref=e41]:
+                - img [ref=e42]
+                - generic [ref=e44]:
+                  - term [ref=e45]: Date
+                  - definition [ref=e46]: Monday, September 14, 2026
+              - generic [ref=e47]:
+                - img [ref=e48]
+                - generic [ref=e51]:
+                  - term [ref=e52]: Time
+                  - definition [ref=e53]:
+                    - time [ref=e54]: 6:00 p.m.
+                    - text: "-"
+                    - time [ref=e55]: 8:00 p.m.
+              - generic [ref=e56]:
+                - img [ref=e57]
+                - generic [ref=e60]:
+                  - term [ref=e61]: Location
+                  - definition [ref=e62]: MathSoc Comfy Lounge, MC
+            - button "Login to RSVP" [disabled] [ref=e63]
+            - button "Save event" [ref=e65]:
+              - img [ref=e66]
+              - text: Save event
+  - button "Open Next.js Dev Tools" [ref=e73] [cursor=pointer]:
+    - img [ref=e74]
+  - alert [ref=e77]

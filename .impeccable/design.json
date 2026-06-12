@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-12T00:00:00.000Z",
+  "title": "Design System: Project Hermes",
+  "extensions": {
+    "colorMeta": {
+      "night-canvas": {
+        "role": "neutral",
+        "displayName": "Night Canvas",
+        "canonical": "#050505",
+        "tonalRamp": ["#050505", "#101014", "#18181b", "#27272a"]
+      },
+      "signal-blue": {
+        "role": "primary",
+        "displayName": "Signal Blue",
+        "canonical": "#2563eb",
+        "tonalRamp": ["#dbeafe", "#7db5ff", "#3b82f6", "#2563eb", "#1d4ed8"]
+      },
+      "success": {
+        "role": "success",
+        "displayName": "Success Mint",
+        "canonical": "#6ee7b7",
+        "tonalRamp": ["#d1fae5", "#6ee7b7", "#10b981"]
+      },
+      "warning": {
+        "role": "warning",
+        "displayName": "Opportunity Amber",
+        "canonical": "#fdba74",
+        "tonalRamp": ["#ffedd5", "#fdba74", "#f97316"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Marketing and onboarding moments only."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Page-level product headings and major empty states."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Event titles and panel headings."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Product explanations and descriptions."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Controls, filters, metadata, and navigation."
+      }
+    },
+    "shadows": [
+      {
+        "name": "ambient-panel",
+        "value": "0 24px 70px rgba(0,0,0,0.28)",
+        "purpose": "Major cards and panels above the canvas."
+      },
+      {
+        "name": "interactive-lift",
+        "value": "0 12px 32px rgba(0,0,0,0.24)",
+        "purpose": "Temporary hover or focused elevation."
+      },
+      {
+        "name": "inset-highlight",
+        "value": "inset 0 1px 0 rgba(255,255,255,0.08)",
+        "purpose": "Subtle edge definition on dark controls and cards."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-fast",
+        "value": "180ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Hover, selection, and compact state feedback."
+      },
+      {
+        "name": "state-standard",
+        "value": "240ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Panel and card state transitions."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Primary product action with restrained blue signal.",
+      "html": "<button class=\"ds-primary\">Save event</button>",
+      "css": ".ds-primary{min-height:44px;border:1px solid #3b82f666;border-radius:12px;padding:12px 20px;background:#2563eb;color:#fff;font:600 14px/1.25 Inter,system-ui,sans-serif;transition:background 180ms cubic-bezier(.16,1,.3,1),transform 180ms cubic-bezier(.16,1,.3,1)}.ds-primary:hover{background:#3b82f6;transform:translateY(-1px)}.ds-primary:focus-visible{outline:3px solid #7db5ff;outline-offset:3px}"
+    },
+    {
+      "name": "Filter Chip",
+      "kind": "chip",
+      "refersTo": "chip-default",
+      "description": "Plain-language filter with clear selected state.",
+      "html": "<button class=\"ds-chip\" aria-pressed=\"false\">Free food</button>",
+      "css": ".ds-chip{min-height:40px;border:1px solid #ffffff14;border-radius:999px;padding:8px 16px;background:#101014;color:#d4d4d8;font:600 14px/1.25 Inter,system-ui,sans-serif}.ds-chip:hover{background:#18181b}.ds-chip[aria-pressed=true]{border-color:#fff;background:#fff;color:#050505}.ds-chip:focus-visible{outline:3px solid #7db5ff;outline-offset:3px}"
+    },
+    {
+      "name": "Event Card",
+      "kind": "card",
+      "refersTo": "card-event",
+      "description": "Compressed decision surface for campus events.",
+      "html": "<article class=\"ds-event\"><p class=\"ds-org\">Mathematics Society</p><h3>MathSoc Pizza Night</h3><p>Today · 6:00 PM · MC Comfy</p><div><button>Save</button><button>Interested</button></div></article>",
+      "css": ".ds-event{max-width:360px;border:1px solid #ffffff14;border-radius:20px;padding:24px;background:#101014;color:#fff;box-shadow:inset 0 1px 0 #ffffff14,0 24px 70px rgba(0,0,0,.28);font-family:Inter,system-ui,sans-serif}.ds-event h3{margin:8px 0 12px;font-size:20px;line-height:1.25}.ds-event p{color:#a1a1aa;font-size:14px;line-height:1.5}.ds-event .ds-org{color:#7db5ff;font-weight:600}.ds-event div{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:20px}.ds-event button{min-height:44px;border:1px solid #ffffff14;border-radius:12px;background:#18181b;color:#d4d4d8;font-weight:600}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Clear Campus Pulse",
+    "overview": "A calm, high-signal product view of campus life. Restrained dark surfaces and one electric-blue signal keep discovery fast, alive, and trustworthy.",
+    "keyCharacteristics": [
+      "Restrained dark surfaces with one clear blue signal",
+      "High-signal event metadata and visible source provenance",
+      "Soft ambient depth used selectively",
+      "Precise familiar controls with generous mobile targets",
+      "Social energy expressed through event content"
+    ],
+    "rules": [
+      {
+        "name": "The Signal Rule",
+        "body": "Blue indicates an action, active state, or trusted source. It is not ambient decoration.",
+        "section": "colors"
+      },
+      {
+        "name": "The Lift Must Mean Something Rule",
+        "body": "A shadow indicates hierarchy or interaction. Otherwise use tonal layering and a subtle border.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Product Scale Rule",
+        "body": "App typography uses fixed restrained steps. Fluid display typography belongs only on marketing surfaces.",
+        "section": "typography"
+      }
+    ],
+    "dos": [
+      "Prioritise time, location, vibe, organiser, and source freshness on event cards.",
+      "Use Signal Blue for primary actions, active state, and trusted source indicators.",
+      "Use familiar product controls with clear focus states and large mobile targets."
+    ],
+    "donts": [
+      "Do not make Hermes look like a Waterloo administration website or generic events portal.",
+      "Do not use neon social styling, excessive decorative motion, or vague AI SaaS gradients.",
+      "Do not use gradient text, colored side stripes, decorative glassmorphism, or identical card grids."
+    ]
+  }
+}

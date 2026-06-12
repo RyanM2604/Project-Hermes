@@ -3,97 +3,92 @@
 import React, { useState } from 'react';
 import { 
   ArrowRight, 
-  BellRing,
   CalendarDays,
   Check,
+  ChevronRight,
+  Clock3,
   Mail, 
   CheckCircle2,
   Code2,
   Compass,
+  EyeOff,
+  Filter,
   Heart,
+  LockKeyhole,
   MapPin,
   Music2,
   Pizza,
   Search,
+  ShieldCheck,
   Sparkles,
-  UsersRound
+  Verified,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ScrollReveal } from '@/components/landing/ScrollReveal';
 import BackgroundGlobe from '@/components/puslate-globe'
 
-const benefits = [
-  {
-    icon: BellRing,
-    title: "Timely campus alerts",
-    description:
-      "See free food, club drops, and events worth showing up for before they are over.",
-  },
-  {
-    icon: CalendarDays,
-    title: "One event feed",
-    description:
-      "Browse events from clubs, faculties, and student groups without checking five different sites.",
-  },
-  {
-    icon: UsersRound,
-    title: "Find your people",
-    description:
-      "Discover communities through the events they run, from hack nights to casual socials.",
-  },
-  {
-    icon: MapPin,
-    title: "Campus context",
-    description:
-      "Know the building, room, time, and source before you decide to cross campus.",
-  },
-  {
-    icon: Search,
-    title: "Browse by vibe",
-    description:
-      "Filter for free food, career events, hack nights, music, or whatever fits your day.",
-  },
-  {
-    icon: Heart,
-    title: "Save what matters",
-    description:
-      "Keep interesting events close and mark what you are planning to attend.",
-  },
-] as const;
-
-const feedPreview = [
+const previewEvents = [
   {
     icon: Pizza,
-    iconClass: "bg-emerald-400/10 text-emerald-300",
+    iconClass: "bg-orange-400/10 text-orange-200",
     title: "MathSoc Pizza Night",
-    meta: "MC Comfy · Starts at 6:00 PM",
-    pill: "Free food",
-    pillClass: "border-emerald-300/20 bg-emerald-300/10 text-emerald-200",
+    club: "Mathematics Society",
+    meta: "Today · 6:00 PM · MC Comfy",
+    tags: ["Free food", "Social"],
+    source: "WUSA Clubs",
+    freshness: "Updated 8m ago",
   },
   {
     icon: Code2,
     iconClass: "bg-blue-400/10 text-blue-300",
-    title: "Hack the North Build Night",
-    meta: "E7 · Tonight",
-    pill: "Hack / Dev",
-    pillClass: "border-blue-300/20 bg-blue-300/10 text-blue-200",
+    title: "Build Night: Ship Something",
+    club: "UW Blueprint",
+    meta: "Tonight · 7:30 PM · E7 2317",
+    tags: ["Hack / Dev", "Workshop"],
+    source: "Official club",
+    freshness: "Updated 21m ago",
   },
   {
     icon: Music2,
     iconClass: "bg-purple-400/10 text-purple-300",
     title: "Live Music on the Green",
-    meta: "Arts Quad · 4:00 PM",
-    pill: "Music",
-    pillClass: "border-purple-300/20 bg-purple-300/10 text-purple-200",
+    club: "UW Music Club",
+    meta: "Tomorrow · 4:00 PM · Arts Quad",
+    tags: ["Music", "Chill"],
+    source: "Waterloo Events",
+    freshness: "Updated 1h ago",
   },
 ] as const;
 
-const vibes = [
-  { icon: Pizza, title: "Free Food", count: "Pizza, BBQs, snacks", tone: "blue" },
-  { icon: Code2, title: "Hack / Dev", count: "Build nights, workshops", tone: "indigo" },
-  { icon: Sparkles, title: "Social", count: "Meetups, games, clubs", tone: "purple" },
-  { icon: Compass, title: "Opportunities", count: "Career, co-op, startups", tone: "orange" },
+const discoveryModes = [
+  {
+    icon: Sparkles,
+    eyebrow: "For You",
+    title: "A feed that learns without trapping you.",
+    description:
+      "Hermes ranks what is timely and relevant while keeping Fresh and Following one tap away.",
+    detail: "Save, Interested, Hide, and Why recommended controls",
+    tone: "blue",
+  },
+  {
+    icon: Filter,
+    eyebrow: "Explore",
+    title: "Filters when you know what you need.",
+    description:
+      "Narrow campus events by vibe, date, organiser, faculty, cost, and accessibility.",
+    detail: "Structured discovery alongside the feed",
+    tone: "purple",
+  },
+  {
+    icon: MapPin,
+    eyebrow: "Near now",
+    title: "See what is happening around you.",
+    description:
+      "Move from a building or map pin directly into the canonical event detail.",
+    detail: "Building-level context without precise user tracking",
+    tone: "orange",
+  },
 ] as const;
 
 export default function App() {
@@ -199,67 +194,104 @@ export default function App() {
 
       </main>
 
-      <section className="landing-proof relative z-10 border-y border-white/[0.07] bg-white/[0.02]">
-        {[
-          ["12", "event vibes"],
-          ["One", "campus feed"],
-          ["Seconds", "to discover"],
-          ["Free", "for UW students"],
-        ].map(([value, label]) => (
-          <div key={label} className="landing-proof-item">
-            <p className="text-2xl font-bold tracking-tight text-blue-300 sm:text-3xl">
-              {value}
-            </p>
-            <p className="mt-1 text-xs font-medium text-zinc-500">{label}</p>
-          </div>
-        ))}
-      </section>
-
       <section id="features" className="landing-section relative z-10">
-        <ScrollReveal>
-          <p className="landing-eyebrow">What Hermes brings together</p>
+        <ScrollReveal className="mx-auto max-w-3xl text-center">
+          <p className="landing-eyebrow">The campus discovery layer</p>
           <h2 className="landing-title">
-            Everything campus,
+            A feed built for deciding,
             <br />
-            in one place.
+            not endless scrolling.
           </h2>
-          <p className="landing-subtitle">
-            Hermes turns scattered campus posts into one browse-first feed built
-            around what students actually want to find.
+          <p className="landing-subtitle mx-auto">
+            Every Hermes card compresses the details you need to decide whether
+            something is worth your time, with the source and organiser always
+            one tap away.
           </p>
         </ScrollReveal>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {benefits.map(({ icon: Icon, title, description }, index) => (
-            <ScrollReveal key={title} delay={index * 70}>
-              <article className="landing-card h-full">
-                <div className="landing-icon">
-                  <Icon size={20} />
-                </div>
-                <h3 className="text-lg font-semibold text-white">{title}</h3>
-                <p className="mt-2 text-sm leading-6 text-zinc-500">
-                  {description}
-                </p>
-              </article>
-            </ScrollReveal>
-          ))}
-        </div>
+        <ScrollReveal delay={120}>
+          <div className="product-shell">
+            <div className="product-shell-bar">
+              <div className="product-switcher">
+                <span className="product-switcher-active">For You</span>
+                <span>Fresh</span>
+                <span>Following</span>
+              </div>
+              <div className="product-search">
+                <Search size={15} />
+                Search campus
+              </div>
+            </div>
+
+            <div className="product-chip-row">
+              {["Everything", "Free food", "Career", "Hack / Dev", "Social"].map((chip, index) => (
+                <span key={chip} className={index === 0 ? "product-chip-active" : "product-chip"}>
+                  {chip}
+                </span>
+              ))}
+            </div>
+
+            <div className="product-feed-grid">
+              {previewEvents.map(({ icon: Icon, iconClass, title, club, meta, tags, source, freshness }, index) => (
+                <ScrollReveal key={title} delay={180 + index * 90}>
+                  <article className={`product-event-card ${index === 0 ? "product-event-card-featured" : ""}`}>
+                    <div className="flex items-start justify-between gap-4">
+                      <div className={`product-event-icon ${iconClass}`}>
+                        <Icon size={20} />
+                      </div>
+                      <button type="button" aria-label={`Hide ${title}`} className="product-icon-button">
+                        <EyeOff size={15} />
+                      </button>
+                    </div>
+                    <p className="mt-5 text-xs font-semibold text-blue-300">{club}</p>
+                    <h3 className="mt-2 text-xl font-bold leading-tight text-white">{title}</h3>
+                    <p className="mt-3 flex items-center gap-2 text-xs text-zinc-400">
+                      <Clock3 size={14} />
+                      {meta}
+                    </p>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {tags.map((tag) => (
+                        <span key={tag} className="product-tag">{tag}</span>
+                      ))}
+                    </div>
+                    <div className="product-source-row">
+                      <span className="flex items-center gap-1.5">
+                        <Verified size={14} className="text-blue-300" />
+                        {source}
+                      </span>
+                      <span>{freshness}</span>
+                    </div>
+                    <div className="mt-4 grid grid-cols-2 gap-2">
+                      <button type="button" className="product-action product-action-primary">
+                        <Heart size={15} />
+                        Save
+                      </button>
+                      <button type="button" className="product-action">
+                        Interested
+                      </button>
+                    </div>
+                  </article>
+                </ScrollReveal>
+              ))}
+            </div>
+          </div>
+        </ScrollReveal>
       </section>
 
       <section className="landing-section relative z-10 pt-0">
-        <div className="grid items-center gap-12 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="grid items-center gap-12 lg:grid-cols-[1fr_1.05fr]">
           <ScrollReveal>
-            <p className="landing-eyebrow">Live campus feed</p>
-            <h2 className="landing-title">Know what is happening right now.</h2>
-            <p className="landing-subtitle mb-8">
-              Open Hermes and immediately see the events that are starting soon,
-              nearby, and worth your time.
+            <p className="landing-eyebrow">Events lead somewhere</p>
+            <h2 className="landing-title">Find the event. Stay for the community.</h2>
+            <p className="landing-subtitle mb-7">
+              Hermes connects every event to a durable club or organiser, making
+              campus discovery useful beyond a single night.
             </p>
             <div className="space-y-3">
               {[
-                "Browse without knowing what to search",
-                "See verified source links and locations",
-                "Save events and mark when you are going",
+                "Follow organisers for recurring events",
+                "See official links and source provenance",
+                "Move from save to interested to going",
               ].map((item) => (
                 <div key={item} className="flex items-center gap-3 text-sm text-zinc-400">
                   <Check size={16} className="text-emerald-300" />
@@ -270,34 +302,35 @@ export default function App() {
           </ScrollReveal>
 
           <ScrollReveal direction="right" delay={120}>
-            <div className="landing-feed">
-              <div className="mb-5 flex items-center justify-between">
-                <div>
-                  <p className="font-semibold text-white">Today at Waterloo</p>
-                  <p className="mt-1 text-xs text-zinc-600">Starting soon</p>
+            <div className="community-preview">
+              <div className="community-event">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="product-tag">Starting tonight</span>
+                  <span className="flex items-center gap-1.5 text-xs text-zinc-500">
+                    <Verified size={14} className="text-blue-300" />
+                    Official club
+                  </span>
                 </div>
-                <span className="flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-300/10 px-3 py-1 text-xs font-semibold text-emerald-200">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
-                  Live
-                </span>
+                <h3 className="mt-5 text-2xl font-bold tracking-tight text-white">
+                  Build Night: Ship Something
+                </h3>
+                <p className="mt-3 text-sm leading-6 text-zinc-400">
+                  Bring an idea, meet a team, and leave with something working.
+                  Beginners welcome.
+                </p>
+                <div className="mt-5 grid gap-3 text-sm text-zinc-400 sm:grid-cols-2">
+                  <span className="flex items-center gap-2"><CalendarDays size={15} /> Thursday · 7:30 PM</span>
+                  <span className="flex items-center gap-2"><MapPin size={15} /> E7 2317</span>
+                </div>
               </div>
-              <div className="space-y-3">
-                {feedPreview.map(({ icon: Icon, iconClass, title, meta, pill, pillClass }, index) => (
-                  <ScrollReveal key={title} direction="right" delay={180 + index * 100}>
-                    <div className="landing-feed-item">
-                      <div className={`landing-feed-icon ${iconClass}`}>
-                        <Icon size={18} />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-white">{title}</p>
-                        <p className="mt-1 text-xs text-zinc-500">{meta}</p>
-                        <span className={`mt-2 inline-flex rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${pillClass}`}>
-                          {pill}
-                        </span>
-                      </div>
-                    </div>
-                  </ScrollReveal>
-                ))}
+              <div className="community-org-card">
+                <div className="community-org-avatar"><Code2 size={22} /></div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-300">Organiser</p>
+                  <h4 className="mt-1 font-semibold text-white">UW Blueprint</h4>
+                  <p className="mt-1 text-xs text-zinc-500">4 upcoming events · Technology</p>
+                </div>
+                <button type="button" className="community-follow">Follow</button>
               </div>
             </div>
           </ScrollReveal>
@@ -306,60 +339,76 @@ export default function App() {
 
       <section className="landing-section relative z-10 pt-0">
         <ScrollReveal>
-          <p className="landing-eyebrow">Browse your way</p>
-          <h2 className="landing-title">Find the right vibe.</h2>
+          <p className="landing-eyebrow">Feed-first, not feed-only</p>
+          <h2 className="landing-title">Discover campus your way.</h2>
           <p className="landing-subtitle">
-            Start broad, then narrow the feed to match the kind of day you want.
+            Browse when you want inspiration. Filter or use the map when you
+            already know what kind of opportunity you need.
           </p>
         </ScrollReveal>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {vibes.map(({ icon: Icon, title, count, tone }, index) => (
-            <ScrollReveal key={title} delay={index * 80}>
-              <div className={`landing-vibe landing-vibe-${tone}`}>
-                <Icon size={24} />
-                <h3 className="mt-5 font-semibold text-white">{title}</h3>
-                <p className="mt-1 text-xs text-zinc-500">{count}</p>
-              </div>
+        <div className="grid gap-4 lg:grid-cols-3">
+          {discoveryModes.map(({ icon: Icon, eyebrow, title, description, detail, tone }, index) => (
+            <ScrollReveal key={eyebrow} delay={index * 90}>
+              <article className={`discovery-card discovery-card-${tone}`}>
+                <div className="flex items-center justify-between">
+                  <div className="landing-icon mb-0"><Icon size={20} /></div>
+                  <ChevronRight size={18} className="text-zinc-600" />
+                </div>
+                <p className="mt-8 text-xs font-bold uppercase tracking-[0.18em] text-blue-300">{eyebrow}</p>
+                <h3 className="mt-3 text-xl font-bold leading-tight text-white">{title}</h3>
+                <p className="mt-3 text-sm leading-6 text-zinc-500">{description}</p>
+                <p className="mt-8 border-t border-white/[0.08] pt-4 text-xs text-zinc-400">{detail}</p>
+              </article>
             </ScrollReveal>
           ))}
         </div>
       </section>
 
-      <section className="landing-section relative z-10 border-t border-white/[0.06]">
-        <ScrollReveal>
-          <p className="landing-eyebrow">How it works</p>
-          <h2 className="landing-title">From signup to showing up.</h2>
-          <p className="landing-subtitle">
-            Hermes keeps onboarding short so discovery can start immediately.
-          </p>
-        </ScrollReveal>
-        <div className="landing-steps">
-          {[
-            ["1", "Join with your UW email", "Create your campus account and keep your feed student-focused."],
-            ["2", "Browse what is happening", "Explore events by time, vibe, location, and what is starting soon."],
-            ["3", "Save it and show up", "Keep events close, mark that you are going, and stop missing out."],
-          ].map(([number, title, description], index) => (
-            <ScrollReveal key={number} delay={index * 110}>
-              <div className="landing-step">
-                <div className="landing-step-number">{number}</div>
-                <h3 className="font-semibold text-white">{title}</h3>
-                <p className="mt-2 text-sm leading-6 text-zinc-500">{description}</p>
-              </div>
+      <section className="trust-section relative z-10">
+        <div className="landing-section py-0">
+          <div className="grid items-center gap-12 lg:grid-cols-[0.9fr_1.1fr]">
+            <ScrollReveal>
+              <p className="landing-eyebrow">Trust is part of discovery</p>
+              <h2 className="landing-title">Know why an event is here.</h2>
+              <p className="landing-subtitle mb-0">
+                Hermes foregrounds provenance, freshness, and organiser identity
+                so campus discovery stays useful instead of becoming another
+                noisy anonymous feed.
+              </p>
             </ScrollReveal>
-          ))}
+            <div className="grid gap-3 sm:grid-cols-2">
+              {[
+                [Verified, "Source-backed events", "Official and imported events retain their source link and freshness."],
+                [LockKeyhole, "Campus-gated actions", "Browsing stays easy while saves, RSVPs, and submissions require identity."],
+                [ShieldCheck, "Named organisers", "Events connect to accountable clubs and organisations."],
+                [Compass, "Privacy-conscious by default", "Building-level context works without precise live location tracking."],
+              ].map(([Icon, title, description], index) => {
+                const TrustIcon = Icon as typeof Verified;
+                return (
+                  <ScrollReveal key={title as string} delay={index * 80}>
+                    <article className="trust-card">
+                      <TrustIcon size={20} className="text-blue-300" />
+                      <h3 className="mt-5 font-semibold text-white">{title as string}</h3>
+                      <p className="mt-2 text-sm leading-6 text-zinc-500">{description as string}</p>
+                    </article>
+                  </ScrollReveal>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </section>
 
       <section className="landing-final-cta relative z-10">
         <ScrollReveal>
-          <p className="landing-eyebrow">Your campus is waiting</p>
+          <p className="landing-eyebrow">Start with what is happening</p>
           <h2 className="landing-title mx-auto max-w-2xl">
-            Spend less time searching.
+            Find the event.
             <br />
-            Show up more.
+            Follow what comes next.
           </h2>
           <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-zinc-500">
-            Join Hermes with your UW email and make campus easier to discover.
+            Join Hermes with your UW email or preview the current campus feed.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <a href="#join" className="landing-primary-button">

@@ -1,0 +1,31 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+DTSTART;TZID=America/Toronto:20260618T170000
+DTEND;TZID=America/Toronto:20260618T190000
+UID:wusa-free-food-1@wusa.ca
+SUMMARY:UW Entomology Club - Buzz & Mingle: Free Food
+DESCRIPTION:Free pizza\, crafts\, and drinks for students. This description
+  is folded across two lines.
+URL:https://wusa.ca/event/buzz-mingle/
+LOCATION:QNC 2501
+CATEGORIES:Clubs Events,Food Event,Social
+ATTACH;FMTTYPE=image/png:https://wusa.ca/uploads/buzz.png
+ORGANIZER;CN="UW Entomology Club":MAILTO:club@example.com
+END:VEVENT
+BEGIN:VEVENT
+DTSTART:20260619T230000Z
+DTEND:20260620T010000Z
+UID:wusa-no-location@wusa.ca
+SUMMARY:WUSA Board Meeting
+DESCRIPTION:Monthly board meeting.
+URL:https://wusa.ca/event/board-meeting/
+END:VEVENT
+BEGIN:VEVENT
+DTSTART;TZID=America/Toronto:not-a-date
+DTEND;TZID=America/Toronto:20260620T190000
+UID:wusa-bad-date@wusa.ca
+SUMMARY:Malformed event
+URL:https://wusa.ca/event/malformed/
+END:VEVENT
+END:VCALENDAR

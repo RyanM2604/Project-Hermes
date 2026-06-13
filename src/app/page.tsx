@@ -1,61 +1,69 @@
 "use client";
 
-import React, { useState } from 'react';
-import { 
-  ArrowRight, 
+import React, { useState } from "react";
+import {
+  ArrowRight,
   CalendarDays,
   Check,
-  ChevronRight,
-  Clock3,
-  Mail, 
   CheckCircle2,
+  Clock3,
   Code2,
   Compass,
-  EyeOff,
   Filter,
   Heart,
   LockKeyhole,
+  Mail,
   MapPin,
   Music2,
   Pizza,
+  Radio,
+  Route,
   Search,
   ShieldCheck,
   Sparkles,
+  Users,
   Verified,
-} from 'lucide-react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { ScrollReveal } from '@/components/landing/ScrollReveal';
-import BackgroundGlobe from '@/components/puslate-globe'
+  Zap,
+} from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ScrollReveal } from "@/components/landing/ScrollReveal";
+import BackgroundGlobe from "@/components/puslate-globe";
 
 const previewEvents = [
   {
     icon: Pizza,
-    iconClass: "bg-orange-400/10 text-orange-200",
-    title: "MathSoc Pizza Night",
+    accent: "amber",
+    href: "/events/event-mathsoc-pizza-night",
+    title: "MathSoc Pizza and Board Games",
     club: "Mathematics Society",
-    meta: "Today · 6:00 PM · MC Comfy",
-    tags: ["Free food", "Social"],
+    time: "Today · 6:00 PM",
+    location: "MC Comfy",
+    status: "Free food",
     source: "WUSA Clubs",
     freshness: "Updated 8m ago",
   },
   {
     icon: Code2,
-    iconClass: "bg-blue-400/10 text-blue-300",
-    title: "Build Night: Ship Something",
-    club: "UW Blueprint",
-    meta: "Tonight · 7:30 PM · E7 2317",
-    tags: ["Hack / Dev", "Workshop"],
+    accent: "blue",
+    href: "/events/event-csc-lightning-talks",
+    title: "CSC Lightning Talks and Snacks",
+    club: "Computer Science Club",
+    time: "Tonight · 7:30 PM",
+    location: "DC Lecture Hall",
+    status: "Hack / Dev",
     source: "Official club",
     freshness: "Updated 21m ago",
   },
   {
     icon: Music2,
-    iconClass: "bg-purple-400/10 text-purple-300",
-    title: "Live Music on the Green",
-    club: "UW Music Club",
-    meta: "Tomorrow · 4:00 PM · Arts Quad",
-    tags: ["Music", "Chill"],
+    accent: "mint",
+    href: "/events/event-wusa-open-mic",
+    title: "SLC Open Mic Night",
+    club: "WUSA",
+    time: "Tomorrow · 8:00 PM",
+    location: "SLC Great Hall",
+    status: "Music",
     source: "Waterloo Events",
     freshness: "Updated 1h ago",
   },
@@ -64,126 +72,169 @@ const previewEvents = [
 const discoveryModes = [
   {
     icon: Sparkles,
-    eyebrow: "For You",
-    title: "A feed that learns without trapping you.",
+    label: "For you",
+    title: "Start with what feels worth your time.",
     description:
-      "Hermes ranks what is timely and relevant while keeping Fresh and Following one tap away.",
-    detail: "Save, Interested, Hide, and Why recommended controls",
-    tone: "blue",
+      "A timely feed that learns from saves and RSVPs without hiding fresh campus options.",
+    detail: "Personal signal, always explainable",
   },
   {
     icon: Filter,
-    eyebrow: "Explore",
-    title: "Filters when you know what you need.",
+    label: "Explore",
+    title: "Narrow the campus when you know the vibe.",
     description:
-      "Narrow campus events by vibe, date, organiser, faculty, cost, and accessibility.",
-    detail: "Structured discovery alongside the feed",
-    tone: "purple",
+      "Filter by free food, career, hack and dev, music, social events, or what starts soon.",
+    detail: "Structured discovery, one tap away",
   },
   {
     icon: MapPin,
-    eyebrow: "Near now",
-    title: "See what is happening around you.",
+    label: "Near now",
+    title: "Turn the buildings around you into plans.",
     description:
-      "Move from a building or map pin directly into the canonical event detail.",
-    detail: "Building-level context without precise user tracking",
-    tone: "orange",
+      "Move from a campus location into a clear event detail without precise live tracking.",
+    detail: "Building-level context, privacy intact",
+  },
+] as const;
+
+const trustRows = [
+  {
+    icon: Verified,
+    title: "Source-backed events",
+    description: "Official links and freshness stay attached to every listing.",
+    state: "Verified",
+  },
+  {
+    icon: LockKeyhole,
+    title: "Campus-gated actions",
+    description: "Browsing stays open; saves and RSVPs require a UW identity.",
+    state: "Protected",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Named organisers",
+    description: "Events connect to accountable clubs and organisations.",
+    state: "Accountable",
+  },
+  {
+    icon: Compass,
+    title: "Privacy-conscious location",
+    description: "Useful building context without precise live location tracking.",
+    state: "Private",
   },
 ] as const;
 
 export default function App() {
-  const [email, setEmail] = useState('');
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
   const router = useRouter();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.toLowerCase().includes('@uwaterloo.ca')) {
+    if (!email.toLowerCase().includes("@uwaterloo.ca")) {
       alert("Please use your @uwaterloo.ca email to join the waitlist.");
       return;
     }
-    setStatus('loading');
+    setStatus("loading");
 
     router.push(`/signup?email=${encodeURIComponent(email)}`);
 
-    setTimeout(() => setStatus('success'), 1500);
+    setTimeout(() => setStatus("success"), 1500);
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-zinc-300 font-sans antialiased selection:bg-blue-500/30 overflow-x-hidden relative">
-      
-      {/* 1. Animated Background Map Pings */}
+    <div className="relative min-h-screen overflow-x-hidden bg-[#050505] font-sans text-zinc-300 antialiased selection:bg-blue-500/30">
+      {/* Hero section is intentionally preserved. */}
       <div
         id="map"
         className="absolute inset-x-0 top-0 h-[56rem] overflow-hidden opacity-45 [mask-image:linear-gradient(to_bottom,black_78%,transparent_100%)] max-md:pointer-events-none md:h-[60rem]"
       >
-        <BackgroundGlobe /> 
-        
-        {/* Subtle Map Outline (SVG) */}
-        <svg className="absolute inset-0 w-full h-full opacity-10" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
-          <path d="M200,300 Q400,100 600,300 T900,500" fill="none" stroke="white" strokeWidth="0.5" strokeDasharray="5,5" />
+        <BackgroundGlobe />
+
+        <svg
+          className="absolute inset-0 h-full w-full opacity-10"
+          viewBox="0 0 1000 1000"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <path
+            d="M200,300 Q400,100 600,300 T900,500"
+            fill="none"
+            stroke="white"
+            strokeWidth="0.5"
+            strokeDasharray="5,5"
+          />
           <circle cx="330" cy="300" r="2" fill="white" />
           <circle cx="500" cy="500" r="2" fill="white" />
           <circle cx="750" cy="450" r="2" fill="white" />
         </svg>
       </div>
 
-      {/* Ambient Blurs */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/10 blur-[120px] rounded-full"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-600/10 blur-[120px] rounded-full"></div>
+      <div className="absolute top-[-10%] left-[-10%] h-[50%] w-[50%] rounded-full bg-blue-600/10 blur-[120px]" />
+      <div className="absolute right-[-10%] bottom-[-10%] h-[50%] w-[50%] rounded-full bg-indigo-600/10 blur-[120px]" />
 
-      <main className="relative z-10 max-w-5xl mx-auto px-6 pt-40 md:pt-48 pb-24 flex flex-col items-center text-center">
-
-        {/* Improved Typography: Using font-sans with heavy weights */}
-        <h1 className="text-6xl md:text-[100px] font-extrabold text-white tracking-tighter mb-8 leading-[0.98]">
-          <span className="hero-reveal hero-reveal-delay-1 inline-block pb-[0.12em] -mb-[0.12em]">
+      <main className="relative z-10 mx-auto flex max-w-5xl flex-col items-center px-6 pt-40 pb-24 text-center md:pt-48">
+        <h1 className="mb-8 text-6xl leading-[0.98] font-extrabold tracking-tighter text-white md:text-[100px]">
+          <span className="hero-reveal hero-reveal-delay-1 -mb-[0.12em] inline-block pb-[0.12em]">
             <span>See what&apos;s</span>
           </span>{" "}
           <br />
-          <span className="hero-reveal hero-reveal-delay-2 inline-block pb-[0.16em] -mb-[0.16em]">
+          <span className="hero-reveal hero-reveal-delay-2 -mb-[0.16em] inline-block pb-[0.16em]">
             <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-blue-500 bg-clip-text text-transparent">
               happening at UW.
             </span>
           </span>
         </h1>
 
-        <p className="hero-reveal hero-reveal-delay-3 max-w-xl text-zinc-500 text-lg leading-relaxed mb-12 font-medium">
-          The central feed for Waterloo campus life. <br className="hidden md:block" />
+        <p className="hero-reveal hero-reveal-delay-3 mb-12 max-w-xl text-lg leading-relaxed font-medium text-zinc-500">
+          The central feed for Waterloo campus life.{" "}
+          <br className="hidden md:block" />
           Clubs, events, and free food alerts, synced in real-time.
         </p>
 
-        {/* CTA Container */}
-        <div id="join" className="hero-reveal hero-reveal-delay-4 w-full max-w-lg scroll-mt-32 bg-zinc-900/30 border border-zinc-800/50 p-2 rounded-2xl backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
-          {status !== 'success' ? (
-            <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-2">
-              <div className="flex-1 relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600" size={20} />
-                <input 
+        <div
+          id="join"
+          className="hero-reveal hero-reveal-delay-4 w-full max-w-lg scroll-mt-32 rounded-2xl border border-zinc-800/50 bg-zinc-900/30 p-2 shadow-[0_20px_50px_rgba(0,0,0,0.5)] backdrop-blur-xl"
+        >
+          {status !== "success" ? (
+            <form onSubmit={handleSubmit} className="flex flex-col gap-2 md:flex-row">
+              <div className="relative flex-1">
+                <Mail
+                  className="absolute top-1/2 left-4 -translate-y-1/2 text-zinc-600"
+                  size={20}
+                />
+                <input
                   type="email"
                   required
                   placeholder="your.email@uwaterloo.ca"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-transparent border-none py-4 pl-12 pr-4 text-white focus:ring-0 placeholder:text-zinc-700 text-base"
+                  className="w-full border-none bg-transparent py-4 pr-4 pl-12 text-base text-white placeholder:text-zinc-700 focus:ring-0"
                 />
               </div>
-              <button 
+              <button
                 type="submit"
-                disabled={status === 'loading'}
-                className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-8 py-4 rounded-xl transition-all flex items-center justify-center gap-2 group disabled:opacity-50 shadow-lg shadow-blue-600/20"
+                disabled={status === "loading"}
+                className="group flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-8 py-4 font-bold text-white shadow-lg shadow-blue-600/20 transition-all hover:bg-blue-500 disabled:opacity-50"
               >
-                {status === 'loading' ? 'Joining...' : 'Get Access'}
-                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                {status === "loading" ? "Joining..." : "Get Access"}
+                <ArrowRight
+                  size={20}
+                  className="transition-transform group-hover:translate-x-1"
+                />
               </button>
             </form>
           ) : (
-            <div className="py-10 px-4 flex flex-col items-center gap-3 animate-in fade-in zoom-in duration-500">
-              <div className="w-14 h-14 bg-green-500/10 rounded-full flex items-center justify-center border border-green-500/20">
+            <div className="animate-in fade-in zoom-in flex flex-col items-center gap-3 px-4 py-10 duration-500">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full border border-green-500/20 bg-green-500/10">
                 <CheckCircle2 size={28} className="text-green-500" />
               </div>
               <div className="text-center">
-                <p className="text-white text-xl font-bold tracking-tight">Access Granted.</p>
-                <p className="text-zinc-500 text-sm mt-1">We sent a verification link to your inbox.</p>
+                <p className="text-xl font-bold tracking-tight text-white">
+                  Access Granted.
+                </p>
+                <p className="mt-1 text-sm text-zinc-500">
+                  We sent a verification link to your inbox.
+                </p>
               </div>
             </div>
           )}
@@ -191,256 +242,320 @@ export default function App() {
         <p className="hero-reveal hero-reveal-delay-4 mt-4 text-xs font-medium text-zinc-600">
           Built for UW students. No spam.
         </p>
-
       </main>
 
-      <section id="features" className="landing-section relative z-10">
-        <ScrollReveal className="mx-auto max-w-3xl text-center">
-          <p className="landing-eyebrow">The campus discovery layer</p>
-          <h2 className="landing-title">
-            A feed built for deciding,
-            <br />
-            not endless scrolling.
-          </h2>
-          <p className="landing-subtitle mx-auto">
-            Every Hermes card compresses the details you need to decide whether
-            something is worth your time, with the source and organiser always
-            one tap away.
-          </p>
-        </ScrollReveal>
+      <div id="features" className="signal-story">
+        <div className="signal-route" aria-hidden="true">
+          <span className="signal-route-node signal-route-node-1" />
+          <span className="signal-route-node signal-route-node-2" />
+          <span className="signal-route-node signal-route-node-3" />
+          <span className="signal-route-node signal-route-node-4" />
+        </div>
 
-        <ScrollReveal delay={120}>
-          <div className="product-shell">
-            <div className="product-shell-bar">
-              <div className="product-switcher">
-                <span className="product-switcher-active">For You</span>
+        <section className="signal-section signal-feed-section">
+          <ScrollReveal className="signal-section-copy">
+            <p className="signal-label">
+              <Radio size={15} />
+              Live campus signal
+            </p>
+            <h2 className="signal-title">
+              Decide what is worth doing before your next class.
+            </h2>
+            <p className="signal-body">
+              Hermes turns scattered campus listings into one timely feed. The
+              important details stay visible: when, where, who is hosting, and
+              why it belongs on your radar.
+            </p>
+            <Link href="/events" className="signal-text-link">
+              Browse the live feed
+              <ArrowRight size={17} />
+            </Link>
+          </ScrollReveal>
+
+          <ScrollReveal direction="right" delay={100} className="signal-feed-window">
+            <div className="signal-feed-toolbar">
+              <div className="signal-feed-tabs" aria-label="Feed preview">
+                <span className="is-active">For you</span>
                 <span>Fresh</span>
                 <span>Following</span>
               </div>
-              <div className="product-search">
-                <Search size={15} />
+              <span className="signal-search-preview">
+                <Search size={14} />
                 Search campus
-              </div>
+              </span>
             </div>
 
-            <div className="product-chip-row">
-              {["Everything", "Free food", "Career", "Hack / Dev", "Social"].map((chip, index) => (
-                <span key={chip} className={index === 0 ? "product-chip-active" : "product-chip"}>
-                  {chip}
-                </span>
-              ))}
+            <div className="signal-starting-row">
+              <span className="signal-live-dot" />
+              <span>Starting soon</span>
+              <span className="signal-starting-count">3 near campus</span>
             </div>
 
-            <div className="product-feed-grid">
-              {previewEvents.map(({ icon: Icon, iconClass, title, club, meta, tags, source, freshness }, index) => (
-                <ScrollReveal key={title} delay={180 + index * 90}>
-                  <article className={`product-event-card ${index === 0 ? "product-event-card-featured" : ""}`}>
-                    <div className="flex items-start justify-between gap-4">
-                      <div className={`product-event-icon ${iconClass}`}>
-                        <Icon size={20} />
+            <div className="signal-event-rail">
+              {previewEvents.map(
+                ({
+                  icon: Icon,
+                  accent,
+                  href,
+                  title,
+                  club,
+                  time,
+                  location,
+                  status: eventStatus,
+                  source,
+                  freshness,
+                }) => (
+                  <Link key={title} href={href} className="signal-event-card">
+                    <div className="signal-event-card-top">
+                      <span className={`signal-event-icon signal-event-icon-${accent}`}>
+                        <Icon size={18} />
+                      </span>
+                      <span className={`signal-event-status signal-event-status-${accent}`}>
+                        {eventStatus}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="signal-event-club">{club}</p>
+                      <h3>{title}</h3>
+                    </div>
+                    <dl className="signal-event-meta">
+                      <div>
+                        <Clock3 size={14} />
+                        <dt className="sr-only">Time</dt>
+                        <dd>{time}</dd>
                       </div>
-                      <button type="button" aria-label={`Hide ${title}`} className="product-icon-button">
-                        <EyeOff size={15} />
-                      </button>
-                    </div>
-                    <p className="mt-5 text-xs font-semibold text-blue-300">{club}</p>
-                    <h3 className="mt-2 text-xl font-bold leading-tight text-white">{title}</h3>
-                    <p className="mt-3 flex items-center gap-2 text-xs text-zinc-400">
-                      <Clock3 size={14} />
-                      {meta}
-                    </p>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {tags.map((tag) => (
-                        <span key={tag} className="product-tag">{tag}</span>
-                      ))}
-                    </div>
-                    <div className="product-source-row">
-                      <span className="flex items-center gap-1.5">
-                        <Verified size={14} className="text-blue-300" />
+                      <div>
+                        <MapPin size={14} />
+                        <dt className="sr-only">Location</dt>
+                        <dd>{location}</dd>
+                      </div>
+                    </dl>
+                    <div className="signal-event-source">
+                      <span>
+                        <Verified size={13} />
                         {source}
                       </span>
                       <span>{freshness}</span>
                     </div>
-                    <div className="mt-4 grid grid-cols-2 gap-2">
-                      <button type="button" className="product-action product-action-primary">
-                        <Heart size={15} />
-                        Save
-                      </button>
-                      <button type="button" className="product-action">
-                        Interested
-                      </button>
-                    </div>
-                  </article>
+                  </Link>
+                ),
+              )}
+            </div>
+
+            <div className="signal-feed-foot">
+              <span>Free food</span>
+              <span>Career</span>
+              <span>Hack / Dev</span>
+              <span>Social</span>
+              <span className="signal-feed-foot-active">Everything</span>
+            </div>
+          </ScrollReveal>
+        </section>
+
+        <section className="signal-section signal-community-section">
+          <ScrollReveal className="signal-community-visual">
+            <article className="signal-event-detail">
+              <div className="signal-detail-head">
+                <span className="signal-event-status signal-event-status-blue">
+                  Starting tonight
+                </span>
+                <span className="signal-trusted">
+                  <Verified size={14} />
+                  Official club
+                </span>
+              </div>
+              <p className="signal-event-club">UW Blueprint</p>
+              <h3>Build Night: Ship Something</h3>
+              <p>
+                Bring an idea, meet a team, and leave with something working.
+                Beginners welcome.
+              </p>
+              <div className="signal-detail-meta">
+                <span>
+                  <CalendarDays size={15} />
+                  Thursday · 7:30 PM
+                </span>
+                <span>
+                  <MapPin size={15} />
+                  E7 2317
+                </span>
+              </div>
+              <div className="signal-detail-actions" aria-label="Example event actions">
+                <span className="signal-action-primary">
+                  <Heart size={15} />
+                  Save
+                </span>
+                <span>Going</span>
+              </div>
+            </article>
+
+            <div className="signal-community-connector" aria-hidden="true">
+              <span />
+            </div>
+
+            <article className="signal-organizer">
+              <div className="signal-organizer-avatar">
+                <Code2 size={22} />
+              </div>
+              <div>
+                <p>Organiser</p>
+                <h3>UW Blueprint</h3>
+                <span>4 upcoming events · Technology</span>
+              </div>
+              <span className="signal-follow-preview">
+                <Users size={14} />
+                Follow
+              </span>
+            </article>
+          </ScrollReveal>
+
+          <ScrollReveal direction="right" delay={100} className="signal-section-copy">
+            <p className="signal-label">
+              <Users size={15} />
+              Events lead somewhere
+            </p>
+            <h2 className="signal-title">
+              Find the event. Stay for the community.
+            </h2>
+            <p className="signal-body">
+              Every event connects back to a durable organiser, so discovering
+              one good night can lead to the next workshop, meetup, or group.
+            </p>
+            <ul className="signal-check-list">
+              {[
+                "Follow organisers for recurring events",
+                "See official links and source provenance",
+                "Move naturally from save to going",
+              ].map((item) => (
+                <li key={item}>
+                  <Check size={16} />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </ScrollReveal>
+        </section>
+
+        <section className="signal-section signal-discovery-section">
+          <ScrollReveal className="signal-section-copy signal-discovery-copy">
+            <p className="signal-label">
+              <Route size={15} />
+              Feed-first, not feed-only
+            </p>
+            <h2 className="signal-title">Discover campus your way.</h2>
+            <p className="signal-body">
+              Browse when you want inspiration. Filter or use nearby buildings
+              when you already know the kind of plan you need.
+            </p>
+          </ScrollReveal>
+
+          <div className="signal-discovery-layout">
+            <div className="signal-path-map" aria-hidden="true">
+              <span className="signal-path-building signal-path-building-mc">MC</span>
+              <span className="signal-path-building signal-path-building-e7">E7</span>
+              <span className="signal-path-building signal-path-building-slc">SLC</span>
+              <span className="signal-path-you">
+                <Zap size={15} />
+              </span>
+              <svg viewBox="0 0 600 340" preserveAspectRatio="none">
+                <path d="M70 250 C170 90 225 270 320 150 S470 40 545 105" />
+                <path d="M70 250 C205 310 380 290 510 235" />
+              </svg>
+            </div>
+
+            <div className="signal-mode-list">
+              {discoveryModes.map(({ icon: Icon, label, title, description, detail }, index) => (
+                <ScrollReveal key={label} delay={index * 80}>
+                  <Link href="/events" className="signal-mode-row">
+                    <span className="signal-mode-index">0{index + 1}</span>
+                    <span className="signal-mode-icon">
+                      <Icon size={18} />
+                    </span>
+                    <span className="signal-mode-content">
+                      <span>{label}</span>
+                      <strong>{title}</strong>
+                      <small>{description}</small>
+                    </span>
+                    <span className="signal-mode-detail">{detail}</span>
+                    <ArrowRight size={17} />
+                  </Link>
                 </ScrollReveal>
               ))}
             </div>
           </div>
-        </ScrollReveal>
-      </section>
+        </section>
 
-      <section className="landing-section relative z-10 pt-0">
-        <div className="grid items-center gap-12 lg:grid-cols-[1fr_1.05fr]">
-          <ScrollReveal>
-            <p className="landing-eyebrow">Events lead somewhere</p>
-            <h2 className="landing-title">Find the event. Stay for the community.</h2>
-            <p className="landing-subtitle mb-7">
-              Hermes connects every event to a durable club or organiser, making
-              campus discovery useful beyond a single night.
+        <section className="signal-section signal-trust-section">
+          <ScrollReveal className="signal-section-copy">
+            <p className="signal-label">
+              <ShieldCheck size={15} />
+              Trust is part of discovery
             </p>
-            <div className="space-y-3">
-              {[
-                "Follow organisers for recurring events",
-                "See official links and source provenance",
-                "Move from save to interested to going",
-              ].map((item) => (
-                <div key={item} className="flex items-center gap-3 text-sm text-zinc-400">
-                  <Check size={16} className="text-emerald-300" />
-                  {item}
-                </div>
-              ))}
-            </div>
+            <h2 className="signal-title">Know why an event is here.</h2>
+            <p className="signal-body">
+              Provenance, freshness, and organiser identity stay visible, so
+              campus discovery remains useful instead of becoming another noisy
+              anonymous feed.
+            </p>
           </ScrollReveal>
 
-          <ScrollReveal direction="right" delay={120}>
-            <div className="community-preview">
-              <div className="community-event">
-                <div className="flex items-center justify-between gap-4">
-                  <span className="product-tag">Starting tonight</span>
-                  <span className="flex items-center gap-1.5 text-xs text-zinc-500">
-                    <Verified size={14} className="text-blue-300" />
-                    Official club
-                  </span>
-                </div>
-                <h3 className="mt-5 text-2xl font-bold tracking-tight text-white">
-                  Build Night: Ship Something
-                </h3>
-                <p className="mt-3 text-sm leading-6 text-zinc-400">
-                  Bring an idea, meet a team, and leave with something working.
-                  Beginners welcome.
-                </p>
-                <div className="mt-5 grid gap-3 text-sm text-zinc-400 sm:grid-cols-2">
-                  <span className="flex items-center gap-2"><CalendarDays size={15} /> Thursday · 7:30 PM</span>
-                  <span className="flex items-center gap-2"><MapPin size={15} /> E7 2317</span>
-                </div>
-              </div>
-              <div className="community-org-card">
-                <div className="community-org-avatar"><Code2 size={22} /></div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-300">Organiser</p>
-                  <h4 className="mt-1 font-semibold text-white">UW Blueprint</h4>
-                  <p className="mt-1 text-xs text-zinc-500">4 upcoming events · Technology</p>
-                </div>
-                <button type="button" className="community-follow">Follow</button>
-              </div>
+          <ScrollReveal direction="right" delay={100} className="signal-trust-ledger">
+            <div className="signal-ledger-head">
+              <span>Hermes listing standard</span>
+              <span>
+                <span className="signal-live-dot" />
+                Active
+              </span>
             </div>
-          </ScrollReveal>
-        </div>
-      </section>
-
-      <section className="landing-section relative z-10 pt-0">
-        <ScrollReveal>
-          <p className="landing-eyebrow">Feed-first, not feed-only</p>
-          <h2 className="landing-title">Discover campus your way.</h2>
-          <p className="landing-subtitle">
-            Browse when you want inspiration. Filter or use the map when you
-            already know what kind of opportunity you need.
-          </p>
-        </ScrollReveal>
-        <div className="grid gap-4 lg:grid-cols-3">
-          {discoveryModes.map(({ icon: Icon, eyebrow, title, description, detail, tone }, index) => (
-            <ScrollReveal key={eyebrow} delay={index * 90}>
-              <article className={`discovery-card discovery-card-${tone}`}>
-                <div className="flex items-center justify-between">
-                  <div className="landing-icon mb-0"><Icon size={20} /></div>
-                  <ChevronRight size={18} className="text-zinc-600" />
+            {trustRows.map(({ icon: Icon, title, description, state }) => (
+              <article key={title} className="signal-ledger-row">
+                <span className="signal-ledger-icon">
+                  <Icon size={18} />
+                </span>
+                <div>
+                  <h3>{title}</h3>
+                  <p>{description}</p>
                 </div>
-                <p className="mt-8 text-xs font-bold uppercase tracking-[0.18em] text-blue-300">{eyebrow}</p>
-                <h3 className="mt-3 text-xl font-bold leading-tight text-white">{title}</h3>
-                <p className="mt-3 text-sm leading-6 text-zinc-500">{description}</p>
-                <p className="mt-8 border-t border-white/[0.08] pt-4 text-xs text-zinc-400">{detail}</p>
+                <span className="signal-ledger-state">
+                  <Check size={13} />
+                  {state}
+                </span>
               </article>
-            </ScrollReveal>
-          ))}
-        </div>
-      </section>
+            ))}
+          </ScrollReveal>
+        </section>
 
-      <section className="trust-section relative z-10">
-        <div className="landing-section py-0">
-          <div className="grid items-center gap-12 lg:grid-cols-[0.9fr_1.1fr]">
-            <ScrollReveal>
-              <p className="landing-eyebrow">Trust is part of discovery</p>
-              <h2 className="landing-title">Know why an event is here.</h2>
-              <p className="landing-subtitle mb-0">
-                Hermes foregrounds provenance, freshness, and organiser identity
-                so campus discovery stays useful instead of becoming another
-                noisy anonymous feed.
-              </p>
-            </ScrollReveal>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {[
-                [Verified, "Source-backed events", "Official and imported events retain their source link and freshness."],
-                [LockKeyhole, "Campus-gated actions", "Browsing stays easy while saves, RSVPs, and submissions require identity."],
-                [ShieldCheck, "Named organisers", "Events connect to accountable clubs and organisations."],
-                [Compass, "Privacy-conscious by default", "Building-level context works without precise live location tracking."],
-              ].map(([Icon, title, description], index) => {
-                const TrustIcon = Icon as typeof Verified;
-                return (
-                  <ScrollReveal key={title as string} delay={index * 80}>
-                    <article className="trust-card">
-                      <TrustIcon size={20} className="text-blue-300" />
-                      <h3 className="mt-5 font-semibold text-white">{title as string}</h3>
-                      <p className="mt-2 text-sm leading-6 text-zinc-500">{description as string}</p>
-                    </article>
-                  </ScrollReveal>
-                );
-              })}
+        <section className="signal-final-cta">
+          <ScrollReveal>
+            <span className="signal-cta-node" aria-hidden="true">
+              <Zap size={18} />
+            </span>
+            <h2>Find the event. Follow what comes next.</h2>
+            <p>
+              Join Hermes with your UW email, or preview what is happening
+              around campus right now.
+            </p>
+            <div className="signal-cta-actions">
+              <a href="#join" className="signal-primary-button">
+                Get access
+                <ArrowRight size={18} />
+              </a>
+              <Link href="/events" className="signal-secondary-button">
+                Preview events
+              </Link>
             </div>
-          </div>
-        </div>
-      </section>
+          </ScrollReveal>
+        </section>
+      </div>
 
-      <section className="landing-final-cta relative z-10">
-        <ScrollReveal>
-          <p className="landing-eyebrow">Start with what is happening</p>
-          <h2 className="landing-title mx-auto max-w-2xl">
-            Find the event.
-            <br />
-            Follow what comes next.
-          </h2>
-          <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-zinc-500">
-            Join Hermes with your UW email or preview the current campus feed.
-          </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <a href="#join" className="landing-primary-button">
-              Get access
-              <ArrowRight size={18} />
-            </a>
-            <Link href="/events" className="landing-secondary-button">
-              Preview events
-            </Link>
-          </div>
-        </ScrollReveal>
-      </section>
-
-      <footer className="relative z-10 flex flex-col gap-4 border-t border-white/[0.07] px-6 py-8 text-xs text-zinc-600 sm:flex-row sm:items-center sm:justify-between sm:px-10">
+      <footer className="signal-footer">
         <p>© 2026 Hermes · Built for UWaterloo</p>
-        <div className="flex gap-5">
-          <a href="#features" className="transition hover:text-zinc-300">Features</a>
-          <Link href="/events" className="transition hover:text-zinc-300">Events</Link>
-          <a href="#join" className="transition hover:text-zinc-300">Get access</a>
+        <div>
+          <a href="#features">How it works</a>
+          <Link href="/events">Events</Link>
+          <a href="#join">Get access</a>
         </div>
       </footer>
-
-      {/* Global CSS for Inter Font Fallback */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-        
-        :root {
-          font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        }
-
-        }
-      `}} />
     </div>
   );
 }

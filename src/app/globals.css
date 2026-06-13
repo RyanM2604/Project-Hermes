@@ -639,17 +639,17 @@
 }
 
 .signal-feed-foot {
+  flex-wrap: wrap;
   gap: 0.4rem;
   margin-top: 0.75rem;
   padding: 0.45rem;
-  overflow-x: auto;
+  overflow-x: visible;
   border: 1px solid var(--signal-line);
   border-radius: 0.8rem;
   color: #71717a;
   background: #0c0c0f;
   font-size: 0.67rem;
   font-weight: 700;
-  scrollbar-width: none;
 }
 
 .signal-feed-foot span {
@@ -1326,9 +1326,8 @@
   }
 
   .signal-event-rail {
-    grid-template-columns: repeat(3, minmax(13.5rem, 1fr));
-    overflow-x: auto;
-    scrollbar-width: none;
+    grid-template-columns: repeat(auto-fit, minmax(13.5rem, 1fr));
+    overflow-x: visible;
   }
 
   .signal-organizer {
@@ -1399,7 +1398,7 @@
   }
 
   .signal-event-rail {
-    grid-template-columns: repeat(3, minmax(15rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(13.5rem, 1fr));
   }
 
   .signal-feed-window {

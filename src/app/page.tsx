@@ -142,7 +142,7 @@ export default function App() {
   };
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#050505] font-sans text-zinc-300 antialiased selection:bg-blue-500/30">
+    <div className="relative min-h-screen overflow-clip bg-[#050505] font-sans text-zinc-300 antialiased selection:bg-blue-500/30">
       {/* Hero section is intentionally preserved. */}
       <div
         id="map"

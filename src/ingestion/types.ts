@@ -4,6 +4,7 @@ import type {
   NormalizationResult,
   NormalizedEventCandidate,
 } from "@/lib/events/adapters";
+import type { EventPersistenceResult } from "@/lib/events/persistence";
 
 export type IngestionErrorCode =
   | "http-error"
@@ -53,6 +54,7 @@ export interface IngestionRunResult {
   sources: SourceIngestionResult[];
   events: NormalizedEventCandidate[];
   duplicates: DuplicateEvent[];
+  persistence?: EventPersistenceResult;
 }
 
 export type FetchText = (source: IngestionSource) => Promise<string>;

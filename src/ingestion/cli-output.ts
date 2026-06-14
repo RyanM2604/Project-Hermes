@@ -14,6 +14,7 @@ export function buildCliOutput(run: IngestionRunResult) {
     })),
     eventCount: run.events.length,
     duplicateCount: run.duplicates.length,
+    ...(run.persistence ? { persistence: run.persistence } : {}),
     events: run.events.map((event) => ({
       source: event.source,
       sourceUrl: event.sourceUrl,

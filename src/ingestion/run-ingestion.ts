@@ -1,4 +1,8 @@
 import type { NormalizedEventCandidate } from "@/lib/events/adapters";
+import {
+  persistEvents,
+  type EventPersistenceRepository,
+} from "@/lib/events/persistence";
 
 import { deduplicateEvents } from "./dedupe-events";
 import { fetchSourceText } from "./fetch-source";
@@ -17,6 +21,7 @@ interface RunIngestionOptions {
   sources?: readonly IngestionSource[];
   fetchText?: FetchText;
   now?: () => Date;
+  persistence?: EventPersistenceRepository;
 }
 
 const ERROR_CODES = new Set<IngestionErrorCode>([
@@ -139,6 +144,9 @@ export async function runIngestion(
   const deduplicated = deduplicateEvents(
     sourceRuns.flatMap((sourceRun) => sourceRun.events),
   );
+  const persistence = options.persistence
+    ? await persistEvents(deduplicated.events, options.persistence)
+    : undefined;
 
   return {
     startedAt,
@@ -146,5 +154,6 @@ export async function runIngestion(
     sources: sourceRuns.map((sourceRun) => sourceRun.result),
     events: deduplicated.events,
     duplicates: deduplicated.duplicates,
+    ...(persistence ? { persistence } : {}),
   };
 }

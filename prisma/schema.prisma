@@ -7,6 +7,57 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum EventClassificationStatus {
+  pending
+  classified
+  fallback
+  retry
+}
+
+model Event {
+  id                   String                    @id
+  source               String
+  sourceFingerprint    String                    @unique @map("source_fingerprint")
+  sourceUrl            String                    @map("source_url")
+  title                String
+  description          String
+  clubName             String                    @map("club_name")
+  startTime            DateTime                  @map("start_time") @db.Timestamptz(6)
+  endTime              DateTime                  @map("end_time") @db.Timestamptz(6)
+  locationName         String                    @map("location_name")
+  buildingCode         String?                   @map("building_code")
+  sourceTags           String[]                  @default([]) @map("source_tags")
+  imageUrl             String?                   @map("image_url")
+  isFreeFood           Boolean                   @default(false) @map("is_free_food")
+  contentHash          String                    @map("content_hash")
+  classificationStatus EventClassificationStatus @default(pending) @map("classification_status")
+  classification       EventClassification?
+  createdAt            DateTime                  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime                  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([startTime], map: "events_start_time_idx")
+  @@index([classificationStatus], map: "events_classification_status_idx")
+  @@map("events")
+}
+
+model EventClassification {
+  eventId       String   @id @map("event_id")
+  event         Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  promptVersion String   @map("prompt_version")
+  model         String
+  primaryTag    String   @map("primary_tag")
+  tags          String[] @default([])
+  vibes         String[] @default([])
+  audiences     String[] @default([])
+  format        String
+  confidence    Float
+  rationale     String
+  classifiedAt  DateTime @default(now()) @map("classified_at") @db.Timestamptz(6)
+
+  @@index([primaryTag], map: "event_classifications_primary_tag_idx")
+  @@map("event_classifications")
+}
+
 model Interaction {
   id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId             String?  @map("user_id") @db.Uuid

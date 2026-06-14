@@ -41,7 +41,7 @@ export default async function EventsPage({ searchParams }: PageProps<"/events">)
       >
         {[
           { label: "Home", href: "/events", icon: Home },
-          { label: "Map", href: "#map", icon: Map },
+          { label: "Map", href: "/map", icon: Map },
           { label: "Post", href: "#post", icon: Plus },
           { label: "Profile", href: "#profile", icon: UserRound },
         ].map(({ label, href, icon: Icon }, index) => (

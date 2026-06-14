@@ -9,8 +9,8 @@ import { useState } from "react";
 const navItems = [
   { label: "Home", href: "/" },
   { label: "Events", href: "/events" },
-  { label: "Clubs", href: "/#clubs" },
-  { label: "Map", href: "/#map" },
+  { label: "Clubs", href: "/clubs" },
+  { label: "Map", href: "/map" },
 ];
 
 interface SiteNavbarProps {
@@ -50,9 +50,9 @@ export function SiteNavbar({ isAuthenticated }: SiteNavbarProps) {
             <div className="flex items-center gap-1">
               {navItems.map((item) => {
                 const isActive =
-                  item.href === "/events"
-                    ? pathname.startsWith("/events")
-                    : item.href === "/" && pathname === "/";
+                  item.href === "/"
+                    ? pathname === "/"
+                    : pathname.startsWith(item.href);
 
                 return (
                   <Link

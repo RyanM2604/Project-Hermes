@@ -2,7 +2,8 @@ import Link from "next/link";
 import { ArrowLeft, CalendarDays, Clock, MapPin } from "lucide-react";
 
 import { RSVPButton, SaveEventButton } from "@/components/events";
-import { mockEvents } from "@/lib/events";
+import { formatEventLocation } from "@/lib/events";
+import { getEventById } from "@/lib/events/repository";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { HermesEvent } from "@/types/event";
 
@@ -27,19 +28,15 @@ function formatTag(tag: HermesEvent["tags"][number]) {
     .join(" ");
 }
 
-export function generateStaticParams() {
-  return mockEvents.map((event) => ({ id: event.id }));
-}
-
 export default async function EventDetailPage({
   params,
 }: PageProps<"/events/[id]">) {
   const { id } = await params;
+  const eventPromise = getEventById(id);
   const supabase = await createSupabaseServerClient();
-  const {
+  const [event, {
     data: { user },
-  } = await supabase.auth.getUser();
-  const event = mockEvents.find((candidate) => candidate.id === id);
+  }] = await Promise.all([eventPromise, supabase.auth.getUser()]);
 
   if (!event) {
     return (
@@ -88,9 +85,11 @@ export default async function EventDetailPage({
                     🍕 Free Food
                   </span>
                 )}
-                <span className="rounded-full border border-white/15 bg-black/35 px-3 py-1 text-sm font-semibold text-zinc-200">
-                  {event.buildingCode}
-                </span>
+                {event.buildingCode && (
+                  <span className="rounded-full border border-white/15 bg-black/35 px-3 py-1 text-sm font-semibold text-zinc-200">
+                    {event.buildingCode}
+                  </span>
+                )}
               </div>
 
               <div>
@@ -165,7 +164,7 @@ export default async function EventDetailPage({
                   <div>
                     <dt className="font-semibold text-zinc-500">Location</dt>
                     <dd className="mt-1 text-zinc-200">
-                      {event.locationName}, {event.buildingCode}
+                      {formatEventLocation(event)}
                     </dd>
                   </div>
                 </div>

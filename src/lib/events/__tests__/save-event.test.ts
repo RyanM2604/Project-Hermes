@@ -1,12 +1,30 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   handleSaveEvent,
   type SavedEventRepository,
 } from "../save-event";
 
+const routeMocks = vi.hoisted(() => ({
+  eventExists: vi.fn(),
+  from: vi.fn(),
+  getUser: vi.fn(),
+}));
+
+vi.mock("@/lib/events/repository", () => ({
+  eventExists: routeMocks.eventExists,
+}));
+vi.mock("@/lib/supabase/server", () => ({
+  createSupabaseServerClient: async () => ({
+    auth: { getUser: routeMocks.getUser },
+    from: routeMocks.from,
+  }),
+}));
+
 const eventId = "event-mathsoc-pizza-night";
 const user = { id: "user-123" };
+const eventExists = async (candidateEventId: string) =>
+  candidateEventId === eventId || candidateEventId === "event-live";
 
 function createRepository() {
   const saved = new Set<string>();
@@ -33,6 +51,7 @@ describe("save event", () => {
     const result = await handleSaveEvent({
       action: "save",
       eventId,
+      eventExists,
       getUser: async () => null,
       repository,
     });
@@ -49,6 +68,7 @@ describe("save event", () => {
     const result = await handleSaveEvent({
       action: "save",
       eventId,
+      eventExists,
       getUser: async () => user,
       repository,
     });
@@ -64,6 +84,7 @@ describe("save event", () => {
     const result = await handleSaveEvent({
       action: "unsave",
       eventId,
+      eventExists,
       getUser: async () => user,
       repository,
     });
@@ -77,6 +98,7 @@ describe("save event", () => {
     const options = {
       action: "save" as const,
       eventId,
+      eventExists,
       getUser: async () => user,
       repository,
     };
@@ -86,5 +108,73 @@ describe("save event", () => {
 
     expect(result).toEqual({ body: { saved: true }, status: 200 });
     expect(saved.size).toBe(1);
+  });
+
+  it("accepts a live event ID supplied by the event repository", async () => {
+    const { repository } = createRepository();
+
+    const result = await handleSaveEvent({
+      action: "save",
+      eventId: "event-live",
+      eventExists,
+      getUser: async () => user,
+      repository,
+    });
+
+    expect(result).toEqual({ body: { saved: true }, status: 200 });
+  });
+
+  it("rejects event IDs missing from the event repository", async () => {
+    const { repository, saved } = createRepository();
+
+    const result = await handleSaveEvent({
+      action: "save",
+      eventId: "missing-event",
+      eventExists,
+      getUser: async () => user,
+      repository,
+    });
+
+    expect(result).toEqual({ body: { error: "Event not found" }, status: 404 });
+    expect(saved.size).toBe(0);
+  });
+
+  it("propagates event repository outages before writing", async () => {
+    const { repository, saved } = createRepository();
+    const outage = new Error("event database unavailable");
+    const failingEventExists = vi.fn(async () => {
+      throw outage;
+    });
+
+    await expect(
+      handleSaveEvent({
+        action: "save",
+        eventId,
+        eventExists: failingEventExists,
+        getUser: async () => user,
+        repository,
+      }),
+    ).rejects.toBe(outage);
+    expect(saved.size).toBe(0);
+  });
+
+  it("returns a route-level service error without writing during an event repository outage", async () => {
+    const outage = Object.assign(
+      new Error("database unavailable at db.internal.example:5432"),
+      { code: "P1001" },
+    );
+    routeMocks.eventExists.mockRejectedValueOnce(outage);
+    routeMocks.getUser.mockResolvedValueOnce({ data: { user } });
+    const { PUT } = await import("@/app/api/events/[id]/save/route");
+
+    const response = await PUT(new Request("https://example.com"), {
+      params: Promise.resolve({ id: eventId }),
+    });
+
+    expect(response.status).toBe(500);
+    await expect(response.json()).resolves.toEqual({
+      error: "Unable to update saved event",
+    });
+    expect(routeMocks.from).not.toHaveBeenCalled();
   });
 });

@@ -1,28 +1,10 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { eventExists } from "@/lib/events/repository";
 import {
   handleRsvpEvent,
   type RsvpEventRepository,
   isRsvpStatus,
 } from "@/lib/events/rsvp-event";
-
-function toDatabaseErrorResponse(error: unknown) {
-  const message =
-    error instanceof Error && error.message
-      ? error.message
-      : "Unable to update RSVP";
-  const code =
-    error && typeof error === "object" && "code" in error
-      ? String(error.code)
-      : undefined;
-
-  return Response.json(
-    {
-      error: message,
-      ...(code ? { code } : {}),
-    },
-    { status: 500 },
-  );
-}
 
 async function handleRequest(
   request: Request,
@@ -82,6 +64,7 @@ async function handleRequest(
   try {
     const result = await handleRsvpEvent({
       eventId: id,
+      eventExists,
       getUser: async () => {
         const {
           data: { user },
@@ -94,8 +77,8 @@ async function handleRequest(
     });
 
     return Response.json(result.body, { status: result.status });
-  } catch (error) {
-    return toDatabaseErrorResponse(error);
+  } catch {
+    return Response.json({ error: "Unable to update RSVP" }, { status: 500 });
   }
 }
 

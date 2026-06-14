@@ -28,9 +28,10 @@ export interface HermesEvent {
   startTime: string;
   endTime: string;
   locationName: string;
-  buildingCode: BuildingCode;
+  buildingCode?: BuildingCode;
   tags: EventTag[];
-  imageUrl: string;
+  primaryTag?: EventTag;
+  imageUrl?: string;
   sourceUrl: string;
   isFreeFood: boolean;
   createdAt: string;

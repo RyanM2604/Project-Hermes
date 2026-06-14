@@ -74,6 +74,21 @@ const buildingCodes = new Set<BuildingCode>([
 const initializationAvailabilityCodes = new Set(["P1001", "P1002"]);
 const requestAvailabilityCodes = new Set(["P1008", "P1017", "P2024"]);
 
+function hasDatabaseUrl(): boolean {
+  if (process.env.NODE_ENV === "test") {
+    return true;
+  }
+
+  return Boolean(process.env.DATABASE_URL?.trim());
+}
+
+function fallbackEventExists(
+  fallbackEvents: readonly HermesEvent[],
+  eventId: string,
+): boolean {
+  return fallbackEvents.some((event) => event.id === eventId);
+}
+
 export function isDatabaseUnavailableError(error: unknown): boolean {
   if (error instanceof Prisma.PrismaClientInitializationError) {
     return (
@@ -161,6 +176,11 @@ export function createPrismaEventRepository({
 }: CreatePrismaEventRepositoryOptions) {
   async function getEvents(): Promise<HermesEvent[]> {
     const currentTime = now();
+
+    if (!hasDatabaseUrl()) {
+      return upcomingFallbackEvents(fallbackEvents, currentTime);
+    }
+
     let records: PersistedEventRecord[];
 
     try {
@@ -183,6 +203,10 @@ export function createPrismaEventRepository({
   async function getEventById(
     eventId: string,
   ): Promise<HermesEvent | undefined> {
+    if (!hasDatabaseUrl()) {
+      return fallbackEvents.find((event) => event.id === eventId);
+    }
+
     let record: PersistedEventRecord | null;
 
     try {
@@ -202,12 +226,24 @@ export function createPrismaEventRepository({
   }
 
   async function eventExists(eventId: string): Promise<boolean> {
-    return Boolean(
-      await client.event.findUnique({
-        select: { id: true },
-        where: { id: eventId },
-      }),
-    );
+    if (!hasDatabaseUrl()) {
+      return fallbackEventExists(fallbackEvents, eventId);
+    }
+
+    try {
+      return Boolean(
+        await client.event.findUnique({
+          select: { id: true },
+          where: { id: eventId },
+        }),
+      );
+    } catch (error) {
+      if (isDatabaseUnavailableError(error)) {
+        return fallbackEventExists(fallbackEvents, eventId);
+      }
+
+      throw error;
+    }
   }
 
   return { getEvents, getEventById, eventExists };

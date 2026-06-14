@@ -1,0 +1,117 @@
+import { describe, expect, it, vi } from "vitest";
+
+import type { ClassificationPromptInput } from "../prompt";
+
+const promptInput: ClassificationPromptInput = {
+  title: "Technical Interview Workshop",
+  description: "Practice interviews with peers.",
+  clubName: "Engineering Society",
+  locationName: "E5 6006",
+  sourceTags: ["career-coop", "hack-dev"],
+};
+
+describe("createOpenAIClassifier", () => {
+  it("returns a validated classification from structured output", async () => {
+    const create = vi.fn(async () => ({
+      output_text: JSON.stringify({
+        primaryTag: "hack-dev",
+        tags: ["hack-dev", "career-coop"],
+        vibes: ["focused", "professional"],
+        audiences: ["technical", "career-focused"],
+        format: "workshop",
+        confidence: 0.92,
+        rationale: "A technical career workshop.",
+      }),
+    }));
+
+    const { createOpenAIClassifier } = await import("../openai-classifier");
+    const classifier = createOpenAIClassifier({
+      apiKey: "test-api-key",
+      client: { responses: { create } },
+      model: "test-model",
+    });
+
+    await expect(classifier.classify(promptInput)).resolves.toMatchObject({
+      status: "classified",
+      classification: {
+        primaryTag: "hack-dev",
+        tags: ["hack-dev", "career-coop"],
+      },
+    });
+    expect(create).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns unavailable without calling OpenAI when the API key is missing", async () => {
+    const create = vi.fn();
+    const { createOpenAIClassifier } = await import("../openai-classifier");
+    const classifier = createOpenAIClassifier({
+      client: { responses: { create } },
+      model: "test-model",
+    });
+
+    await expect(classifier.classify(promptInput)).resolves.toEqual({
+      status: "unavailable",
+      code: "missing-api-key",
+    });
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it("returns a constrained failure for invalid structured output", async () => {
+    const create = vi.fn(async () => ({
+      output_text: JSON.stringify({
+        primaryTag: "not-a-tag",
+        tags: ["not-a-tag"],
+        vibes: ["focused"],
+        audiences: ["technical"],
+        format: "workshop",
+        confidence: 0.5,
+        rationale: "Not a valid classification.",
+      }),
+    }));
+
+    const { createOpenAIClassifier } = await import("../openai-classifier");
+    const classifier = createOpenAIClassifier({
+      apiKey: "test-api-key",
+      client: { responses: { create } },
+      model: "test-model",
+    });
+
+    await expect(classifier.classify(promptInput)).resolves.toEqual({
+      status: "invalid-output",
+      code: "invalid-output",
+    });
+  });
+
+  it("sanitizes provider failures and timeout failures", async () => {
+    const providerCreate = vi.fn(async () => {
+      throw new Error("private response body");
+    });
+    const timeoutCreate = vi.fn(async () => {
+      const error = new Error("operation aborted");
+      error.name = "AbortError";
+      throw error;
+    });
+
+    const { createOpenAIClassifier } = await import("../openai-classifier");
+    const providerClassifier = createOpenAIClassifier({
+      apiKey: "test-api-key",
+      client: { responses: { create: providerCreate } },
+      model: "test-model",
+    });
+    const timeoutClassifier = createOpenAIClassifier({
+      apiKey: "test-api-key",
+      client: { responses: { create: timeoutCreate } },
+      model: "test-model",
+      timeoutMs: 1,
+    });
+
+    await expect(providerClassifier.classify(promptInput)).resolves.toEqual({
+      status: "unavailable",
+      code: "provider-error",
+    });
+    await expect(timeoutClassifier.classify(promptInput)).resolves.toEqual({
+      status: "unavailable",
+      code: "timeout",
+    });
+  });
+});

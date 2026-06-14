@@ -1,5 +1,3 @@
-import { mockEvents } from "@/lib/events/mock-events";
-
 type SaveAction = "get" | "save" | "unsave";
 
 interface AuthenticatedUser {
@@ -15,6 +13,7 @@ interface SavedEventRepository {
 interface HandleSaveEventOptions {
   action: SaveAction;
   eventId: string;
+  eventExists: (eventId: string) => Promise<boolean>;
   getUser: () => Promise<AuthenticatedUser | null>;
   repository: SavedEventRepository;
 }
@@ -30,6 +29,7 @@ interface SaveEventResult {
 export async function handleSaveEvent({
   action,
   eventId,
+  eventExists,
   getUser,
   repository,
 }: HandleSaveEventOptions): Promise<SaveEventResult> {
@@ -39,7 +39,7 @@ export async function handleSaveEvent({
     return { body: { error: "Authentication required" }, status: 401 };
   }
 
-  if (!mockEvents.some((event) => event.id === eventId)) {
+  if (!(await eventExists(eventId))) {
     return { body: { error: "Event not found" }, status: 404 };
   }
 

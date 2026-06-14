@@ -1,5 +1,3 @@
-import { mockEvents } from "@/lib/events/mock-events";
-
 export type RsvpStatus = "going" | "interested" | "cancelled";
 
 export const rsvpStatuses = ["going", "interested", "cancelled"] as const;
@@ -19,6 +17,7 @@ interface RsvpEventRepository {
 
 interface HandleRsvpEventOptions {
   eventId: string;
+  eventExists: (eventId: string) => Promise<boolean>;
   getUser: () => Promise<AuthenticatedUser | null>;
   repository: RsvpEventRepository;
   status?: RsvpStatus;
@@ -34,6 +33,7 @@ interface RsvpEventResult {
 
 export async function handleRsvpEvent({
   eventId,
+  eventExists,
   getUser,
   repository,
   status,
@@ -44,7 +44,7 @@ export async function handleRsvpEvent({
     return { body: { error: "Authentication required" }, status: 401 };
   }
 
-  if (!mockEvents.some((event) => event.id === eventId)) {
+  if (!(await eventExists(eventId))) {
     return { body: { error: "Event not found" }, status: 404 };
   }
 

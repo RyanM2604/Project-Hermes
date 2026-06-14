@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { eventExists } from "@/lib/events/repository";
 import {
   handleSaveEvent,
   type SavedEventRepository,
@@ -59,6 +60,7 @@ async function handleRequest(
     const result = await handleSaveEvent({
       action,
       eventId: id,
+      eventExists,
       getUser: async () => {
         const {
           data: { user },
@@ -70,21 +72,9 @@ async function handleRequest(
     });
 
     return Response.json(result.body, { status: result.status });
-  } catch (error) {
-    const message =
-      error instanceof Error && error.message
-        ? error.message
-        : "Unable to update saved event";
-    const code =
-      error && typeof error === "object" && "code" in error
-        ? String(error.code)
-        : undefined;
-
+  } catch {
     return Response.json(
-      {
-        error: message,
-        ...(code ? { code } : {}),
-      },
+      { error: "Unable to update saved event" },
       { status: 500 },
     );
   }

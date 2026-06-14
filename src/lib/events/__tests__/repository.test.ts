@@ -334,6 +334,44 @@ describe("createPrismaEventRepository", () => {
     await expect(repository.getEventById("missing")).resolves.toBeUndefined();
   });
 
+  it("uses fallback events immediately when DATABASE_URL is missing", async () => {
+    const originalDatabaseUrl = process.env.DATABASE_URL;
+    const originalNodeEnv = process.env.NODE_ENV;
+    delete process.env.DATABASE_URL;
+    process.env.NODE_ENV = "development";
+
+    try {
+      const client = createClient();
+      const repository = createPrismaEventRepository({
+        client,
+        fallbackEvents: [fallbackEvent, pastFallbackEvent],
+        now: () => fixedNow,
+      });
+
+      await expect(repository.getEvents()).resolves.toEqual([fallbackEvent]);
+      await expect(
+        repository.getEventById(fallbackEvent.id),
+      ).resolves.toEqual(fallbackEvent);
+      await expect(repository.eventExists(fallbackEvent.id)).resolves.toBe(
+        true,
+      );
+      expect(client.event.findMany).not.toHaveBeenCalled();
+      expect(client.event.findUnique).not.toHaveBeenCalled();
+    } finally {
+      if (originalDatabaseUrl === undefined) {
+        delete process.env.DATABASE_URL;
+      } else {
+        process.env.DATABASE_URL = originalDatabaseUrl;
+      }
+
+      if (originalNodeEnv === undefined) {
+        delete process.env.NODE_ENV;
+      } else {
+        process.env.NODE_ENV = originalNodeEnv;
+      }
+    }
+  });
+
   it("propagates unrecognized query errors instead of returning fallback events", async () => {
     const queryError = new Prisma.PrismaClientValidationError(
       "private validation details",

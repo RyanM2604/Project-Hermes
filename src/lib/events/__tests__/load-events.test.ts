@@ -1,0 +1,57 @@
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("server-only", () => ({}));
+
+import { loadFreshEvents } from "../load-events";
+import type { CanonicalEventRefreshResult } from "@/ingestion/types";
+import type { HermesEvent } from "@/types/event";
+
+const event: HermesEvent = {
+  id: "event-a",
+  title: "Canonical Event",
+  description: "Read from canonical data.",
+  clubName: "Hermes",
+  startTime: "2026-06-18T21:00:00.000Z",
+  endTime: "2026-06-18T23:00:00.000Z",
+  locationName: "SLC",
+  tags: [],
+  sourceUrl: "https://example.com/events/canonical",
+  isFreeFood: false,
+  createdAt: "2026-06-13T22:00:00.000Z",
+};
+
+const events = [event];
+
+const refreshResult: CanonicalEventRefreshResult = {
+  startedAt: "2026-06-13T22:00:00.000Z",
+  completedAt: "2026-06-13T22:00:01.000Z",
+  sources: [],
+  events: [],
+  duplicates: [],
+  persistedEventIds: [],
+  skipped: true,
+};
+
+describe("loadFreshEvents", () => {
+  it("refreshes before reading canonical events", async () => {
+    const refresh = vi.fn(async () => refreshResult);
+    const getEvents = vi.fn(async () => events);
+
+    await loadFreshEvents({ refresh, getEvents });
+
+    expect(refresh.mock.invocationCallOrder[0]).toBeLessThan(
+      getEvents.mock.invocationCallOrder[0],
+    );
+  });
+
+  it("serves canonical events when refresh fails", async () => {
+    const refresh = vi.fn(async () => {
+      throw new Error("source unavailable");
+    });
+    const getEvents = vi.fn(async () => events);
+
+    await expect(loadFreshEvents({ refresh, getEvents })).resolves.toEqual(
+      events,
+    );
+  });
+});

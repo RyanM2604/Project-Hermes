@@ -33,6 +33,7 @@ describe("createOpenAIClassifier", () => {
 
     await expect(classifier.classify(promptInput)).resolves.toMatchObject({
       status: "classified",
+      model: "test-model",
       classification: {
         primaryTag: "hack-dev",
         tags: ["hack-dev", "career-coop"],
@@ -52,6 +53,7 @@ describe("createOpenAIClassifier", () => {
     await expect(classifier.classify(promptInput)).resolves.toEqual({
       status: "unavailable",
       code: "missing-api-key",
+      model: "test-model",
     });
     expect(create).not.toHaveBeenCalled();
   });
@@ -79,6 +81,7 @@ describe("createOpenAIClassifier", () => {
     await expect(classifier.classify(promptInput)).resolves.toEqual({
       status: "invalid-output",
       code: "invalid-output",
+      model: "test-model",
     });
   });
 
@@ -108,10 +111,12 @@ describe("createOpenAIClassifier", () => {
     await expect(providerClassifier.classify(promptInput)).resolves.toEqual({
       status: "unavailable",
       code: "provider-error",
+      model: "test-model",
     });
     await expect(timeoutClassifier.classify(promptInput)).resolves.toEqual({
       status: "unavailable",
       code: "timeout",
+      model: "test-model",
     });
   });
 });

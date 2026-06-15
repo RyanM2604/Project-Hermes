@@ -41,6 +41,17 @@ function persistedEvent(
   };
 }
 
+function inProgressEvent(
+  overrides: Partial<PersistedEventRecord> = {},
+): PersistedEventRecord {
+  return persistedEvent({
+    id: "event-in-progress",
+    startTime: new Date("2026-06-14T10:00:00.000Z"),
+    endTime: new Date("2026-06-14T13:00:00.000Z"),
+    ...overrides,
+  });
+}
+
 const fallbackEvent: HermesEvent = {
   id: "event-fallback",
   title: "Fallback Event",
@@ -243,8 +254,20 @@ describe("createPrismaEventRepository", () => {
     expect(client.event.findMany).toHaveBeenCalledWith({
       include: { classification: true },
       orderBy: { startTime: "asc" },
-      where: { startTime: { gte: fixedNow } },
+      where: { endTime: { gte: fixedNow } },
     });
+  });
+
+  it("includes events that have started but not ended", async () => {
+    const record = inProgressEvent();
+    const client = createClient([record]);
+    const repository = createPrismaEventRepository({
+      client,
+      fallbackEvents: [fallbackEvent],
+      now: () => fixedNow,
+    });
+
+    await expect(repository.getEvents()).resolves.toEqual([toHermesEvent(record)]);
   });
 
   it("reads an event by id from Prisma", async () => {
@@ -340,18 +363,26 @@ describe("createPrismaEventRepository", () => {
 
     try {
       const client = createClient();
+      const inProgressFallbackEvent: HermesEvent = {
+        ...fallbackEvent,
+        id: "event-in-progress-fallback",
+        startTime: "2026-06-14T10:00:00.000Z",
+        endTime: "2026-06-14T13:00:00.000Z",
+      };
       const repository = createPrismaEventRepository({
         client,
-        fallbackEvents: [fallbackEvent, pastFallbackEvent],
+        fallbackEvents: [inProgressFallbackEvent, pastFallbackEvent],
         now: () => fixedNow,
       });
 
-      await expect(repository.getEvents()).resolves.toEqual([fallbackEvent]);
+      await expect(repository.getEvents()).resolves.toEqual([
+        inProgressFallbackEvent,
+      ]);
       await expect(
-        repository.getEventById(fallbackEvent.id),
-      ).resolves.toEqual(fallbackEvent);
+        repository.getEventById(inProgressFallbackEvent.id),
+      ).resolves.toEqual(inProgressFallbackEvent);
       await expect(repository.eventExists(fallbackEvent.id)).resolves.toBe(
-        true,
+        false,
       );
       expect(client.event.findMany).not.toHaveBeenCalled();
       expect(client.event.findUnique).not.toHaveBeenCalled();

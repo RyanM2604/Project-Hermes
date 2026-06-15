@@ -31,7 +31,7 @@ interface EventReadClient {
     findMany(args: {
       include: { classification: true };
       orderBy: { startTime: "asc" };
-      where: { startTime: { gte: Date } };
+      where: { endTime: { gte: Date } };
     }): Promise<PersistedEventRecord[]>;
     findUnique(args: {
       where: { id: string };
@@ -161,7 +161,7 @@ function upcomingFallbackEvents(
   now: Date,
 ): HermesEvent[] {
   return fallbackEvents
-    .filter((event) => new Date(event.startTime) >= now)
+    .filter((event) => new Date(event.endTime) >= now)
     .sort(
       (left, right) =>
         new Date(left.startTime).getTime() -
@@ -187,7 +187,7 @@ export function createPrismaEventRepository({
       records = await client.event.findMany({
         include: { classification: true },
         orderBy: { startTime: "asc" },
-        where: { startTime: { gte: currentTime } },
+        where: { endTime: { gte: currentTime } },
       });
     } catch (error) {
       if (isDatabaseUnavailableError(error)) {

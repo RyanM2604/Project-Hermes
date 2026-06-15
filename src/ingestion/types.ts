@@ -4,6 +4,7 @@ import type {
   NormalizationResult,
   NormalizedEventCandidate,
 } from "@/lib/events/adapters";
+import type { ClassifyEventsResult } from "@/lib/classification/classify-events";
 import type { EventPersistenceResult } from "@/lib/events/persistence";
 
 export type IngestionErrorCode =
@@ -55,6 +56,22 @@ export interface IngestionRunResult {
   events: NormalizedEventCandidate[];
   duplicates: DuplicateEvent[];
   persistence?: EventPersistenceResult;
+}
+
+export interface CanonicalEventRefreshResult extends IngestionRunResult {
+  persistedEventIds: string[];
+  classification?: ClassifyEventsResult;
+  skipped: boolean;
+}
+
+export interface CanonicalEventRefreshOptions {
+  force?: boolean;
+}
+
+export interface CanonicalEventRefreshCoordinator {
+  refresh(
+    options?: CanonicalEventRefreshOptions,
+  ): Promise<CanonicalEventRefreshResult>;
 }
 
 export type FetchText = (source: IngestionSource) => Promise<string>;

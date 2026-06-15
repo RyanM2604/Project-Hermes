@@ -2,10 +2,10 @@ import { CalendarDays, Home, Map, Plus, UserRound } from "lucide-react";
 
 import { EventFeed, EventFilters, StartingSoonCarousel } from "@/components/feed";
 import { filterEventsByTag, parseEventTag } from "@/lib/events";
-import { getEvents } from "@/lib/events/repository";
+import { loadFreshEvents } from "@/lib/events/load-events";
 
 export default async function EventsPage({ searchParams }: PageProps<"/events">) {
-  const [params, events] = await Promise.all([searchParams, getEvents()]);
+  const [params, events] = await Promise.all([searchParams, loadFreshEvents()]);
   const selectedTag = parseEventTag(params.tag);
   const filteredEvents = filterEventsByTag(events, selectedTag);
   const startingSoonEvents = events.slice(0, 5);

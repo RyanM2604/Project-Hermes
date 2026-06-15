@@ -90,6 +90,7 @@ describe("persistEvents", () => {
       persistedCount: 1,
       changedCount: 1,
       failedCount: 0,
+      persistedEventIds: [`event-${candidate.sourceFingerprint}`],
       failures: [],
     });
   });
@@ -122,6 +123,7 @@ describe("persistEvents", () => {
       persistedCount: 1,
       changedCount: 0,
       failedCount: 1,
+      persistedEventIds: [`event-${laterCandidate.sourceFingerprint}`],
       failures: [
         {
           eventId: `event-${candidate.sourceFingerprint}`,
@@ -237,6 +239,7 @@ describe("ingestion persistence", () => {
       persistedCount: 0,
       changedCount: 0,
       failedCount: 1,
+      persistedEventIds: [],
       failures: [
         {
           eventId: `event-${candidate.sourceFingerprint}`,

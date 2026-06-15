@@ -14,6 +14,17 @@ export {
   createFallbackClassification,
 } from "./fallback";
 export {
+  classifyEvents,
+  type ClassificationCandidate,
+  type ClassificationClassifier,
+  type ClassificationRepository,
+  type ClassifyEventsOptions,
+  type ClassifyEventsResult,
+} from "./classify-events";
+export {
+  createPrismaClassificationRepository,
+} from "./prisma-repository";
+export {
   createOpenAIClassifier,
   type OpenAIClassifierClient,
   type OpenAIClassifierOptions,

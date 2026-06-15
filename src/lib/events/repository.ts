@@ -3,8 +3,6 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import type { BuildingCode, EventTag, HermesEvent } from "@/types/event";
 
-import { mockEvents } from "./mock-events";
-
 export interface PersistedEventRecord {
   id: string;
   sourceUrl: string;
@@ -42,9 +40,7 @@ interface EventReadClient {
 }
 
 interface CreatePrismaEventRepositoryOptions {
-  allowFallbackEvents?: boolean;
   client: EventReadClient;
-  fallbackEvents: readonly HermesEvent[];
   now?: () => Date;
 }
 
@@ -73,7 +69,8 @@ const buildingCodes = new Set<BuildingCode>([
 ]);
 
 const initializationAvailabilityCodes = new Set(["P1001", "P1002"]);
-const requestAvailabilityCodes = new Set(["P1008", "P1017", "P2024"]);
+const requestAvailabilityCodes = new Set(["P1008", "P1017", "P2021", "P2024"]);
+const missingDatabaseUrlMessage = "Environment variable not found: DATABASE_URL";
 
 function hasDatabaseUrl(): boolean {
   if (process.env.NODE_ENV === "test") {
@@ -83,19 +80,19 @@ function hasDatabaseUrl(): boolean {
   return Boolean(process.env.DATABASE_URL?.trim());
 }
 
-function fallbackEventExists(
-  fallbackEvents: readonly HermesEvent[],
-  eventId: string,
-): boolean {
-  return fallbackEvents.some((event) => event.id === eventId);
-}
-
 export function isDatabaseUnavailableError(error: unknown): boolean {
   if (error instanceof Prisma.PrismaClientInitializationError) {
     return (
       typeof error.errorCode === "string" &&
       initializationAvailabilityCodes.has(error.errorCode)
     );
+  }
+
+  if (
+    error instanceof Prisma.PrismaClientValidationError &&
+    error.message.includes(missingDatabaseUrlMessage)
+  ) {
+    return true;
   }
 
   return (
@@ -157,32 +154,15 @@ export function toHermesEvent(record: PersistedEventRecord): HermesEvent {
   };
 }
 
-function upcomingFallbackEvents(
-  fallbackEvents: readonly HermesEvent[],
-  now: Date,
-): HermesEvent[] {
-  return fallbackEvents
-    .filter((event) => new Date(event.endTime) >= now)
-    .sort(
-      (left, right) =>
-        new Date(left.startTime).getTime() -
-        new Date(right.startTime).getTime(),
-    );
-}
-
 export function createPrismaEventRepository({
-  allowFallbackEvents = process.env.NODE_ENV !== "production",
   client,
-  fallbackEvents,
   now = () => new Date(),
 }: CreatePrismaEventRepositoryOptions) {
   async function getEvents(): Promise<HermesEvent[]> {
     const currentTime = now();
 
     if (!hasDatabaseUrl()) {
-      return allowFallbackEvents
-        ? upcomingFallbackEvents(fallbackEvents, currentTime)
-        : [];
+      return [];
     }
 
     let records: PersistedEventRecord[];
@@ -195,9 +175,7 @@ export function createPrismaEventRepository({
       });
     } catch (error) {
       if (isDatabaseUnavailableError(error)) {
-        return allowFallbackEvents
-          ? upcomingFallbackEvents(fallbackEvents, currentTime)
-          : [];
+        return [];
       }
 
       throw error;
@@ -210,9 +188,7 @@ export function createPrismaEventRepository({
     eventId: string,
   ): Promise<HermesEvent | undefined> {
     if (!hasDatabaseUrl()) {
-      return allowFallbackEvents
-        ? fallbackEvents.find((event) => event.id === eventId)
-        : undefined;
+      return undefined;
     }
 
     let record: PersistedEventRecord | null;
@@ -224,9 +200,7 @@ export function createPrismaEventRepository({
       })) as PersistedEventRecord | null;
     } catch (error) {
       if (isDatabaseUnavailableError(error)) {
-        return allowFallbackEvents
-          ? fallbackEvents.find((event) => event.id === eventId)
-          : undefined;
+        return undefined;
       }
 
       throw error;
@@ -237,7 +211,7 @@ export function createPrismaEventRepository({
 
   async function eventExists(eventId: string): Promise<boolean> {
     if (!hasDatabaseUrl()) {
-      return allowFallbackEvents && fallbackEventExists(fallbackEvents, eventId);
+      return false;
     }
 
     try {
@@ -249,7 +223,7 @@ export function createPrismaEventRepository({
       );
     } catch (error) {
       if (isDatabaseUnavailableError(error)) {
-        return allowFallbackEvents && fallbackEventExists(fallbackEvents, eventId);
+        return false;
       }
 
       throw error;
@@ -261,7 +235,6 @@ export function createPrismaEventRepository({
 
 const repository = createPrismaEventRepository({
   client: prisma,
-  fallbackEvents: mockEvents,
 });
 
 export const { eventExists, getEventById, getEvents } = repository;

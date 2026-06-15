@@ -33,15 +33,35 @@ const refreshResult: CanonicalEventRefreshResult = {
 };
 
 describe("loadFreshEvents", () => {
-  it("refreshes before reading canonical events", async () => {
+  it("serves canonical events before a background refresh when data already exists", async () => {
     const refresh = vi.fn(async () => refreshResult);
     const getEvents = vi.fn(async () => events);
 
-    await loadFreshEvents({ refresh, getEvents });
-
-    expect(refresh.mock.invocationCallOrder[0]).toBeLessThan(
-      getEvents.mock.invocationCallOrder[0],
+    await expect(loadFreshEvents({ refresh, getEvents })).resolves.toEqual(
+      events,
     );
+
+    expect(getEvents.mock.invocationCallOrder[0]).toBeLessThan(
+      refresh.mock.invocationCallOrder[0],
+    );
+  });
+
+  it("refreshes and re-reads when the canonical store is initially empty", async () => {
+    const refresh = vi.fn(async () => ({
+      ...refreshResult,
+      skipped: false,
+    }));
+    const getEvents = vi
+      .fn<() => Promise<HermesEvent[]>>()
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce(events);
+
+    await expect(loadFreshEvents({ refresh, getEvents })).resolves.toEqual(
+      events,
+    );
+
+    expect(getEvents).toHaveBeenCalledTimes(2);
+    expect(refresh).toHaveBeenCalledTimes(1);
   });
 
   it("serves canonical events when refresh fails", async () => {

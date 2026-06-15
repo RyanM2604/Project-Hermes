@@ -7,7 +7,7 @@ import {
 
 const validPayload = {
   action: "open",
-  eventId: "event-mathsoc-pizza-night",
+  eventId: "event-source-backed",
   metadata: { source: "event_feed" },
 } as const;
 
@@ -34,7 +34,7 @@ describe("log interaction", () => {
     expect(create).toHaveBeenCalledWith({
       action: "open",
       anonymousSessionId: null,
-      eventId: "event-mathsoc-pizza-night",
+      eventId: "event-source-backed",
       metadata: { source: "event_feed" },
       userId: "user-123",
     });

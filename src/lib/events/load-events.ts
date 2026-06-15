@@ -1,6 +1,7 @@
 import "server-only";
 
 import { canonicalEventRefreshCoordinator } from "@/ingestion/refresh-canonical-events.server";
+import type { CanonicalEventRefreshResult } from "@/ingestion/types";
 
 import { getEvents } from "./repository";
 import type { HermesEvent } from "@/types/event";
@@ -8,6 +9,14 @@ import type { HermesEvent } from "@/types/event";
 export interface LoadFreshEventsOptions {
   getEvents?: () => Promise<HermesEvent[]>;
   refresh?: typeof canonicalEventRefreshCoordinator.refresh;
+}
+
+function triggerBackgroundRefresh(
+  refresh: NonNullable<LoadFreshEventsOptions["refresh"]>,
+) {
+  void refresh().catch(() => {
+    // Best-effort background refresh; canonical data still serves the page.
+  });
 }
 
 export async function loadFreshEvents(
@@ -19,11 +28,21 @@ export async function loadFreshEvents(
       typeof canonicalEventRefreshCoordinator.refresh
     >[0]) => canonicalEventRefreshCoordinator.refresh(refreshOptions));
   const getCanonicalEvents = options.getEvents ?? getEvents;
+  const events = await getCanonicalEvents();
 
   try {
-    await refresh();
+    if (events.length > 0) {
+      triggerBackgroundRefresh(refresh);
+      return events;
+    }
+
+    const refreshResult = (await refresh()) as CanonicalEventRefreshResult;
+
+    if (refreshResult.skipped) {
+      return events;
+    }
   } catch {
-    // Best-effort refresh; canonical data still serves the page.
+    return events;
   }
 
   return getCanonicalEvents();

@@ -19,12 +19,8 @@ The `/events` browse page performs a best-effort refresh before reading
 canonical events. A process-local freshness window, five minutes by default,
 prevents repeated source requests and coalesces concurrent refreshes. If a
 refresh fails, Hermes serves the last available canonical data rather than
-breaking discovery. When `DATABASE_URL` is absent or the database is
-unavailable, development reads fall back to mock events.
-
-Mock events are development and test fixtures only. Production never exposes
-them, and mock cards do not display source links because they are illustrative
-rather than source-backed.
+breaking discovery. If `DATABASE_URL` is absent or the database is unavailable,
+the event repository returns no events instead of displaying fictional data.
 
 `npm run ingest:events` forces the same canonical refresh pipeline regardless
 of freshness. It reports source, deduplication, persistence, and classification

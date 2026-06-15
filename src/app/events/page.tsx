@@ -26,7 +26,7 @@ export default async function EventsPage({ searchParams }: PageProps<"/events">)
           </p>
         </div>
 
-        <EventFilters selectedTag={selectedTag} />
+        <EventFilters events={events} selectedTag={selectedTag} />
 
         <StartingSoonCarousel events={startingSoonEvents} />
 

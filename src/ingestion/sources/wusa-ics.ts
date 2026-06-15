@@ -1,4 +1,5 @@
 import { createSourceFingerprint } from "@/lib/events/adapters";
+import { resolveEventLocation } from "@/lib/events/location";
 import type {
   NormalizationResult,
   NormalizedEventCandidate,
@@ -6,7 +7,6 @@ import type {
 
 import type { IngestionSource } from "../types";
 import {
-  deriveBuildingCode,
   deriveTags,
   toAbsoluteHttpUrl,
   zonedDateTimeToIso,
@@ -146,9 +146,7 @@ function normalizeEvent(properties: IcalProperty[]): NormalizationResult {
   const description =
     unescapeText(first(properties, "DESCRIPTION")?.value ?? "") ||
     "No description provided.";
-  const locationName =
-    unescapeText(first(properties, "LOCATION")?.value ?? "") ||
-    "Location not provided";
+  const locationName = unescapeText(first(properties, "LOCATION")?.value ?? "");
   const organizer =
     unescapeText(first(properties, "ORGANIZER")?.params.CN ?? "") ||
     "Waterloo Undergraduate Student Association";
@@ -157,7 +155,10 @@ function normalizeEvent(properties: IcalProperty[]): NormalizationResult {
     .flatMap((property) => property.value.split(","))
     .map(unescapeText);
   const tags = deriveTags(title, description, ...categories);
-  const buildingCode = deriveBuildingCode(locationName);
+  const resolvedLocation = resolveEventLocation({
+    description,
+    locationName: locationName || "Location not provided",
+  });
   const imageUrl = toAbsoluteHttpUrl(
     first(properties, "ATTACH")?.value ?? "",
     SOURCE_URL,
@@ -171,8 +172,8 @@ function normalizeEvent(properties: IcalProperty[]): NormalizationResult {
     clubName: organizer,
     startTime,
     endTime,
-    locationName,
-    ...(buildingCode ? { buildingCode } : {}),
+    locationName: resolvedLocation.locationName,
+    ...(resolvedLocation.buildingCode ? { buildingCode: resolvedLocation.buildingCode } : {}),
     tags,
     ...(imageUrl ? { imageUrl } : {}),
     isFreeFood: tags.includes("free-food"),

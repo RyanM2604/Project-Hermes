@@ -1,3 +1,5 @@
+import { getPublicAppOrigin } from "@/lib/public-origin";
+
 export function isUWaterlooEmail(email: string) {
   return /^[^@\s]+@uwaterloo\.ca$/i.test(email.trim());
 }
@@ -7,11 +9,16 @@ export function isValidPassword(password: string) {
 }
 
 export function getSafeRedirectPath(value: string | null) {
-  if (!value || !value.startsWith("/") || value.includes("\\")) {
+  if (
+    !value ||
+    !value.startsWith("/") ||
+    value.startsWith("//") ||
+    value.includes("\\")
+  ) {
     return "/events";
   }
 
-  const baseUrl = "https://hermes.local";
+  const baseUrl = getPublicAppOrigin();
   const redirectUrl = new URL(value, baseUrl);
 
   if (redirectUrl.origin !== baseUrl) {

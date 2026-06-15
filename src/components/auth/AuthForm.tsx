@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { isUWaterlooEmail, isValidPassword } from "@/lib/auth/validation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { getPublicAppOrigin } from "@/lib/public-origin";
 
 interface AuthFormProps {
   initialEmail?: string;
@@ -48,7 +49,7 @@ export function AuthForm({
     const supabase = createSupabaseBrowserClient();
 
     if (mode === "signup") {
-      const callbackUrl = new URL("/auth/callback", window.location.origin);
+      const callbackUrl = new URL("/auth/callback", getPublicAppOrigin());
       callbackUrl.searchParams.set("next", next);
 
       const { data, error } = await supabase.auth.signUp({
@@ -95,7 +96,7 @@ export function AuthForm({
     }
 
     setStatus("loading");
-    const callbackUrl = new URL("/auth/callback", window.location.origin);
+    const callbackUrl = new URL("/auth/callback", getPublicAppOrigin());
     callbackUrl.searchParams.set("next", next);
 
     const supabase = createSupabaseBrowserClient();

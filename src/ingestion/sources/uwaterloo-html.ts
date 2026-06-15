@@ -1,6 +1,7 @@
 import { load } from "cheerio";
 
 import { createSourceFingerprint } from "@/lib/events/adapters";
+import { resolveEventLocation } from "@/lib/events/location";
 import type {
   NormalizationResult,
   NormalizedEventCandidate,
@@ -140,6 +141,10 @@ function parse(raw: string): NormalizationResult[] {
         .map((_, tag) => $(tag).text())
         .get();
       const tags = deriveTags(title, description, ...sourceTags);
+      const resolvedLocation = resolveEventLocation({
+        description,
+        locationName: "Location not provided",
+      });
       const imageUrl = toAbsoluteHttpUrl(
         card.find(".card__image img").first().attr("src") ?? "",
         SOURCE_URL,
@@ -152,7 +157,8 @@ function parse(raw: string): NormalizationResult[] {
         description,
         clubName: "University of Waterloo",
         ...times,
-        locationName: "Location not provided",
+        locationName: resolvedLocation.locationName,
+        ...(resolvedLocation.buildingCode ? { buildingCode: resolvedLocation.buildingCode } : {}),
         tags,
         ...(imageUrl ? { imageUrl } : {}),
         isFreeFood: tags.includes("free-food"),

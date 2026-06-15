@@ -7,6 +7,10 @@ import { useState } from "react";
 import { EventThemeMotif } from "@/components/events/EventThemeMotif";
 import { getEventThemeForEvent } from "@/lib/events/event-theme";
 import { formatEventLocation } from "@/lib/events/format";
+import {
+  formatEventTagLabel,
+  getEventSocialSubTag,
+} from "@/lib/events/social-tags";
 import { logClientInteraction } from "@/lib/interactions/log-client-interaction";
 import type { HermesEvent } from "@/types/event";
 
@@ -23,17 +27,19 @@ const dateFormatter = new Intl.DateTimeFormat("en-CA", {
   timeZone: "America/Toronto",
 });
 
-function formatTag(tag: HermesEvent["tags"][number]) {
-  return tag
-    .split("-")
-    .map((word) => word[0].toUpperCase() + word.slice(1))
-    .join(" ");
+function visibleEventTags(tags: HermesEvent["tags"]) {
+  const socialSubTag = getEventSocialSubTag(tags);
+
+  return tags.filter(
+    (tag) => tag !== "chill-social" || socialSubTag === undefined,
+  );
 }
 
 export function EventCard({ event }: EventCardProps) {
   const [isDismissed, setIsDismissed] = useState(false);
   const theme = getEventThemeForEvent(event);
   const themedTag = event.primaryTag ?? event.tags[0];
+  const socialSubTag = getEventSocialSubTag(event.tags);
 
   function logOpen() {
     logClientInteraction({
@@ -84,6 +90,13 @@ export function EventCard({ event }: EventCardProps) {
         >
           {theme.label}
         </span>
+        {socialSubTag && event.primaryTag === "chill-social" ? (
+          <span
+            className={`absolute left-4 top-14 rounded-full border px-3 py-1 text-xs font-semibold backdrop-blur-md ${theme.tagClassName}`}
+          >
+            {formatEventTagLabel(socialSubTag)}
+          </span>
+        ) : null}
 
         <div className="relative flex w-full items-end justify-between gap-3">
           {event.buildingCode ? (
@@ -133,16 +146,16 @@ export function EventCard({ event }: EventCardProps) {
         </dl>
 
         <div className="flex flex-wrap gap-2">
-          {event.tags.map((tag) => (
+          {visibleEventTags(event.tags).map((tag) => (
             <span
               key={tag}
               className={`rounded-full border px-3 py-1 text-xs font-medium ${
-                tag === themedTag
+                tag === themedTag || tag === socialSubTag
                   ? theme.tagClassName
                   : "border-white/10 bg-white/[0.05] text-zinc-300"
               }`}
             >
-              {formatTag(tag)}
+              {formatEventTagLabel(tag)}
             </span>
           ))}
         </div>

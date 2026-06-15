@@ -6,6 +6,8 @@ import { Menu, UserRound } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
+import { LogoutButton } from "@/components/auth/LogoutButton";
+
 const navItems = [
   { label: "Home", href: "/" },
   { label: "Events", href: "/events" },
@@ -20,6 +22,7 @@ interface SiteNavbarProps {
 export function SiteNavbar({ isAuthenticated }: SiteNavbarProps) {
   const pathname = usePathname();
   const [isNavOpen, setIsNavOpen] = useState(false);
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-5 py-5 md:px-10 md:py-7">
@@ -74,13 +77,29 @@ export function SiteNavbar({ isAuthenticated }: SiteNavbarProps) {
         </div>
 
         {isAuthenticated ? (
-          <button
-            type="button"
-            aria-label="Open profile"
-            className="hidden h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-xl md:inline-flex"
-          >
-            <UserRound size={19} />
-          </button>
+          <div className="relative hidden md:block">
+            <button
+              type="button"
+              aria-label="Open account menu"
+              aria-expanded={isAccountOpen}
+              aria-haspopup="menu"
+              onClick={() => setIsAccountOpen((isOpen) => !isOpen)}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-xl transition-colors hover:bg-white/15"
+            >
+              <UserRound size={19} />
+            </button>
+            {isAccountOpen && (
+              <div
+                role="menu"
+                className="absolute right-0 top-14 w-44 rounded-2xl border border-white/15 bg-black/80 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.15),0_18px_50px_rgba(0,0,0,0.45)] backdrop-blur-xl"
+              >
+                <LogoutButton
+                  onLoggedOut={() => setIsAccountOpen(false)}
+                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-zinc-200 transition-colors hover:bg-white/10 hover:text-white disabled:cursor-wait disabled:opacity-60"
+                />
+              </div>
+            )}
+          </div>
         ) : (
           <Link
             href="/signup"
@@ -114,14 +133,10 @@ export function SiteNavbar({ isAuthenticated }: SiteNavbarProps) {
                 </Link>
               ))}
               {isAuthenticated ? (
-                <button
-                  type="button"
-                  onClick={() => setIsNavOpen(false)}
-                  className="mt-2 flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-black"
-                >
-                  <UserRound size={17} />
-                  Profile
-                </button>
+                <LogoutButton
+                  onLoggedOut={() => setIsNavOpen(false)}
+                  className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-black disabled:cursor-wait disabled:opacity-60"
+                />
               ) : (
                 <Link
                   href="/signup"

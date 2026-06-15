@@ -1,33 +1,37 @@
-export interface EventTag {
-  id: string;
-  name: string;
-  slug: string;
-}
+export type EventTag =
+  | "free-food"
+  | "hack-dev"
+  | "career-coop"
+  | "chill-social"
+  | "music"
+  | "reels"
+  | "startup-pitch";
 
-export interface Venue {
-  id: string;
-  name: string;
-  address?: string;
-  latitude?: number;
-  longitude?: number;
-}
-
-export interface Club {
-  id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  isVerified: boolean;
-}
+export type BuildingCode =
+  | "AL"
+  | "DC"
+  | "E5"
+  | "E7"
+  | "FED"
+  | "MC"
+  | "PAC"
+  | "QNC"
+  | "SCH"
+  | "SLC"
+  | "TC";
 
 export interface HermesEvent {
   id: string;
   title: string;
   description: string;
-  startsAt: string;
-  endsAt?: string;
-  club?: Club;
-  venue?: Venue;
+  clubName: string;
+  startTime: string;
+  endTime: string;
+  locationName: string;
+  buildingCode: BuildingCode;
   tags: EventTag[];
-  sourceUrl?: string;
+  imageUrl: string;
+  sourceUrl: string;
+  isFreeFood: boolean;
+  createdAt: string;
 }

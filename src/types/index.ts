@@ -1,7 +1,6 @@
 export type {
-  Club,
+  BuildingCode,
   EventTag,
   HermesEvent,
-  Venue,
 } from "./event";
 export type { UserProfile } from "./user";

@@ -147,17 +147,15 @@ export function EventCard({ event }: EventCardProps) {
           ))}
         </div>
 
-        {event.sourceUrl && (
-          <a
-            href={event.sourceUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="w-fit text-sm font-semibold text-white underline decoration-white/30 underline-offset-4 transition hover:decoration-white"
-          >
-            View source
-            <span aria-hidden="true"> -&gt;</span>
-          </a>
-        )}
+        <a
+          href={event.sourceUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="w-fit text-sm font-semibold text-white underline decoration-white/30 underline-offset-4 transition hover:decoration-white"
+        >
+          View source
+          <span aria-hidden="true"> -&gt;</span>
+        </a>
       </div>
     </article>
   );

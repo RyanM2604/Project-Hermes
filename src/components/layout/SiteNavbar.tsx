@@ -33,13 +33,13 @@ export function SiteNavbar({ isAuthenticated }: SiteNavbarProps) {
           aria-label="Hermes home"
           onClick={() => setIsNavOpen(false)}
         >
-          <span className="flex h-10 w-14 items-center justify-center">
+          <span className="flex h-10 w-12 items-center justify-center">
             <Image
-              src="/hermes-logo.png"
+              src="/logo.svg"
               alt=""
-              width={64}
-              height={36}
-              className="scale-[1.8] brightness-0 invert"
+              width={40}
+              height={40}
+              className="h-9 w-auto brightness-0 invert"
               priority
             />
           </span>

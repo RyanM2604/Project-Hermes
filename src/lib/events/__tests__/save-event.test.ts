@@ -21,7 +21,7 @@ vi.mock("@/lib/supabase/server", () => ({
   }),
 }));
 
-const eventId = "event-mathsoc-pizza-night";
+const eventId = "event-source-backed";
 const user = { id: "user-123" };
 const eventExists = async (candidateEventId: string) =>
   candidateEventId === eventId || candidateEventId === "event-live";

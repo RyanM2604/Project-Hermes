@@ -6,17 +6,13 @@ import {
   CalendarDays,
   Check,
   CheckCircle2,
-  Compass,
   Filter,
   Heart,
-  LockKeyhole,
   Mail,
   MapPin,
   Radio,
-  ShieldCheck,
   Sparkles,
   Users,
-  Verified,
   Zap,
 } from "lucide-react";
 import Link from "next/link";
@@ -29,30 +25,30 @@ import BackgroundGlobe from "@/components/puslate-globe";
 
 const previewEvents = [
   {
-    building: "MC",
-    href: "/events/event-mathsoc-pizza-night",
-    title: "MathSoc Pizza and Board Games",
-    club: "Mathematics Society",
-    time: "Today · 6:00 PM",
-    location: "MC Comfy",
+    building: "Live",
+    href: "/events",
+    title: "Source-backed campus events",
+    club: "Official campus sources",
+    time: "Updated regularly",
+    location: "Across Waterloo",
     tag: "free-food",
   },
   {
-    building: "DC",
-    href: "/events/event-csc-lightning-talks",
-    title: "CSC Lightning Talks and Snacks",
-    club: "Computer Science Club",
-    time: "Tonight · 7:30 PM",
-    location: "DC Lecture Hall",
+    building: "Current",
+    href: "/events",
+    title: "Verified event details",
+    club: "Original links attached",
+    time: "Checked before listing",
+    location: "Campus and nearby",
     tag: "hack-dev",
   },
   {
-    building: "SLC",
-    href: "/events/event-wusa-open-mic",
-    title: "SLC Open Mic Night",
-    club: "WUSA",
-    time: "Tomorrow · 8:00 PM",
-    location: "SLC Great Hall",
+    building: "Fresh",
+    href: "/events",
+    title: "What is actually happening",
+    club: "Only source-backed listings",
+    time: "Browse the live feed",
+    location: "Waterloo",
     tag: "music",
   },
 ] as const;
@@ -81,33 +77,6 @@ const discoveryModes = [
     description:
       "Move from a campus location into a clear event detail without precise live tracking.",
     detail: "Building-level context, privacy intact",
-  },
-] as const;
-
-const trustRows = [
-  {
-    icon: Verified,
-    title: "Source-backed events",
-    description: "Official links and freshness stay attached to every listing.",
-    state: "Verified",
-  },
-  {
-    icon: LockKeyhole,
-    title: "Campus-gated actions",
-    description: "Browsing stays open; saves and RSVPs require a UW identity.",
-    state: "Protected",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Named organisers",
-    description: "Events connect to accountable clubs and organisations.",
-    state: "Accountable",
-  },
-  {
-    icon: Compass,
-    title: "Privacy-conscious location",
-    description: "Useful building context without precise live location tracking.",
-    state: "Private",
   },
 ] as const;
 
@@ -242,10 +211,6 @@ export default function App() {
 
         <section className="signal-section signal-feed-section">
           <ScrollReveal className="signal-section-copy">
-            <p className="signal-label">
-              <Radio size={15} />
-              Live campus signal
-            </p>
             <h2 className="signal-title">
               Decide what is worth doing before your next class.
             </h2>
@@ -331,16 +296,16 @@ export default function App() {
                   <span className="signal-detail-building">E7</span>
                 </div>
                 <div className="signal-detail-themed-title">
-                  <p>UW Blueprint</p>
-                  <h3>Build Night: Ship Something</h3>
+                  <p>Verified campus organiser</p>
+                  <h3>Source-backed event detail</h3>
                 </div>
               </div>
               <div className="signal-detail-themed-body">
                 <div>
                   <span className="signal-detail-overline">About this event</span>
                   <p>
-                    Bring an idea, meet a team, and leave with something working.
-                    Beginners welcome.
+                    Every listing includes its original source, current event
+                    details, and a link students can verify.
                   </p>
                   <span className="signal-product-tag signal-product-tag-cyan">
                     Hack Dev
@@ -349,11 +314,11 @@ export default function App() {
                 <dl>
                   <div>
                     <CalendarDays size={15} />
-                    <span>Thursday · 7:30 PM</span>
+                    <span>Current source time</span>
                   </div>
                   <div>
                     <MapPin size={15} />
-                    <span>E7 2317</span>
+                    <span>Verified location</span>
                   </div>
                 </dl>
                 <div className="signal-detail-actions" aria-label="Example event actions">
@@ -370,10 +335,6 @@ export default function App() {
           </ScrollReveal>
 
           <ScrollReveal direction="right" delay={100} className="signal-section-copy">
-            <p className="signal-label">
-              <Users size={15} />
-              Events lead somewhere
-            </p>
             <h2 className="signal-title">
               Find the event. Stay for the community.
             </h2>
@@ -402,46 +363,6 @@ export default function App() {
           </ScrollReveal>
 
           <DiscoveryCardStack modes={discoveryModes} />
-        </section>
-
-        <section className="signal-section signal-trust-section">
-          <ScrollReveal className="signal-section-copy">
-            <p className="signal-label">
-              <ShieldCheck size={15} />
-              Trust is part of discovery
-            </p>
-            <h2 className="signal-title">Know why an event is here.</h2>
-            <p className="signal-body">
-              Provenance, freshness, and organiser identity stay visible, so
-              campus discovery remains useful instead of becoming another noisy
-              anonymous feed.
-            </p>
-          </ScrollReveal>
-
-          <ScrollReveal direction="right" delay={100} className="signal-trust-ledger">
-            <div className="signal-ledger-head">
-              <span>Hermes listing standard</span>
-              <span>
-                <span className="signal-live-dot" />
-                Active
-              </span>
-            </div>
-            {trustRows.map(({ icon: Icon, title, description, state }) => (
-              <article key={title} className="signal-ledger-row">
-                <span className="signal-ledger-icon">
-                  <Icon size={18} />
-                </span>
-                <div>
-                  <h3>{title}</h3>
-                  <p>{description}</p>
-                </div>
-                <span className="signal-ledger-state">
-                  <Check size={13} />
-                  {state}
-                </span>
-              </article>
-            ))}
-          </ScrollReveal>
         </section>
 
         <section className="signal-final-cta">

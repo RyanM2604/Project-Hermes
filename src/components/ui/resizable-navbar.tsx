@@ -240,7 +240,7 @@ export const NavbarLogo = () => {
       className="relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal text-black"
     >
       <Image
-        src="/hermes-logo.png"
+        src="/logo.svg"
         alt="Hermes winged sandal"
         width={48}
         height={27}

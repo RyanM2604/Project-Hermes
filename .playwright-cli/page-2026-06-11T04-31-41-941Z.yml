@@ -1,0 +1,394 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - link "Hermes home" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e6]: Hermes
+      - generic [ref=e9]:
+        - link "Home" [ref=e10] [cursor=pointer]:
+          - /url: /
+        - link "Events" [ref=e11] [cursor=pointer]:
+          - /url: /events
+        - link "Clubs" [ref=e12] [cursor=pointer]:
+          - /url: /#clubs
+        - link "Map" [ref=e13] [cursor=pointer]:
+          - /url: /#map
+      - link "Sign up" [ref=e14] [cursor=pointer]:
+        - /url: /signup
+  - main [ref=e16]:
+    - generic [ref=e17]:
+      - generic [ref=e18]:
+        - img [ref=e19]
+        - text: Today at Waterloo
+      - heading "Find something worth showing up for." [level=1] [ref=e21]
+      - paragraph [ref=e22]: Events, free food, clubs, and opportunities happening around campus.
+    - navigation "Filter events by vibe" [ref=e23]:
+      - generic [ref=e24]:
+        - link "All Events" [ref=e25] [cursor=pointer]:
+          - /url: /events#event-feed
+        - link "Free Food" [ref=e26] [cursor=pointer]:
+          - /url: /events?tag=free-food#event-feed
+        - link "Hack + Dev" [ref=e27] [cursor=pointer]:
+          - /url: /events?tag=hack-dev#event-feed
+        - link "Career + Co-op" [ref=e28] [cursor=pointer]:
+          - /url: /events?tag=career-coop#event-feed
+        - link "Chill + Social" [ref=e29] [cursor=pointer]:
+          - /url: /events?tag=chill-social#event-feed
+        - link "Music" [ref=e30] [cursor=pointer]:
+          - /url: /events?tag=music#event-feed
+        - link "Startup + Pitch" [ref=e31] [cursor=pointer]:
+          - /url: /events?tag=startup-pitch#event-feed
+    - region "Starting Soon" [ref=e32]:
+      - generic [ref=e33]:
+        - generic [ref=e34]:
+          - paragraph [ref=e35]: Up next
+          - heading "Starting Soon" [level=2] [ref=e36]
+        - paragraph [ref=e37]: Swipe to explore
+      - generic [ref=e38]:
+        - link "6:00 p.m. 🍕 Free Food Mathematics Society MathSoc Pizza and Board Games MathSoc Comfy Lounge, MC" [ref=e39] [cursor=pointer]:
+          - /url: /events/event-mathsoc-pizza-night
+          - generic [ref=e41]:
+            - generic [ref=e42]:
+              - generic [ref=e43]: 6:00 p.m.
+              - generic [ref=e44]: 🍕 Free Food
+            - generic [ref=e45]:
+              - paragraph [ref=e46]: Mathematics Society
+              - heading "MathSoc Pizza and Board Games" [level=3] [ref=e47]
+              - paragraph [ref=e48]: MathSoc Comfy Lounge, MC
+        - link "6:30 p.m. WATonomous Build Your First Autonomous Robot RoboHub Project Space, E5" [ref=e49] [cursor=pointer]:
+          - /url: /events/event-watonomous-robotics-workshop
+          - generic [ref=e51]:
+            - generic [ref=e53]: 6:30 p.m.
+            - generic [ref=e54]:
+              - paragraph [ref=e55]: WATonomous
+              - heading "Build Your First Autonomous Robot" [level=3] [ref=e56]
+              - paragraph [ref=e57]: RoboHub Project Space, E5
+        - link "5:00 p.m. Tech+ Co-op Resume Roast Davis Centre Fishbowl, DC" [ref=e58] [cursor=pointer]:
+          - /url: /events/event-tech-plus-resume-roast
+          - generic [ref=e60]:
+            - generic [ref=e62]: 5:00 p.m.
+            - generic [ref=e63]:
+              - paragraph [ref=e64]: Tech+
+              - heading "Co-op Resume Roast" [level=3] [ref=e65]
+              - paragraph [ref=e66]: Davis Centre Fishbowl, DC
+        - link "12:00 p.m. 🍕 Free Food Engineering Society EngSoc Welcome Back BBQ Engineering 7 Green, E7" [ref=e67] [cursor=pointer]:
+          - /url: /events/event-engsoc-bbq
+          - generic [ref=e69]:
+            - generic [ref=e70]:
+              - generic [ref=e71]: 12:00 p.m.
+              - generic [ref=e72]: 🍕 Free Food
+            - generic [ref=e73]:
+              - paragraph [ref=e74]: Engineering Society
+              - heading "EngSoc Welcome Back BBQ" [level=3] [ref=e75]
+              - paragraph [ref=e76]: Engineering 7 Green, E7
+        - link "6:00 p.m. Velocity Velocity Student Pitch Night Velocity Start Lounge, SCH" [ref=e77] [cursor=pointer]:
+          - /url: /events/event-velocity-pitch-night
+          - generic [ref=e79]:
+            - generic [ref=e81]: 6:00 p.m.
+            - generic [ref=e82]:
+              - paragraph [ref=e83]: Velocity
+              - heading "Velocity Student Pitch Night" [level=3] [ref=e84]
+              - paragraph [ref=e85]: Velocity Start Lounge, SCH
+    - region "All Events" [ref=e87]:
+      - generic [ref=e88]:
+        - paragraph [ref=e89]: Explore campus
+        - heading "All Events" [level=2] [ref=e90]
+      - generic [ref=e91]:
+        - article [ref=e93]:
+          - link "View MathSoc Pizza and Board Games" [ref=e94] [cursor=pointer]:
+            - /url: /events/event-mathsoc-pizza-night
+            - generic [ref=e97]:
+              - generic [ref=e98]: MC
+              - generic [ref=e99]: 🍕 Free Food
+          - generic [ref=e100]:
+            - generic [ref=e101]:
+              - paragraph [ref=e102]: Mathematics Society
+              - heading "MathSoc Pizza and Board Games" [level=2] [ref=e103]:
+                - link "MathSoc Pizza and Board Games" [ref=e104] [cursor=pointer]:
+                  - /url: /events/event-mathsoc-pizza-night
+            - generic [ref=e105]:
+              - generic [ref=e106]:
+                - term [ref=e107]: When
+                - definition [ref=e108]:
+                  - time [ref=e109]: Mon, Sep 14, 6:00 p.m.
+              - generic [ref=e110]:
+                - term [ref=e111]: Where
+                - definition [ref=e112]: MathSoc Comfy Lounge, MC
+            - generic [ref=e113]:
+              - generic [ref=e114]: Free Food
+              - generic [ref=e115]: Chill Social
+            - link "View source" [ref=e116] [cursor=pointer]:
+              - /url: https://mathsoc.uwaterloo.ca/events
+              - text: View source ->
+        - article [ref=e118]:
+          - link "View Build Your First Autonomous Robot" [ref=e119] [cursor=pointer]:
+            - /url: /events/event-watonomous-robotics-workshop
+            - generic [ref=e123]: E5
+          - generic [ref=e124]:
+            - generic [ref=e125]:
+              - paragraph [ref=e126]: WATonomous
+              - heading "Build Your First Autonomous Robot" [level=2] [ref=e127]:
+                - link "Build Your First Autonomous Robot" [ref=e128] [cursor=pointer]:
+                  - /url: /events/event-watonomous-robotics-workshop
+            - generic [ref=e129]:
+              - generic [ref=e130]:
+                - term [ref=e131]: When
+                - definition [ref=e132]:
+                  - time [ref=e133]: Tue, Sep 15, 6:30 p.m.
+              - generic [ref=e134]:
+                - term [ref=e135]: Where
+                - definition [ref=e136]: RoboHub Project Space, E5
+            - generic [ref=e138]: Hack Dev
+            - link "View source" [ref=e139] [cursor=pointer]:
+              - /url: https://www.watonomous.ca/
+              - text: View source ->
+        - article [ref=e141]:
+          - link "View Co-op Resume Roast" [ref=e142] [cursor=pointer]:
+            - /url: /events/event-tech-plus-resume-roast
+            - generic [ref=e146]: DC
+          - generic [ref=e147]:
+            - generic [ref=e148]:
+              - paragraph [ref=e149]: Tech+
+              - heading "Co-op Resume Roast" [level=2] [ref=e150]:
+                - link "Co-op Resume Roast" [ref=e151] [cursor=pointer]:
+                  - /url: /events/event-tech-plus-resume-roast
+            - generic [ref=e152]:
+              - generic [ref=e153]:
+                - term [ref=e154]: When
+                - definition [ref=e155]:
+                  - time [ref=e156]: Wed, Sep 16, 5:00 p.m.
+              - generic [ref=e157]:
+                - term [ref=e158]: Where
+                - definition [ref=e159]: Davis Centre Fishbowl, DC
+            - generic [ref=e161]: Career Coop
+            - link "View source" [ref=e162] [cursor=pointer]:
+              - /url: https://www.techplusuw.com/
+              - text: View source ->
+        - article [ref=e164]:
+          - link "View EngSoc Welcome Back BBQ" [ref=e165] [cursor=pointer]:
+            - /url: /events/event-engsoc-bbq
+            - generic [ref=e168]:
+              - generic [ref=e169]: E7
+              - generic [ref=e170]: 🍕 Free Food
+          - generic [ref=e171]:
+            - generic [ref=e172]:
+              - paragraph [ref=e173]: Engineering Society
+              - heading "EngSoc Welcome Back BBQ" [level=2] [ref=e174]:
+                - link "EngSoc Welcome Back BBQ" [ref=e175] [cursor=pointer]:
+                  - /url: /events/event-engsoc-bbq
+            - generic [ref=e176]:
+              - generic [ref=e177]:
+                - term [ref=e178]: When
+                - definition [ref=e179]:
+                  - time [ref=e180]: Thu, Sep 17, 12:00 p.m.
+              - generic [ref=e181]:
+                - term [ref=e182]: Where
+                - definition [ref=e183]: Engineering 7 Green, E7
+            - generic [ref=e184]:
+              - generic [ref=e185]: Free Food
+              - generic [ref=e186]: Chill Social
+              - generic [ref=e187]: Music
+            - link "View source" [ref=e188] [cursor=pointer]:
+              - /url: https://www.engsoc.uwaterloo.ca/events/
+              - text: View source ->
+        - article [ref=e190]:
+          - link "View Velocity Student Pitch Night" [ref=e191] [cursor=pointer]:
+            - /url: /events/event-velocity-pitch-night
+            - generic [ref=e195]: SCH
+          - generic [ref=e196]:
+            - generic [ref=e197]:
+              - paragraph [ref=e198]: Velocity
+              - heading "Velocity Student Pitch Night" [level=2] [ref=e199]:
+                - link "Velocity Student Pitch Night" [ref=e200] [cursor=pointer]:
+                  - /url: /events/event-velocity-pitch-night
+            - generic [ref=e201]:
+              - generic [ref=e202]:
+                - term [ref=e203]: When
+                - definition [ref=e204]:
+                  - time [ref=e205]: Thu, Sep 17, 6:00 p.m.
+              - generic [ref=e206]:
+                - term [ref=e207]: Where
+                - definition [ref=e208]: Velocity Start Lounge, SCH
+            - generic [ref=e209]:
+              - generic [ref=e210]: Startup Pitch
+              - generic [ref=e211]: Career Coop
+            - link "View source" [ref=e212] [cursor=pointer]:
+              - /url: https://velocityincubator.com/events/
+              - text: View source ->
+        - article [ref=e214]:
+          - link "View CSC Lightning Talks and Snacks" [ref=e215] [cursor=pointer]:
+            - /url: /events/event-csc-lightning-talks
+            - generic [ref=e218]:
+              - generic [ref=e219]: DC
+              - generic [ref=e220]: 🍕 Free Food
+          - generic [ref=e221]:
+            - generic [ref=e222]:
+              - paragraph [ref=e223]: Computer Science Club
+              - heading "CSC Lightning Talks and Snacks" [level=2] [ref=e224]:
+                - link "CSC Lightning Talks and Snacks" [ref=e225] [cursor=pointer]:
+                  - /url: /events/event-csc-lightning-talks
+            - generic [ref=e226]:
+              - generic [ref=e227]:
+                - term [ref=e228]: When
+                - definition [ref=e229]:
+                  - time [ref=e230]: Fri, Sep 18, 5:30 p.m.
+              - generic [ref=e231]:
+                - term [ref=e232]: Where
+                - definition [ref=e233]: Davis Centre Lecture Hall, DC
+            - generic [ref=e234]:
+              - generic [ref=e235]: Hack Dev
+              - generic [ref=e236]: Free Food
+              - generic [ref=e237]: Career Coop
+            - link "View source" [ref=e238] [cursor=pointer]:
+              - /url: https://csclub.uwaterloo.ca/events/
+              - text: View source ->
+        - article [ref=e240]:
+          - link "View SLC Open Mic Night" [ref=e241] [cursor=pointer]:
+            - /url: /events/event-wusa-open-mic
+            - generic [ref=e245]: SLC
+          - generic [ref=e246]:
+            - generic [ref=e247]:
+              - paragraph [ref=e248]: WUSA
+              - heading "SLC Open Mic Night" [level=2] [ref=e249]:
+                - link "SLC Open Mic Night" [ref=e250] [cursor=pointer]:
+                  - /url: /events/event-wusa-open-mic
+            - generic [ref=e251]:
+              - generic [ref=e252]:
+                - term [ref=e253]: When
+                - definition [ref=e254]:
+                  - time [ref=e255]: Fri, Sep 18, 7:00 p.m.
+              - generic [ref=e256]:
+                - term [ref=e257]: Where
+                - definition [ref=e258]: SLC Great Hall, SLC
+            - generic [ref=e259]:
+              - generic [ref=e260]: Music
+              - generic [ref=e261]: Reels
+              - generic [ref=e262]: Chill Social
+            - link "View source" [ref=e263] [cursor=pointer]:
+              - /url: https://wusa.ca/events/
+              - text: View source ->
+        - article [ref=e265]:
+          - link "View Hack the North Builder Meetup" [ref=e266] [cursor=pointer]:
+            - /url: /events/event-hack-the-north-meetup
+            - generic [ref=e270]: QNC
+          - generic [ref=e271]:
+            - generic [ref=e272]:
+              - paragraph [ref=e273]: Hack the North
+              - heading "Hack the North Builder Meetup" [level=2] [ref=e274]:
+                - link "Hack the North Builder Meetup" [ref=e275] [cursor=pointer]:
+                  - /url: /events/event-hack-the-north-meetup
+            - generic [ref=e276]:
+              - generic [ref=e277]:
+                - term [ref=e278]: When
+                - definition [ref=e279]:
+                  - time [ref=e280]: Sat, Sep 19, 2:00 p.m.
+              - generic [ref=e281]:
+                - term [ref=e282]: Where
+                - definition [ref=e283]: Quantum-Nano Centre Atrium, QNC
+            - generic [ref=e284]:
+              - generic [ref=e285]: Hack Dev
+              - generic [ref=e286]: Startup Pitch
+              - generic [ref=e287]: Chill Social
+            - link "View source" [ref=e288] [cursor=pointer]:
+              - /url: https://hackthenorth.com/
+              - text: View source ->
+        - article [ref=e290]:
+          - link "View Afro Dance Workshop and Social" [ref=e291] [cursor=pointer]:
+            - /url: /events/event-afroxdance-workshop
+            - generic [ref=e295]: PAC
+          - generic [ref=e296]:
+            - generic [ref=e297]:
+              - paragraph [ref=e298]: UW AfroXDance
+              - heading "Afro Dance Workshop and Social" [level=2] [ref=e299]:
+                - link "Afro Dance Workshop and Social" [ref=e300] [cursor=pointer]:
+                  - /url: /events/event-afroxdance-workshop
+            - generic [ref=e301]:
+              - generic [ref=e302]:
+                - term [ref=e303]: When
+                - definition [ref=e304]:
+                  - time [ref=e305]: Sat, Sep 19, 6:00 p.m.
+              - generic [ref=e306]:
+                - term [ref=e307]: Where
+                - definition [ref=e308]: PAC Studio, PAC
+            - generic [ref=e309]:
+              - generic [ref=e310]: Music
+              - generic [ref=e311]: Reels
+              - generic [ref=e312]: Chill Social
+            - link "View source" [ref=e313] [cursor=pointer]:
+              - /url: https://clubs.wusa.ca/
+              - text: View source ->
+        - article [ref=e315]:
+          - link "View Campus Jazz Jam" [ref=e316] [cursor=pointer]:
+            - /url: /events/event-uwaterloo-jazz-jam
+            - generic [ref=e320]: AL
+          - generic [ref=e321]:
+            - generic [ref=e322]:
+              - paragraph [ref=e323]: UW Jazz Ensemble
+              - heading "Campus Jazz Jam" [level=2] [ref=e324]:
+                - link "Campus Jazz Jam" [ref=e325] [cursor=pointer]:
+                  - /url: /events/event-uwaterloo-jazz-jam
+            - generic [ref=e326]:
+              - generic [ref=e327]:
+                - term [ref=e328]: When
+                - definition [ref=e329]:
+                  - time [ref=e330]: Sun, Sep 20, 4:00 p.m.
+              - generic [ref=e331]:
+                - term [ref=e332]: Where
+                - definition [ref=e333]: Arts Lecture Hall, AL
+            - generic [ref=e334]:
+              - generic [ref=e335]: Music
+              - generic [ref=e336]: Reels
+              - generic [ref=e337]: Chill Social
+            - link "View source" [ref=e338] [cursor=pointer]:
+              - /url: https://uwaterloo.ca/music/events
+              - text: View source ->
+        - article [ref=e340]:
+          - link "View Founder Coffee and Idea Exchange" [ref=e341] [cursor=pointer]:
+            - /url: /events/event-entrepreneurship-society-founder-coffee
+            - generic [ref=e344]:
+              - generic [ref=e345]: FED
+              - generic [ref=e346]: 🍕 Free Food
+          - generic [ref=e347]:
+            - generic [ref=e348]:
+              - paragraph [ref=e349]: UW Entrepreneurship Society
+              - heading "Founder Coffee and Idea Exchange" [level=2] [ref=e350]:
+                - link "Founder Coffee and Idea Exchange" [ref=e351] [cursor=pointer]:
+                  - /url: /events/event-entrepreneurship-society-founder-coffee
+            - generic [ref=e352]:
+              - generic [ref=e353]:
+                - term [ref=e354]: When
+                - definition [ref=e355]:
+                  - time [ref=e356]: Mon, Sep 21, 11:00 a.m.
+              - generic [ref=e357]:
+                - term [ref=e358]: Where
+                - definition [ref=e359]: Federation Hall, FED
+            - generic [ref=e360]:
+              - generic [ref=e361]: Startup Pitch
+              - generic [ref=e362]: Chill Social
+              - generic [ref=e363]: Free Food
+            - link "View source" [ref=e364] [cursor=pointer]:
+              - /url: https://clubs.wusa.ca/
+              - text: View source ->
+        - article [ref=e366]:
+          - link "View Inside the Co-op Interview" [ref=e367] [cursor=pointer]:
+            - /url: /events/event-coop-employer-panel
+            - generic [ref=e371]: TC
+          - generic [ref=e372]:
+            - generic [ref=e373]:
+              - paragraph [ref=e374]: Centre for Career Development
+              - heading "Inside the Co-op Interview" [level=2] [ref=e375]:
+                - link "Inside the Co-op Interview" [ref=e376] [cursor=pointer]:
+                  - /url: /events/event-coop-employer-panel
+            - generic [ref=e377]:
+              - generic [ref=e378]:
+                - term [ref=e379]: When
+                - definition [ref=e380]:
+                  - time [ref=e381]: Tue, Sep 22, 5:00 p.m.
+              - generic [ref=e382]:
+                - term [ref=e383]: Where
+                - definition [ref=e384]: Tatham Centre Presentation Room, TC
+            - generic [ref=e386]: Career Coop
+            - link "View source" [ref=e387] [cursor=pointer]:
+              - /url: https://uwaterloo.ca/career-development/events
+              - text: View source ->
+  - alert [ref=e388]

@@ -1,15 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { 
   ArrowRight, 
   Mail, 
   CheckCircle2, 
   Map as MapIcon, 
   Video, 
-  Pizza,
-  Globe
+  Pizza
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import BackgroundGlobe from '@/components/puslate-globe'
@@ -18,7 +16,6 @@ export default function App() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
   const [activeTab, setActiveTab] = useState(0);
-
   const router = useRouter();
 
   const features = [
@@ -57,7 +54,7 @@ export default function App() {
     }
     setStatus('loading');
 
-    router.push(`/auth?email=${encodeURIComponent(email)}`);
+    router.push(`/signup?email=${encodeURIComponent(email)}`);
 
     setTimeout(() => setStatus('success'), 1500);
   };
@@ -66,7 +63,7 @@ export default function App() {
     <div className="min-h-screen bg-[#050505] text-zinc-300 font-sans antialiased selection:bg-blue-500/30 overflow-hidden relative">
       
       {/* 1. Animated Background Map Pings */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none">
+      <div id="map" className="absolute inset-0 opacity-45 max-md:pointer-events-none">
         <BackgroundGlobe /> 
         
         {/* Subtle Map Outline (SVG) */}
@@ -82,49 +79,28 @@ export default function App() {
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/10 blur-[120px] rounded-full"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-600/10 blur-[120px] rounded-full"></div>
 
-      {/* Nav */}
-      <nav className="relative z-10 flex justify-between items-center px-6 md:px-12 py-8 max-w-7xl mx-auto">
-        <div className="flex items-center gap-2">
-          <div className="w-12 h-9 flex items-center justify-center">
-            <Image
-              src="/hermes-logo.svg"
-              alt="Hermes winged sandal"
-              width={48}
-              height={36}
-              priority
-            />
-          </div>
-          <span className="text-xl font-bold text-white tracking-tight">Hermes</span>
-        </div>
-        <div className="hidden md:flex items-center gap-3 px-4 py-2 rounded-full border border-zinc-800 bg-zinc-900/40 backdrop-blur-md text-[11px] font-bold text-zinc-400 tracking-wider">
-          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-          LIVE: 42 CAMPUS EVENTS
-        </div>
-      </nav>
-
-      <main className="relative z-10 max-w-5xl mx-auto px-6 pt-20 md:pt-32 pb-32 flex flex-col items-center text-center">
-        
-        {/* Badge */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-zinc-800 bg-zinc-900/50 text-zinc-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-12 cursor-default hover:border-zinc-700 transition-colors">
-          <Globe size={12} className="text-blue-500" />
-          UWaterloo Discovery Network
-        </div>
+      <main className="relative z-10 max-w-5xl mx-auto px-6 pt-40 md:pt-48 pb-32 flex flex-col items-center text-center">
 
         {/* Improved Typography: Using font-sans with heavy weights */}
-        <h1 className="text-6xl md:text-[100px] font-extrabold text-white tracking-tighter mb-8 leading-[0.85]">
-          See what&apos;s <br />
-          <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-blue-500 bg-clip-text text-transparent">
-            happening at UW.
+        <h1 className="text-6xl md:text-[100px] font-extrabold text-white tracking-tighter mb-8 leading-[0.98]">
+          <span className="hero-reveal hero-reveal-delay-1 inline-block pb-[0.12em] -mb-[0.12em]">
+            <span>See what&apos;s</span>
+          </span>{" "}
+          <br />
+          <span className="hero-reveal hero-reveal-delay-2 inline-block pb-[0.16em] -mb-[0.16em]">
+            <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-blue-500 bg-clip-text text-transparent">
+              happening at UW.
+            </span>
           </span>
         </h1>
 
-        <p className="max-w-xl text-zinc-500 text-lg leading-relaxed mb-12 font-medium">
+        <p className="hero-reveal hero-reveal-delay-3 max-w-xl text-zinc-500 text-lg leading-relaxed mb-12 font-medium">
           The central feed for Waterloo campus life. <br className="hidden md:block" />
           Clubs, events, and free food alerts, synced in real-time.
         </p>
 
         {/* CTA Container */}
-        <div className="w-full max-w-lg bg-zinc-900/30 border border-zinc-800/50 p-2 rounded-2xl backdrop-blur-xl mb-24 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+        <div id="join" className="hero-reveal hero-reveal-delay-4 w-full max-w-lg scroll-mt-32 bg-zinc-900/30 border border-zinc-800/50 p-2 rounded-2xl backdrop-blur-xl mb-24 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
           {status !== 'success' ? (
             <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-2">
               <div className="flex-1 relative">
@@ -161,7 +137,7 @@ export default function App() {
         </div>
 
         {/* Feature Grid */}
-        <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div id="clubs" className="w-full scroll-mt-32 grid grid-cols-1 md:grid-cols-3 gap-4">
           {features.map((f, i) => (
             <div 
               key={i}

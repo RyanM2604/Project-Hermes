@@ -1,3 +1,8 @@
+import {
+  socialSubTagLabels,
+  socialSubTags,
+  type SocialSubTag,
+} from "@/lib/events/social-tags";
 import type { EventTag, HermesEvent } from "@/types/event";
 
 export type EventThemeMotif =
@@ -27,6 +32,25 @@ const neutralTheme: EventTheme = {
   tagClassName: "border-blue-300/25 bg-blue-400/15 text-blue-100",
 };
 
+const chillSocialBase = {
+  accentTextClassName: "text-violet-200",
+  glowClassName: "bg-violet-400/30",
+  mediaClassName: "from-violet-500/35 via-rose-500/15 to-zinc-950",
+  motif: "circles",
+  tagClassName: "border-violet-300/30 bg-violet-400/15 text-violet-100",
+} as const;
+
+function socialTheme(label: string): EventTheme {
+  return {
+    ...chillSocialBase,
+    label,
+  };
+}
+
+const socialSubTagThemes = Object.fromEntries(
+  socialSubTags.map((tag) => [tag, socialTheme(socialSubTagLabels[tag])]),
+) as Record<SocialSubTag, EventTheme>;
+
 const themes = {
   "free-food": {
     accentTextClassName: "text-amber-200",
@@ -52,14 +76,7 @@ const themes = {
     motif: "lines",
     tagClassName: "border-emerald-300/30 bg-emerald-400/15 text-emerald-100",
   },
-  "chill-social": {
-    accentTextClassName: "text-violet-200",
-    glowClassName: "bg-violet-400/30",
-    label: "Chill & social",
-    mediaClassName: "from-violet-500/35 via-rose-500/15 to-zinc-950",
-    motif: "circles",
-    tagClassName: "border-violet-300/30 bg-violet-400/15 text-violet-100",
-  },
+  "chill-social": socialTheme("Chill & social"),
   music: {
     accentTextClassName: "text-fuchsia-200",
     glowClassName: "bg-fuchsia-400/30",
@@ -84,6 +101,7 @@ const themes = {
     motif: "upward",
     tagClassName: "border-lime-300/30 bg-lime-400/15 text-lime-100",
   },
+  ...socialSubTagThemes,
 } as const satisfies Record<EventTag, EventTheme>;
 
 export function getEventTheme(primaryTag?: string | null): EventTheme {

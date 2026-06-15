@@ -12,6 +12,24 @@ const candidate: ClassificationCandidate = {
   sourceTags: ["career-coop", "hack-dev"],
 };
 
+const weakCareerCandidate: ClassificationCandidate = {
+  eventId: "event-b",
+  title: "Toronto Blue Jays vs Texas Rangers Viewing",
+  description: "Catch the away game with friends.",
+  clubName: "Campus Social Club",
+  locationName: "Bingemans",
+  sourceTags: ["career-coop"],
+};
+
+const weakSocialCandidate: ClassificationCandidate = {
+  eventId: "event-c",
+  title: "Campus Hangout",
+  description: "Drop by for a casual meetup.",
+  clubName: "Campus Social Club",
+  locationName: "SLC",
+  sourceTags: [],
+};
+
 function createRepository() {
   return {
     getClassificationCandidate: vi.fn(),
@@ -102,5 +120,81 @@ describe("classifyEvents", () => {
 
     expect(classifier.classify).not.toHaveBeenCalled();
     expect(result.skippedCount).toBe(1);
+  });
+
+  it("falls back when a provider classification uses weak career wording", async () => {
+    const repository = createRepository();
+    const classifier = createClassifier();
+
+    repository.getClassificationCandidate.mockResolvedValue(weakCareerCandidate);
+    classifier.classify.mockResolvedValue({
+      model: "gpt-5.1-mini",
+      status: "classified",
+      classification: {
+        primaryTag: "career-coop",
+        tags: ["career-coop"],
+        vibes: ["professional"],
+        audiences: ["career-focused"],
+        format: "networking",
+        confidence: 0.95,
+        rationale: "Looks like a career event.",
+      },
+    });
+
+    const result = await classifyEvents({
+      repository: repository as never,
+      classifier: classifier as never,
+      eventIds: ["event-b"],
+    });
+
+    expect(repository.saveClassification).toHaveBeenCalledWith(
+      "event-b",
+      expect.objectContaining({
+        model: "gpt-5.1-mini",
+        status: "fallback",
+        classification: expect.objectContaining({
+          primaryTag: "chill-social",
+        }),
+      }),
+    );
+    expect(result.fallbackCount).toBe(1);
+  });
+
+  it("keeps weak social events in chill-social without forcing a sub-tag", async () => {
+    const repository = createRepository();
+    const classifier = createClassifier();
+
+    repository.getClassificationCandidate.mockResolvedValue(weakSocialCandidate);
+    classifier.classify.mockResolvedValue({
+      model: "gpt-5.1-mini",
+      status: "classified",
+      classification: {
+        primaryTag: "chill-social",
+        tags: ["chill-social"],
+        vibes: ["social"],
+        audiences: ["all-students"],
+        format: "social",
+        confidence: 0.62,
+        rationale: "Casual campus hangout.",
+      },
+    });
+
+    const result = await classifyEvents({
+      repository: repository as never,
+      classifier: classifier as never,
+      eventIds: ["event-c"],
+    });
+
+    expect(repository.saveClassification).toHaveBeenCalledWith(
+      "event-c",
+      expect.objectContaining({
+        status: "classified",
+        classification: expect.objectContaining({
+          primaryTag: "chill-social",
+          tags: ["chill-social"],
+        }),
+      }),
+    );
+    expect(result.classifiedCount).toBe(1);
   });
 });

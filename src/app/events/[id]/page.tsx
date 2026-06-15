@@ -8,6 +8,10 @@ import {
 } from "@/components/events";
 import { getEventThemeForEvent } from "@/lib/events/event-theme";
 import { formatEventLocation } from "@/lib/events";
+import {
+  formatEventTagLabel,
+  getEventSocialSubTag,
+} from "@/lib/events/social-tags";
 import { getEventById } from "@/lib/events/repository";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { HermesEvent } from "@/types/event";
@@ -26,11 +30,12 @@ const timeFormatter = new Intl.DateTimeFormat("en-CA", {
   timeZone: "America/Toronto",
 });
 
-function formatTag(tag: HermesEvent["tags"][number]) {
-  return tag
-    .split("-")
-    .map((word) => word[0].toUpperCase() + word.slice(1))
-    .join(" ");
+function visibleEventTags(tags: HermesEvent["tags"]) {
+  const socialSubTag = getEventSocialSubTag(tags);
+
+  return tags.filter(
+    (tag) => tag !== "chill-social" || socialSubTag === undefined,
+  );
 }
 
 export default async function EventDetailPage({
@@ -68,6 +73,7 @@ export default async function EventDetailPage({
   const endTime = new Date(event.endTime);
   const theme = getEventThemeForEvent(event);
   const themedTag = event.primaryTag ?? event.tags[0];
+  const socialSubTag = getEventSocialSubTag(event.tags);
 
   return (
     <main className="min-h-screen bg-[#050505] px-5 pb-8 pt-32 text-white sm:px-8 sm:pb-12 sm:pt-36">
@@ -97,6 +103,13 @@ export default async function EventDetailPage({
                 >
                   {theme.label}
                 </span>
+                {socialSubTag && event.primaryTag === "chill-social" ? (
+                  <span
+                    className={`rounded-full border px-3 py-1 text-sm font-semibold backdrop-blur-md ${theme.tagClassName}`}
+                  >
+                    {formatEventTagLabel(socialSubTag)}
+                  </span>
+                ) : null}
                 {event.isFreeFood && (
                   <span className="rounded-full border border-orange-300/30 bg-orange-400/15 px-3 py-1 text-sm font-semibold text-orange-100">
                     🍕 Free Food
@@ -132,16 +145,16 @@ export default async function EventDetailPage({
               </p>
 
               <div className="mt-8 flex flex-wrap gap-2">
-                {event.tags.map((tag) => (
+                {visibleEventTags(event.tags).map((tag) => (
                   <span
                     key={tag}
                     className={`rounded-full border px-3 py-1.5 text-sm font-medium ${
-                      tag === themedTag
+                      tag === themedTag || tag === socialSubTag
                         ? theme.tagClassName
                         : "border-white/10 bg-white/[0.05] text-zinc-300"
                     }`}
                   >
-                    {formatTag(tag)}
+                    {formatEventTagLabel(tag)}
                   </span>
                 ))}
               </div>

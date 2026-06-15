@@ -5,6 +5,7 @@ import {
   createFallbackClassification,
   type FallbackClassificationInput,
 } from "./fallback";
+import { sanitizeClassification } from "./guardrails";
 import type { Classification } from "./schema";
 import type { OpenAIClassifierResult } from "./openai-classifier";
 
@@ -61,8 +62,24 @@ async function processCandidate(
   );
 
   if (classificationResult.status === "classified") {
+    const trusted = sanitizeClassification(
+      candidate,
+      classificationResult.classification,
+    );
+
+    if (!trusted) {
+      await options.repository.saveClassification(candidate.eventId, {
+        classification: createFallbackClassification(candidate),
+        model: classificationResult.model,
+        promptVersion: options.promptVersion,
+        status: "fallback",
+      });
+
+      return "fallback";
+    }
+
     await options.repository.saveClassification(candidate.eventId, {
-      classification: classificationResult.classification,
+      classification: trusted,
       model: classificationResult.model,
       promptVersion: options.promptVersion,
       status: "classified",

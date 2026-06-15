@@ -4,6 +4,7 @@ const BUILDING_CODES = [
   "AL",
   "DC",
   "E5",
+  "EC5",
   "E7",
   "FED",
   "MC",
@@ -30,13 +31,47 @@ export function deriveTags(...values: string[]): EventTag[] {
   ) {
     tags.push("free-food");
   }
-  if (/\b(hackathon|hack|developer|coding|technical)\b/.test(text)) {
+  if (/\b(hackathon|hack[- ]?dev|developer|development|coding|code|software|programming)\b/.test(text)) {
     tags.push("hack-dev");
   }
-  if (/\b(career|co-op|coop|recruit|networking)\b/.test(text)) {
+  if (
+    /\b(career fair|career|co-op|coop|internship|intern|resume|résumé|job|jobs|hiring|recruit(?:ing)?|networking|interview|employer|professional development)\b/.test(
+      text,
+    )
+  ) {
     tags.push("career-coop");
   }
-  if (/\b(social|mingle|bonfire|games?|picnic)\b/.test(text)) {
+  if (
+    /\b(board games?|game night|cards?|uno|catan|trivia|poker)\b/.test(text)
+  ) {
+    tags.push("games");
+    tags.push("chill-social");
+  }
+  if (/\b(paint night|crafts?|arts?|diy|bake|make and take)\b/.test(text)) {
+    tags.push("arts-crafts");
+    tags.push("chill-social");
+  }
+  if (/\b(hangout|mingle|social hour|casual meetup)\b/.test(text)) {
+    tags.push("hangout");
+    tags.push("chill-social");
+  }
+  if (/\b(hike|hiking|outdoor|picnic|trail walk)\b/.test(text)) {
+    tags.push("outdoors");
+    tags.push("chill-social");
+  }
+  if (/\b(party|club night|pub crawl|night out)\b/.test(text)) {
+    tags.push("nightlife");
+    tags.push("chill-social");
+  }
+  if (/\b(yoga|meditation|wellness|mindfulness)\b/.test(text)) {
+    tags.push("wellness");
+    tags.push("chill-social");
+  }
+  if (/\b(movie night|movie|tv watch|watch party|film screening)\b/.test(text)) {
+    tags.push("movie-tv");
+    tags.push("chill-social");
+  }
+  if (/\b(social|mingle|bonfire)\b/.test(text)) {
     tags.push("chill-social");
   }
   if (/\b(music|concert|performance|dj)\b/.test(text)) {
@@ -49,7 +84,7 @@ export function deriveTags(...values: string[]): EventTag[] {
     tags.push("startup-pitch");
   }
 
-  return tags;
+  return [...new Set(tags)];
 }
 
 export function zonedDateTimeToIso(

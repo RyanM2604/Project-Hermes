@@ -1,7 +1,9 @@
 import { deriveTags } from "@/ingestion/sources/utils";
 import { parseEventTag } from "@/lib/events/filters";
+import { socialSubTags } from "@/lib/events/social-tags";
 import type { EventTag } from "@/types/event";
 
+import { filterTrustedTags } from "./guardrails";
 import { classificationSchema, type Classification } from "./schema";
 
 export const FALLBACK_PRIMARY_TAG_PRIORITY = [
@@ -11,6 +13,7 @@ export const FALLBACK_PRIMARY_TAG_PRIORITY = [
   "music",
   "reels",
   "free-food",
+  ...socialSubTags,
   "chill-social",
 ] as const satisfies readonly EventTag[];
 
@@ -60,6 +63,55 @@ const PRIMARY_TAG_METADATA: Readonly<
     confidence: 0.2,
     format: "social",
     rationale: "The event is best treated as a casual campus social.",
+    vibes: ["social", "relaxed"],
+  },
+  games: {
+    audiences: ["all-students"],
+    confidence: 0.65,
+    format: "social",
+    rationale: "The event centers on games or playful competition.",
+    vibes: ["social", "relaxed"],
+  },
+  hangout: {
+    audiences: ["all-students"],
+    confidence: 0.55,
+    format: "social",
+    rationale: "The event looks like a casual hangout.",
+    vibes: ["social", "relaxed"],
+  },
+  "arts-crafts": {
+    audiences: ["all-students"],
+    confidence: 0.65,
+    format: "social",
+    rationale: "The event centers on arts, crafts, or making things.",
+    vibes: ["creative", "relaxed"],
+  },
+  outdoors: {
+    audiences: ["all-students"],
+    confidence: 0.65,
+    format: "social",
+    rationale: "The event looks outdoor or nature-oriented.",
+    vibes: ["social", "energetic"],
+  },
+  nightlife: {
+    audiences: ["all-students"],
+    confidence: 0.65,
+    format: "social",
+    rationale: "The event looks like a nightlife or party experience.",
+    vibes: ["social", "energetic"],
+  },
+  wellness: {
+    audiences: ["all-students"],
+    confidence: 0.65,
+    format: "social",
+    rationale: "The event centers on wellness or mindfulness.",
+    vibes: ["relaxed", "social"],
+  },
+  "movie-tv": {
+    audiences: ["all-students"],
+    confidence: 0.65,
+    format: "social",
+    rationale: "The event centers on watching movies or TV together.",
     vibes: ["social", "relaxed"],
   },
   music: {
@@ -124,8 +176,22 @@ function collectTags(input: FallbackClassificationInput): EventTag[] {
     input.locationName,
   );
   const tags = uniqueInOrder([...derivedTags, ...sourceTags]);
+  const trustedTags = filterTrustedTags(input, tags);
 
-  return tags.length > 0 ? sortByPriority(tags) : ["chill-social"];
+  if (trustedTags.length > 0) {
+    const ordered = sortByPriority(trustedTags);
+    const hasSocialSubTag = ordered.some((tag) =>
+      (socialSubTags as readonly EventTag[]).includes(tag),
+    );
+
+    if (hasSocialSubTag && !ordered.includes("chill-social")) {
+      ordered.push("chill-social");
+    }
+
+    return ordered;
+  }
+
+  return ["chill-social"];
 }
 
 export function createFallbackClassification(

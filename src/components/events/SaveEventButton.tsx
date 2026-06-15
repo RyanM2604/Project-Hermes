@@ -14,6 +14,7 @@ export function SaveEventButton({ eventId }: SaveEventButtonProps) {
   const router = useRouter();
   const [isSaved, setIsSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>();
 
   useEffect(() => {
@@ -55,7 +56,7 @@ export function SaveEventButton({ eventId }: SaveEventButtonProps) {
   }, [eventId]);
 
   async function toggleSaved() {
-    setIsLoading(true);
+    setIsSaving(true);
     setErrorMessage(undefined);
 
     const response = await fetch(`/api/events/${eventId}/save`, {
@@ -73,17 +74,17 @@ export function SaveEventButton({ eventId }: SaveEventButtonProps) {
           error?: string;
           code?: string;
         };
-        setErrorMessage(body.error ?? "Unable to update saved event.");
-      } catch {
-        setErrorMessage("Unable to update saved event.");
-      }
-      setIsLoading(false);
+      setErrorMessage(body.error ?? "Unable to update saved event.");
+    } catch {
+      setErrorMessage("Unable to update saved event.");
+    }
+      setIsSaving(false);
       return;
     }
 
     const body = (await response.json()) as { saved: boolean };
     setIsSaved(body.saved);
-    setIsLoading(false);
+    setIsSaving(false);
 
     if (body.saved) {
       logClientInteraction({
@@ -98,9 +99,10 @@ export function SaveEventButton({ eventId }: SaveEventButtonProps) {
     <div className="mt-3">
       <button
         type="button"
-        disabled={isLoading}
+        disabled={isLoading || isSaving}
         onClick={toggleSaved}
         aria-pressed={isSaved}
+        aria-busy={isLoading || isSaving}
         className={`flex w-full items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-bold transition disabled:cursor-wait disabled:opacity-60 ${
           isSaved
             ? "border-blue-300/40 bg-blue-300 text-black"
@@ -108,7 +110,7 @@ export function SaveEventButton({ eventId }: SaveEventButtonProps) {
         }`}
       >
         <Bookmark size={17} fill={isSaved ? "currentColor" : "none"} />
-        {isLoading ? "Loading..." : isSaved ? "Saved" : "Save event"}
+        {isSaved ? "Saved" : "Save event"}
       </button>
       {errorMessage && (
         <p role="alert" className="mt-2 text-xs text-red-300">

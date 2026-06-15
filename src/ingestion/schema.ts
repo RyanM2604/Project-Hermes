@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { socialSubTags } from "@/lib/events/social-tags";
+
 const eventSourceSchema = z.enum([
   "uwaterloo-events",
   "wusa-events",
@@ -13,11 +15,13 @@ const eventTagSchema = z.enum([
   "music",
   "reels",
   "startup-pitch",
+  ...socialSubTags,
 ]);
 const buildingCodeSchema = z.enum([
   "AL",
   "DC",
   "E5",
+  "EC5",
   "E7",
   "FED",
   "MC",

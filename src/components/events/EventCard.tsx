@@ -4,6 +4,9 @@ import { X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
+import { EventThemeMotif } from "@/components/events/EventThemeMotif";
+import { getEventThemeForEvent } from "@/lib/events/event-theme";
+import { formatEventLocation } from "@/lib/events/format";
 import { logClientInteraction } from "@/lib/interactions/log-client-interaction";
 import type { HermesEvent } from "@/types/event";
 
@@ -29,6 +32,8 @@ function formatTag(tag: HermesEvent["tags"][number]) {
 
 export function EventCard({ event }: EventCardProps) {
   const [isDismissed, setIsDismissed] = useState(false);
+  const theme = getEventThemeForEvent(event);
+  const themedTag = event.primaryTag ?? event.tags[0];
 
   function logOpen() {
     logClientInteraction({
@@ -66,15 +71,28 @@ export function EventCard({ event }: EventCardProps) {
         href={`/events/${event.id}`}
         onClick={logOpen}
         aria-label={`View ${event.title}`}
-        className="relative flex aspect-[16/9] items-end overflow-hidden border-b border-white/10 bg-gradient-to-br from-blue-500/30 via-indigo-500/15 to-zinc-950 p-5"
+        className={`relative flex aspect-[16/9] items-end overflow-hidden border-b border-white/10 bg-gradient-to-br p-5 ${theme.mediaClassName}`}
       >
-        <div className="absolute -right-10 -top-12 h-40 w-40 rounded-full bg-blue-400/20 blur-3xl" />
+        <div
+          className={`absolute -right-10 -top-12 h-40 w-40 rounded-full blur-3xl ${theme.glowClassName}`}
+        />
         <div className="absolute -bottom-16 -left-8 h-36 w-36 rounded-full bg-indigo-500/20 blur-3xl" />
+        <EventThemeMotif motif={theme.motif} />
+
+        <span
+          className={`absolute left-4 top-4 rounded-full border px-3 py-1 text-xs font-semibold backdrop-blur-md ${theme.tagClassName}`}
+        >
+          {theme.label}
+        </span>
 
         <div className="relative flex w-full items-end justify-between gap-3">
-          <span className="rounded-full border border-white/15 bg-black/35 px-3 py-1 text-xs font-semibold text-zinc-200 backdrop-blur-md">
-            {event.buildingCode}
-          </span>
+          {event.buildingCode ? (
+            <span className="rounded-full border border-white/15 bg-black/35 px-3 py-1 text-xs font-semibold text-zinc-200 backdrop-blur-md">
+              {event.buildingCode}
+            </span>
+          ) : (
+            <span />
+          )}
           {event.isFreeFood && (
             <span className="rounded-full border border-orange-300/30 bg-orange-400/15 px-3 py-1 text-xs font-semibold text-orange-100 backdrop-blur-md">
               🍕 Free Food
@@ -85,7 +103,7 @@ export function EventCard({ event }: EventCardProps) {
 
       <div className="flex flex-col gap-5 p-5 sm:p-6">
         <div>
-          <p className="mb-2 text-sm font-medium text-blue-300">
+          <p className={`mb-2 text-sm font-medium ${theme.accentTextClassName}`}>
             {event.clubName}
           </p>
           <h2>
@@ -110,9 +128,7 @@ export function EventCard({ event }: EventCardProps) {
           </div>
           <div className="grid grid-cols-[4.5rem_1fr] gap-3">
             <dt className="font-semibold text-zinc-500">Where</dt>
-            <dd>
-              {event.locationName}, {event.buildingCode}
-            </dd>
+            <dd>{formatEventLocation(event)}</dd>
           </div>
         </dl>
 
@@ -120,7 +136,11 @@ export function EventCard({ event }: EventCardProps) {
           {event.tags.map((tag) => (
             <span
               key={tag}
-              className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1 text-xs font-medium text-zinc-300"
+              className={`rounded-full border px-3 py-1 text-xs font-medium ${
+                tag === themedTag
+                  ? theme.tagClassName
+                  : "border-white/10 bg-white/[0.05] text-zinc-300"
+              }`}
             >
               {formatTag(tag)}
             </span>

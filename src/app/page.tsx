@@ -6,19 +6,13 @@ import {
   CalendarDays,
   Check,
   CheckCircle2,
-  Clock3,
-  Code2,
   Compass,
   Filter,
   Heart,
   LockKeyhole,
   Mail,
   MapPin,
-  Music2,
-  Pizza,
   Radio,
-  Route,
-  Search,
   ShieldCheck,
   Sparkles,
   Users,
@@ -27,45 +21,39 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { EventThemeMotif } from "@/components/events";
+import { DiscoveryCardStack } from "@/components/landing/DiscoveryCardStack";
 import { ScrollReveal } from "@/components/landing/ScrollReveal";
+import { getEventTheme } from "@/lib/events/event-theme";
 import BackgroundGlobe from "@/components/puslate-globe";
 
 const previewEvents = [
   {
-    icon: Pizza,
-    accent: "amber",
+    building: "MC",
     href: "/events/event-mathsoc-pizza-night",
     title: "MathSoc Pizza and Board Games",
     club: "Mathematics Society",
     time: "Today · 6:00 PM",
     location: "MC Comfy",
-    status: "Free food",
-    source: "WUSA Clubs",
-    freshness: "Updated 8m ago",
+    tag: "free-food",
   },
   {
-    icon: Code2,
-    accent: "blue",
+    building: "DC",
     href: "/events/event-csc-lightning-talks",
     title: "CSC Lightning Talks and Snacks",
     club: "Computer Science Club",
     time: "Tonight · 7:30 PM",
     location: "DC Lecture Hall",
-    status: "Hack / Dev",
-    source: "Official club",
-    freshness: "Updated 21m ago",
+    tag: "hack-dev",
   },
   {
-    icon: Music2,
-    accent: "mint",
+    building: "SLC",
     href: "/events/event-wusa-open-mic",
     title: "SLC Open Mic Night",
     club: "WUSA",
     time: "Tomorrow · 8:00 PM",
     location: "SLC Great Hall",
-    status: "Music",
-    source: "Waterloo Events",
-    freshness: "Updated 1h ago",
+    tag: "music",
   },
 ] as const;
 
@@ -273,81 +261,60 @@ export default function App() {
           </ScrollReveal>
 
           <ScrollReveal direction="right" delay={100} className="signal-feed-window">
-            <div className="signal-feed-toolbar">
-              <div className="signal-feed-tabs" aria-label="Feed preview">
-                <span className="is-active">For you</span>
-                <span>Fresh</span>
-                <span>Following</span>
+            <div className="signal-product-heading">
+              <div>
+                <span>Today at Waterloo</span>
+                <strong>Find something worth showing up for.</strong>
               </div>
-              <span className="signal-search-preview">
-                <Search size={14} />
-                Search campus
-              </span>
+              <CalendarDays size={18} />
             </div>
 
-            <div className="signal-starting-row">
-              <span className="signal-live-dot" />
-              <span>Starting soon</span>
-              <span className="signal-starting-count">3 near campus</span>
+            <div className="signal-product-filters" aria-label="Event filters preview">
+              <span className="is-active">All Events</span>
+              <span>Free Food</span>
+              <span>Hack + Dev</span>
+              <span>Career + Co-op</span>
+            </div>
+
+            <div className="signal-product-section-head">
+              <div>
+                <span>Up next</span>
+                <strong>Starting Soon</strong>
+              </div>
+              <small>Swipe to explore</small>
             </div>
 
             <div className="signal-event-rail">
-              {previewEvents.map(
-                ({
-                  icon: Icon,
-                  accent,
-                  href,
-                  title,
-                  club,
-                  time,
-                  location,
-                  status: eventStatus,
-                  source,
-                  freshness,
-                }) => (
-                  <Link key={title} href={href} className="signal-event-card">
+              {previewEvents.map(({ building, href, title, club, time, location, tag }) => {
+                const theme = getEventTheme(tag);
+
+                return (
+                  <Link
+                    key={title}
+                    href={href}
+                    className={`signal-event-card bg-gradient-to-br ${theme.mediaClassName}`}
+                  >
+                    <div
+                      className={`signal-product-card-glow ${theme.glowClassName}`}
+                    />
+                    <EventThemeMotif motif={theme.motif} />
                     <div className="signal-event-card-top">
-                      <span className={`signal-event-icon signal-event-icon-${accent}`}>
-                        <Icon size={18} />
-                      </span>
-                      <span className={`signal-event-status signal-event-status-${accent}`}>
-                        {eventStatus}
+                      <span className={theme.accentTextClassName}>{time}</span>
+                      <span className={`signal-product-tag ${theme.tagClassName}`}>
+                        {theme.label}
                       </span>
                     </div>
                     <div>
                       <p className="signal-event-club">{club}</p>
                       <h3>{title}</h3>
                     </div>
-                    <dl className="signal-event-meta">
-                      <div>
-                        <Clock3 size={14} />
-                        <dt className="sr-only">Time</dt>
-                        <dd>{time}</dd>
-                      </div>
-                      <div>
-                        <MapPin size={14} />
-                        <dt className="sr-only">Location</dt>
-                        <dd>{location}</dd>
-                      </div>
-                    </dl>
-                    <div className="signal-event-source">
-                      <span>
-                        <Verified size={13} />
-                        {source}
-                      </span>
-                      <span>{freshness}</span>
+                    <div className="signal-product-location">
+                      <span>{location}</span>
+                      <span>{building}</span>
                     </div>
                   </Link>
-                ),
-              )}
-            </div>
-
-            <div className="signal-feed-foot">
-              <span>Free food</span>
-              <span>Career</span>
-              <span>Hack / Dev</span>
-              <span>Social</span>
-              <span className="signal-feed-foot-active">Everything</span>
+                );
+              })}
             </div>
           </ScrollReveal>
         </section>
@@ -355,57 +322,50 @@ export default function App() {
         <section className="signal-section signal-community-section">
           <ScrollReveal className="signal-community-visual">
             <article className="signal-event-detail">
-              <div className="signal-detail-head">
-                <span className="signal-event-status signal-event-status-blue">
-                  Starting tonight
-                </span>
-                <span className="signal-trusted">
-                  <Verified size={14} />
-                  Official club
-                </span>
+              <div className="signal-detail-themed-hero">
+                <div className="signal-detail-grid" aria-hidden="true" />
+                <div className="signal-detail-themed-head">
+                  <span className="signal-product-tag signal-product-tag-cyan">
+                    Hack & dev
+                  </span>
+                  <span className="signal-detail-building">E7</span>
+                </div>
+                <div className="signal-detail-themed-title">
+                  <p>UW Blueprint</p>
+                  <h3>Build Night: Ship Something</h3>
+                </div>
               </div>
-              <p className="signal-event-club">UW Blueprint</p>
-              <h3>Build Night: Ship Something</h3>
-              <p>
-                Bring an idea, meet a team, and leave with something working.
-                Beginners welcome.
-              </p>
-              <div className="signal-detail-meta">
-                <span>
-                  <CalendarDays size={15} />
-                  Thursday · 7:30 PM
-                </span>
-                <span>
-                  <MapPin size={15} />
-                  E7 2317
-                </span>
+              <div className="signal-detail-themed-body">
+                <div>
+                  <span className="signal-detail-overline">About this event</span>
+                  <p>
+                    Bring an idea, meet a team, and leave with something working.
+                    Beginners welcome.
+                  </p>
+                  <span className="signal-product-tag signal-product-tag-cyan">
+                    Hack Dev
+                  </span>
+                </div>
+                <dl>
+                  <div>
+                    <CalendarDays size={15} />
+                    <span>Thursday · 7:30 PM</span>
+                  </div>
+                  <div>
+                    <MapPin size={15} />
+                    <span>E7 2317</span>
+                  </div>
+                </dl>
+                <div className="signal-detail-actions" aria-label="Example event actions">
+                  <span className="signal-action-primary">
+                    Going
+                  </span>
+                  <span>
+                    <Heart size={15} />
+                    Save event
+                  </span>
+                </div>
               </div>
-              <div className="signal-detail-actions" aria-label="Example event actions">
-                <span className="signal-action-primary">
-                  <Heart size={15} />
-                  Save
-                </span>
-                <span>Going</span>
-              </div>
-            </article>
-
-            <div className="signal-community-connector" aria-hidden="true">
-              <span />
-            </div>
-
-            <article className="signal-organizer">
-              <div className="signal-organizer-avatar">
-                <Code2 size={22} />
-              </div>
-              <div>
-                <p>Organiser</p>
-                <h3>UW Blueprint</h3>
-                <span>4 upcoming events · Technology</span>
-              </div>
-              <span className="signal-follow-preview">
-                <Users size={14} />
-                Follow
-              </span>
             </article>
           </ScrollReveal>
 
@@ -437,52 +397,11 @@ export default function App() {
         </section>
 
         <section className="signal-section signal-discovery-section">
-          <ScrollReveal className="signal-section-copy signal-discovery-copy">
-            <p className="signal-label">
-              <Route size={15} />
-              Feed-first, not feed-only
-            </p>
-            <h2 className="signal-title">Discover campus your way.</h2>
-            <p className="signal-body">
-              Browse when you want inspiration. Filter or use nearby buildings
-              when you already know the kind of plan you need.
-            </p>
+          <ScrollReveal className="signal-discovery-heading">
+            <h2 className="signal-title">Discover Waterloo your way.</h2>
           </ScrollReveal>
 
-          <div className="signal-discovery-layout">
-            <div className="signal-path-map" aria-hidden="true">
-              <span className="signal-path-building signal-path-building-mc">MC</span>
-              <span className="signal-path-building signal-path-building-e7">E7</span>
-              <span className="signal-path-building signal-path-building-slc">SLC</span>
-              <span className="signal-path-you">
-                <Zap size={15} />
-              </span>
-              <svg viewBox="0 0 600 340" preserveAspectRatio="none">
-                <path d="M70 250 C170 90 225 270 320 150 S470 40 545 105" />
-                <path d="M70 250 C205 310 380 290 510 235" />
-              </svg>
-            </div>
-
-            <div className="signal-mode-list">
-              {discoveryModes.map(({ icon: Icon, label, title, description, detail }, index) => (
-                <ScrollReveal key={label} delay={index * 80}>
-                  <Link href="/events" className="signal-mode-row">
-                    <span className="signal-mode-index">0{index + 1}</span>
-                    <span className="signal-mode-icon">
-                      <Icon size={18} />
-                    </span>
-                    <span className="signal-mode-content">
-                      <span>{label}</span>
-                      <strong>{title}</strong>
-                      <small>{description}</small>
-                    </span>
-                    <span className="signal-mode-detail">{detail}</span>
-                    <ArrowRight size={17} />
-                  </Link>
-                </ScrollReveal>
-              ))}
-            </div>
-          </div>
+          <DiscoveryCardStack modes={discoveryModes} />
         </section>
 
         <section className="signal-section signal-trust-section">
@@ -549,7 +468,7 @@ export default function App() {
       </div>
 
       <footer className="signal-footer">
-        <p>© 2026 Hermes · Built for UWaterloo</p>
+        <p>© 2026 Hermes · Built for UWaterloo students by Uwaterloo students</p>
         <div>
           <a href="#features">How it works</a>
           <Link href="/events">Events</Link>

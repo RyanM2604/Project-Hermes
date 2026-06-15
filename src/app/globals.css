@@ -380,7 +380,7 @@
 
 .signal-text-link:focus-visible,
 .signal-event-card:focus-visible,
-.signal-mode-row:focus-visible,
+.signal-discovery-card:focus-visible,
 .signal-primary-button:focus-visible,
 .signal-secondary-button:focus-visible,
 .signal-footer a:focus-visible {
@@ -418,70 +418,90 @@
   background: linear-gradient(to right, transparent, rgb(125 181 255 / 0.6));
 }
 
-.signal-feed-toolbar,
-.signal-feed-foot,
-.signal-starting-row {
+.signal-product-heading,
+.signal-product-section-head,
+.signal-product-filters,
+.signal-event-card-top,
+.signal-product-location {
   display: flex;
   align-items: center;
 }
 
-.signal-feed-toolbar {
+.signal-product-heading {
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.25rem 0.25rem 1rem;
+  padding: 0.4rem 0.45rem 1.2rem;
 }
 
-.signal-feed-tabs {
+.signal-product-heading div,
+.signal-product-section-head div {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.signal-product-heading span,
+.signal-product-section-head span {
+  color: #7db5ff;
+  font-size: 0.66rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.signal-product-heading strong {
+  max-width: 20ch;
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+}
+
+.signal-product-heading svg {
+  color: #7db5ff;
+}
+
+.signal-product-filters {
   display: flex;
-  gap: 0.2rem;
-  padding: 0.25rem;
-  border: 1px solid var(--signal-line);
-  border-radius: 999px;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+  overflow: hidden;
   color: #71717a;
-  background: #101014;
-  font-size: 0.72rem;
+  font-size: 0.65rem;
   font-weight: 700;
 }
 
-.signal-feed-tabs span {
-  padding: 0.45rem 0.75rem;
+.signal-product-filters span {
+  flex: 0 0 auto;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--signal-line);
+  border-radius: 999px;
+  background: #101014;
 }
 
-.signal-feed-tabs .is-active {
-  border-radius: 999px;
+.signal-product-filters .is-active {
+  border-color: #fff;
   color: #050505;
   background: #fff;
 }
 
-.signal-search-preview {
-  display: none;
-  align-items: center;
-  gap: 0.5rem;
-  min-height: 2.4rem;
-  padding-inline: 0.8rem;
-  border: 1px solid var(--signal-line);
-  border-radius: 0.75rem;
-  color: #71717a;
-  background: #070709;
-  font-size: 0.72rem;
-}
-
-.signal-starting-row {
-  gap: 0.55rem;
+.signal-product-section-head {
+  justify-content: space-between;
+  gap: 1rem;
   margin-bottom: 0.75rem;
-  padding: 0.8rem 0.9rem;
-  border: 1px solid rgb(255 255 255 / 0.07);
-  border-radius: 0.9rem;
-  color: #e4e4e7;
-  background: #101014;
-  font-size: 0.76rem;
-  font-weight: 700;
+  padding-inline: 0.3rem;
 }
 
-.signal-starting-count {
-  margin-left: auto;
+.signal-product-section-head strong {
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.signal-product-section-head small {
   color: #71717a;
-  font-weight: 600;
+  font-size: 0.64rem;
 }
 
 .signal-live-dot {
@@ -494,36 +514,52 @@
 }
 
 .signal-event-rail {
-  display: grid;
+  display: flex;
   gap: 0.65rem;
+  overflow: hidden;
 }
 
 .signal-event-card {
+  position: relative;
   display: flex;
-  min-width: 0;
+  min-width: 12.5rem;
+  min-height: 12.5rem;
+  flex: 1 0 12.5rem;
   flex-direction: column;
-  gap: 1rem;
+  justify-content: space-between;
+  gap: 1.4rem;
+  overflow: hidden;
   padding: 1.1rem;
   border: 1px solid var(--signal-line);
   border-radius: 1rem;
   color: inherit;
-  background: #121217;
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.035);
   transition:
     border-color 200ms cubic-bezier(0.16, 1, 0.3, 1),
-    background-color 200ms cubic-bezier(0.16, 1, 0.3, 1),
     transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .signal-event-card:hover {
   border-color: rgb(125 181 255 / 0.35);
-  background: #18181e;
   transform: translateY(-3px);
 }
 
+.signal-event-card > *:not(.signal-product-card-glow, [aria-hidden="true"]) {
+  position: relative;
+  z-index: 1;
+}
+
+.signal-product-card-glow {
+  position: absolute;
+  top: -3rem;
+  right: -3rem;
+  width: 9rem;
+  height: 9rem;
+  border-radius: 999px;
+  filter: blur(48px);
+}
+
 .signal-event-card-top,
-.signal-event-source,
-.signal-event-meta div,
 .signal-detail-head,
 .signal-detail-meta,
 .signal-detail-actions,
@@ -537,10 +573,10 @@
 .signal-event-card-top {
   justify-content: space-between;
   gap: 1rem;
+  font-size: 0.68rem;
+  font-weight: 750;
 }
 
-.signal-event-icon,
-.signal-mode-icon,
 .signal-organizer-avatar,
 .signal-ledger-icon {
   display: grid;
@@ -550,25 +586,7 @@
   background: #18181b;
 }
 
-.signal-event-icon {
-  width: 2.35rem;
-  height: 2.35rem;
-  border-radius: 0.75rem;
-}
-
-.signal-event-icon-amber {
-  border-color: rgb(253 186 116 / 0.2);
-  color: #fdba74;
-  background: rgb(253 186 116 / 0.08);
-}
-
-.signal-event-icon-mint {
-  border-color: rgb(110 231 183 / 0.2);
-  color: #6ee7b7;
-  background: rgb(110 231 183 / 0.08);
-}
-
-.signal-event-status {
+.signal-product-tag {
   display: inline-flex;
   align-items: center;
   width: fit-content;
@@ -583,26 +601,21 @@
   white-space: nowrap;
 }
 
-.signal-event-status-amber {
-  border-color: rgb(253 186 116 / 0.2);
-  color: #fed7aa;
-  background: rgb(253 186 116 / 0.08);
-}
-
-.signal-event-status-mint {
-  border-color: rgb(110 231 183 / 0.2);
-  color: #a7f3d0;
-  background: rgb(110 231 183 / 0.08);
+.signal-product-tag-cyan {
+  border-color: rgb(103 232 249 / 0.3);
+  color: #cffafe;
+  background: rgb(34 211 238 / 0.15);
 }
 
 .signal-event-club {
-  color: #7db5ff;
+  color: #d4d4d8;
   font-size: 0.72rem;
   font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
-.signal-event-card h3,
-.signal-event-detail h3 {
+.signal-event-card h3 {
   margin-top: 0.35rem;
   color: #fff;
   font-size: 1.08rem;
@@ -612,56 +625,11 @@
   text-wrap: balance;
 }
 
-.signal-event-meta {
-  display: grid;
-  gap: 0.45rem;
-  color: #a1a1aa;
-  font-size: 0.74rem;
-}
-
-.signal-event-meta div {
-  gap: 0.45rem;
-}
-
-.signal-event-source {
+.signal-product-location {
   justify-content: space-between;
   gap: 0.8rem;
-  padding-top: 0.8rem;
-  border-top: 1px solid rgb(255 255 255 / 0.07);
-  color: #71717a;
-  font-size: 0.66rem;
-}
-
-.signal-event-source span:first-child {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.signal-feed-foot {
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin-top: 0.75rem;
-  padding: 0.45rem;
-  overflow-x: visible;
-  border: 1px solid var(--signal-line);
-  border-radius: 0.8rem;
-  color: #71717a;
-  background: #0c0c0f;
-  font-size: 0.67rem;
-  font-weight: 700;
-}
-
-.signal-feed-foot span {
-  flex: 0 0 auto;
-  padding: 0.45rem 0.65rem;
-}
-
-.signal-feed-foot-active {
-  margin-left: auto;
-  border-radius: 0.6rem;
-  color: #dbeafe;
-  background: rgb(37 99 235 / 0.14);
+  color: #d4d4d8;
+  font-size: 0.68rem;
 }
 
 .signal-community-visual {
@@ -680,54 +648,115 @@
 }
 
 .signal-event-detail {
-  padding: clamp(1.25rem, 4vw, 2rem);
+  overflow: hidden;
   border-radius: 1.25rem;
 }
 
-.signal-detail-head {
+.signal-detail-themed-hero {
+  position: relative;
+  display: flex;
+  min-height: 17rem;
+  flex-direction: column;
   justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 2.5rem;
+  overflow: hidden;
+  padding: clamp(1.25rem, 4vw, 2rem);
+  border-bottom: 1px solid rgb(103 232 249 / 0.2);
+  background:
+    radial-gradient(circle at 15% 100%, rgb(79 70 229 / 0.34), transparent 42%),
+    linear-gradient(135deg, rgb(6 182 212 / 0.38), rgb(30 41 59 / 0.52) 55%, #08080b);
 }
 
-.signal-trusted {
-  gap: 0.4rem;
-  color: #a1a1aa;
+.signal-detail-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.28;
+  background-image:
+    linear-gradient(rgb(103 232 249 / 0.35) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(103 232 249 / 0.35) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: linear-gradient(to bottom, black, transparent);
+}
+
+.signal-detail-themed-head,
+.signal-detail-themed-title {
+  position: relative;
+  z-index: 1;
+}
+
+.signal-detail-themed-head {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.signal-detail-building {
+  padding: 0.36rem 0.65rem;
+  border: 1px solid rgb(255 255 255 / 0.15);
+  border-radius: 999px;
+  color: #e4e4e7;
+  background: rgb(0 0 0 / 0.35);
+  font-size: 0.66rem;
+  font-weight: 750;
+}
+
+.signal-detail-themed-title p {
+  color: #a5f3fc;
   font-size: 0.72rem;
-  font-weight: 650;
+  font-weight: 700;
 }
 
-.signal-trusted svg {
-  color: #7db5ff;
-}
-
-.signal-event-detail h3 {
+.signal-detail-themed-title h3 {
   max-width: 18ch;
-  margin-top: 0.65rem;
+  margin-top: 0.45rem;
+  color: #fff;
   font-size: clamp(1.7rem, 4vw, 2.65rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
 }
 
-.signal-event-detail > p:not(.signal-event-club) {
-  max-width: 50ch;
-  margin-top: 1rem;
+.signal-detail-themed-body {
+  display: grid;
+  gap: 1.5rem;
+  padding: clamp(1.25rem, 4vw, 2rem);
+}
+
+.signal-detail-overline {
+  color: #71717a;
+  font-size: 0.66rem;
+  font-weight: 750;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.signal-detail-themed-body p {
+  max-width: 48ch;
+  margin-block: 0.8rem 1rem;
   color: #a1a1aa;
   font-size: 0.9rem;
   line-height: 1.7;
 }
 
-.signal-detail-meta {
-  flex-wrap: wrap;
-  gap: 0.75rem 1.5rem;
-  margin-top: 1.75rem;
-  color: #d4d4d8;
-  font-size: 0.8rem;
-  font-weight: 600;
+.signal-detail-themed-body dl {
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.9rem;
+  border: 1px solid var(--signal-line);
+  border-radius: 0.9rem;
+  background: rgb(0 0 0 / 0.22);
 }
 
-.signal-detail-meta span {
+.signal-detail-themed-body dl div {
   display: flex;
   align-items: center;
   gap: 0.45rem;
+  color: #d4d4d8;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.signal-detail-themed-body dl svg {
+  color: #67e8f9;
 }
 
 .signal-detail-actions {
@@ -858,183 +887,260 @@
 
 .signal-discovery-section {
   display: block;
+  padding-inline: 0;
 }
 
-.signal-discovery-copy {
-  margin-bottom: clamp(2.5rem, 6vw, 5rem);
-}
-
-.signal-discovery-layout {
+.signal-discovery-heading {
   display: grid;
-  gap: 1rem;
+  justify-items: center;
+  margin-bottom: clamp(4rem, 9vw, 8rem);
+  text-align: center;
 }
 
-.signal-path-map {
-  position: relative;
-  min-height: 23rem;
-  overflow: hidden;
-  border: 1px solid rgb(125 181 255 / 0.14);
-  border-radius: 1.5rem;
-  background:
-    linear-gradient(rgb(255 255 255 / 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(255 255 255 / 0.025) 1px, transparent 1px),
-    radial-gradient(circle at 20% 78%, rgb(37 99 235 / 0.2), transparent 34%),
-    #0b0b0e;
-  background-size:
-    42px 42px,
-    42px 42px,
-    auto,
-    auto;
+.signal-discovery-heading .signal-title {
+  max-width: 13ch;
 }
 
-.signal-path-map::after {
-  position: absolute;
-  inset: 0;
-  content: "";
-  background: linear-gradient(120deg, transparent 48%, rgb(125 181 255 / 0.04), transparent 55%);
-  animation: signal-map-scan 5s ease-in-out infinite;
+.signal-discovery-stack {
+  --signal-discovery-sticky-top: 8rem;
+  display: grid;
+  gap: clamp(7rem, 14vw, 12rem);
+  width: min(100%, 72rem);
+  margin-inline: auto;
+  padding-bottom: clamp(8rem, 18vw, 16rem);
 }
 
-.signal-path-map svg {
-  position: absolute;
-  inset: 0;
+.signal-discovery-card-motion {
+  position: sticky;
   width: 100%;
-  height: 100%;
-  overflow: visible;
+  transform-origin: center top;
 }
 
-.signal-path-map path {
-  fill: none;
-  stroke: rgb(125 181 255 / 0.55);
-  stroke-dasharray: 7 10;
-  stroke-linecap: round;
-  stroke-width: 1.5;
-  vector-effect: non-scaling-stroke;
-}
-
-.signal-path-building,
-.signal-path-you {
-  position: absolute;
-  z-index: 2;
+.signal-discovery-card {
+  position: relative;
   display: grid;
-  place-items: center;
-  border: 1px solid rgb(125 181 255 / 0.22);
-  color: #bfdbfe;
-  background: #111118;
-  box-shadow:
-    0 0 0 6px rgb(37 99 235 / 0.06),
-    0 0 24px rgb(37 99 235 / 0.18);
-}
-
-.signal-path-building {
-  width: 3rem;
-  height: 3rem;
-  border-radius: 0.85rem;
-  font-size: 0.72rem;
-  font-weight: 800;
-}
-
-.signal-path-building-mc {
-  top: 18%;
-  right: 15%;
-}
-
-.signal-path-building-e7 {
-  right: 8%;
-  bottom: 17%;
-}
-
-.signal-path-building-slc {
-  top: 40%;
-  left: 43%;
-}
-
-.signal-path-you {
-  bottom: 14%;
-  left: 8%;
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: 50%;
-  color: #050505;
-  background: #7db5ff;
-}
-
-.signal-mode-list {
-  border-top: 1px solid var(--signal-line);
-}
-
-.signal-mode-row {
-  display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr) auto;
-  gap: 0.75rem;
-  align-items: center;
-  min-height: 8rem;
-  padding-block: 1rem;
-  border-bottom: 1px solid var(--signal-line);
+  min-height: clamp(28rem, 52vw, 36rem);
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: clamp(1.5rem, 4vw, 2.5rem);
   color: inherit;
+  background:
+    radial-gradient(circle at 25% 30%, rgb(37 99 235 / 0.2), transparent 36%),
+    linear-gradient(135deg, #101015, #08080b 58%, #10101a);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.08),
+    0 40px 120px rgb(0 0 0 / 0.38);
   transition:
-    background-color 180ms cubic-bezier(0.16, 1, 0.3, 1),
-    padding 180ms cubic-bezier(0.16, 1, 0.3, 1);
+    border-color 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 220ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.signal-mode-row:hover {
-  padding-inline: 0.75rem;
-  background: rgb(37 99 235 / 0.06);
+.signal-discovery-card::before {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  content: "";
+  background:
+    linear-gradient(rgb(255 255 255 / 0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.022) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: linear-gradient(to right, black, transparent 70%);
 }
 
-.signal-mode-index {
-  color: #52525b;
-  font-size: 0.7rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
+.signal-discovery-card::after {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  content: "";
+  background: linear-gradient(115deg, transparent 44%, rgb(125 181 255 / 0.06), transparent 56%);
+  transform: translateX(-80%);
+  animation: signal-discovery-scan 7s ease-in-out infinite;
 }
 
-.signal-mode-icon {
-  width: 2.6rem;
-  height: 2.6rem;
-  border-radius: 0.8rem;
+.signal-discovery-card-2 {
+  background:
+    radial-gradient(circle at 28% 34%, rgb(110 231 183 / 0.14), transparent 36%),
+    linear-gradient(135deg, #0d1413, #08080b 58%, #0c1016);
 }
 
-.signal-mode-content {
+.signal-discovery-card-3 {
+  background:
+    radial-gradient(circle at 24% 34%, rgb(253 186 116 / 0.14), transparent 36%),
+    linear-gradient(135deg, #15110e, #08080b 58%, #111018);
+}
+
+.signal-discovery-card:hover {
+  border-color: rgb(125 181 255 / 0.32);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.1),
+    0 48px 140px rgb(0 0 0 / 0.48),
+    0 0 80px rgb(37 99 235 / 0.08);
+}
+
+.signal-discovery-visual,
+.signal-discovery-card-copy {
+  position: relative;
+  z-index: 1;
+}
+
+.signal-discovery-visual {
+  min-height: 22rem;
+}
+
+.signal-discovery-orbit,
+.signal-discovery-card-icon,
+.signal-discovery-chip,
+.signal-discovery-signal {
+  position: absolute;
+}
+
+.signal-discovery-orbit {
+  top: 50%;
+  left: 50%;
+  border: 1px solid rgb(125 181 255 / 0.18);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.signal-discovery-orbit-large {
+  width: min(80vw, 26rem);
+  height: min(80vw, 26rem);
+  box-shadow:
+    inset 0 0 70px rgb(37 99 235 / 0.06),
+    0 0 70px rgb(37 99 235 / 0.08);
+}
+
+.signal-discovery-orbit-small {
+  width: min(50vw, 15rem);
+  height: min(50vw, 15rem);
+  border-style: dashed;
+  animation: signal-orbit-spin 18s linear infinite;
+}
+
+.signal-discovery-card-icon {
+  top: 50%;
+  left: 50%;
   display: grid;
-  gap: 0.35rem;
+  width: 5.5rem;
+  height: 5.5rem;
+  place-items: center;
+  border: 1px solid rgb(125 181 255 / 0.3);
+  border-radius: 1.7rem;
+  color: #dbeafe;
+  background: rgb(17 17 24 / 0.9);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.1),
+    0 0 0 12px rgb(37 99 235 / 0.06),
+    0 0 50px rgb(37 99 235 / 0.26);
+  transform: translate(-50%, -50%) rotate(-8deg);
 }
 
-.signal-mode-content > span {
-  color: #7db5ff;
-  font-size: 0.68rem;
-  font-weight: 700;
-}
-
-.signal-mode-content strong {
-  color: #fff;
-  font-size: 0.96rem;
-  font-weight: 700;
-  letter-spacing: -0.015em;
-}
-
-.signal-mode-content small {
-  color: #71717a;
-  font-size: 0.75rem;
-  line-height: 1.55;
-}
-
-.signal-mode-detail {
-  display: none;
-  max-width: 10rem;
-  color: #a1a1aa;
+.signal-discovery-chip {
+  display: inline-flex;
+  min-height: 2.25rem;
+  align-items: center;
+  padding-inline: 0.8rem;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: 999px;
+  color: #d4d4d8;
+  background: rgb(16 16 20 / 0.82);
+  box-shadow: 0 12px 30px rgb(0 0 0 / 0.28);
   font-size: 0.7rem;
+  font-weight: 700;
+  backdrop-filter: blur(12px);
+}
+
+.signal-discovery-chip-primary {
+  top: 24%;
+  left: 8%;
+}
+
+.signal-discovery-chip-secondary {
+  right: 7%;
+  bottom: 24%;
+}
+
+.signal-discovery-signal {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: #7db5ff;
+  box-shadow:
+    0 0 0 7px rgb(37 99 235 / 0.08),
+    0 0 22px rgb(125 181 255 / 0.7);
+}
+
+.signal-discovery-signal-1 {
+  top: 18%;
+  right: 24%;
+}
+
+.signal-discovery-signal-2 {
+  bottom: 17%;
+  left: 22%;
+}
+
+.signal-discovery-signal-3 {
+  right: 12%;
+  bottom: 48%;
+}
+
+.signal-discovery-card-copy {
+  display: grid;
+  align-content: center;
+  padding: clamp(1.5rem, 5vw, 4rem);
+  border-top: 1px solid rgb(255 255 255 / 0.08);
+  background: linear-gradient(to bottom, rgb(8 8 11 / 0.74), rgb(8 8 11 / 0.96));
+}
+
+.signal-discovery-index {
+  color: #52525b;
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+}
+
+.signal-discovery-card-copy p {
+  margin-top: 1.25rem;
+  color: #7db5ff;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.signal-discovery-card-copy h3 {
+  max-width: 18ch;
+  margin-top: 0.55rem;
+  color: #fff;
+  font-size: clamp(1.8rem, 4vw, 3.2rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  text-wrap: balance;
+}
+
+.signal-discovery-card-copy > span:not(.signal-discovery-index, .signal-discovery-card-link) {
+  max-width: 44ch;
+  margin-top: 1rem;
+  color: #a1a1aa;
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+.signal-discovery-card-copy small {
+  margin-top: 1rem;
+  color: #a1a1aa;
+  font-size: 0.72rem;
   line-height: 1.5;
 }
 
-.signal-mode-row > svg {
-  color: #52525b;
-  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.signal-mode-row:hover > svg {
-  color: #7db5ff;
-  transform: translateX(4px);
+.signal-discovery-card-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.75rem;
+  color: #dbeafe;
+  font-size: 0.8rem;
+  font-weight: 700;
 }
 
 .signal-trust-section {
@@ -1255,8 +1361,16 @@
 }
 
 .landing-reveal {
-  opacity: 1;
-  transform: translate3d(0, 0, 0);
+  opacity: 0;
+  transform: translate3d(
+    var(--landing-reveal-x, 0),
+    var(--landing-reveal-y, 28px),
+    0
+  );
+  transition:
+    opacity 650ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 650ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
 }
 
 .landing-reveal-up {
@@ -1270,7 +1384,9 @@
 }
 
 .landing-reveal-visible {
-  animation: landing-section-enter 650ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  will-change: auto;
 }
 
 @keyframes signal-route-pulse {
@@ -1291,32 +1407,22 @@
   }
 }
 
-@keyframes signal-map-scan {
+@keyframes signal-discovery-scan {
   0%,
   100% {
     opacity: 0;
-    transform: translateX(-30%);
+    transform: translateX(-80%);
   }
 
   50% {
-    opacity: 1;
-    transform: translateX(30%);
+    opacity: 0.8;
+    transform: translateX(80%);
   }
 }
 
-@keyframes landing-section-enter {
-  from {
-    opacity: 0;
-    transform: translate3d(
-      var(--landing-reveal-x, 0),
-      var(--landing-reveal-y, 28px),
-      0
-    );
-  }
-
+@keyframes signal-orbit-spin {
   to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
+    transform: translate(-50%, -50%) rotate(360deg);
   }
 }
 
@@ -1338,15 +1444,6 @@
   .signal-follow-preview {
     grid-column: auto;
     padding-inline: 0.8rem;
-  }
-
-  .signal-mode-detail {
-    display: block;
-  }
-
-  .signal-mode-row {
-    grid-template-columns: auto auto minmax(0, 1fr) auto auto;
-    gap: 1rem;
   }
 
   .signal-ledger-row {
@@ -1391,10 +1488,26 @@
     grid-template-columns: minmax(0, 1.2fr) minmax(18rem, 0.8fr);
   }
 
-  .signal-discovery-layout {
+  .signal-discovery-card {
+    grid-template-columns: minmax(0, 1.1fr) minmax(20rem, 0.9fr);
+  }
+
+  .signal-discovery-card:nth-child(even) {
     grid-template-columns: minmax(20rem, 0.9fr) minmax(0, 1.1fr);
-    gap: clamp(2rem, 5vw, 5rem);
-    align-items: center;
+  }
+
+  .signal-discovery-card:nth-child(even) .signal-discovery-visual {
+    order: 2;
+  }
+
+  .signal-discovery-card-copy {
+    border-top: 0;
+    border-left: 1px solid rgb(255 255 255 / 0.08);
+  }
+
+  .signal-discovery-card:nth-child(even) .signal-discovery-card-copy {
+    border-right: 1px solid rgb(255 255 255 / 0.08);
+    border-left: 0;
   }
 
   .signal-event-rail {
@@ -1429,22 +1542,20 @@
     gap: 3.5rem;
   }
 
-  .signal-discovery-copy {
-    margin-bottom: 2.75rem;
+  .signal-discovery-heading {
+    margin-bottom: 3.5rem;
   }
 
-  .signal-path-map {
-    min-height: 19rem;
-  }
-
-  .signal-mode-row {
-    min-height: auto;
-    padding-block: 1.25rem;
+  .signal-discovery-stack {
+    --signal-discovery-sticky-top: 5.5rem;
+    gap: 8rem;
+    padding-bottom: 8rem;
   }
 }
 
 @media (hover: hover) {
   .signal-event-card:hover,
+  .signal-discovery-card:hover,
   .signal-primary-button:hover,
   .signal-secondary-button:hover {
     will-change: transform;
@@ -1475,16 +1586,17 @@
   }
 
   .signal-route::before,
-  .signal-path-map::after {
+  .signal-discovery-card::after,
+  .signal-discovery-orbit-small {
     animation: none;
   }
 
   .signal-event-card,
-  .signal-mode-row,
-  .signal-mode-row > svg,
+  .signal-discovery-card,
   .signal-primary-button,
   .signal-secondary-button,
   .signal-text-link {
     transition: none;
   }
+
 }

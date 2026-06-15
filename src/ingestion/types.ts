@@ -26,7 +26,7 @@ export interface IngestionSource {
 export interface InvalidCandidateRejection {
   source: EventSourceId;
   recordId?: string;
-  reason: "invalid-candidate";
+  reason: "dead-source-url" | "invalid-candidate";
 }
 
 export type IngestionRejection =
@@ -75,3 +75,4 @@ export interface CanonicalEventRefreshCoordinator {
 }
 
 export type FetchText = (source: IngestionSource) => Promise<string>;
+export type ValidateSourceUrl = (sourceUrl: string) => Promise<boolean>;

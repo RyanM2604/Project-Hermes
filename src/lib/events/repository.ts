@@ -42,6 +42,7 @@ interface EventReadClient {
 }
 
 interface CreatePrismaEventRepositoryOptions {
+  allowFallbackEvents?: boolean;
   client: EventReadClient;
   fallbackEvents: readonly HermesEvent[];
   now?: () => Date;
@@ -170,6 +171,7 @@ function upcomingFallbackEvents(
 }
 
 export function createPrismaEventRepository({
+  allowFallbackEvents = process.env.NODE_ENV !== "production",
   client,
   fallbackEvents,
   now = () => new Date(),
@@ -178,7 +180,9 @@ export function createPrismaEventRepository({
     const currentTime = now();
 
     if (!hasDatabaseUrl()) {
-      return upcomingFallbackEvents(fallbackEvents, currentTime);
+      return allowFallbackEvents
+        ? upcomingFallbackEvents(fallbackEvents, currentTime)
+        : [];
     }
 
     let records: PersistedEventRecord[];
@@ -191,7 +195,9 @@ export function createPrismaEventRepository({
       });
     } catch (error) {
       if (isDatabaseUnavailableError(error)) {
-        return upcomingFallbackEvents(fallbackEvents, currentTime);
+        return allowFallbackEvents
+          ? upcomingFallbackEvents(fallbackEvents, currentTime)
+          : [];
       }
 
       throw error;
@@ -204,7 +210,9 @@ export function createPrismaEventRepository({
     eventId: string,
   ): Promise<HermesEvent | undefined> {
     if (!hasDatabaseUrl()) {
-      return fallbackEvents.find((event) => event.id === eventId);
+      return allowFallbackEvents
+        ? fallbackEvents.find((event) => event.id === eventId)
+        : undefined;
     }
 
     let record: PersistedEventRecord | null;
@@ -216,7 +224,9 @@ export function createPrismaEventRepository({
       })) as PersistedEventRecord | null;
     } catch (error) {
       if (isDatabaseUnavailableError(error)) {
-        return fallbackEvents.find((event) => event.id === eventId);
+        return allowFallbackEvents
+          ? fallbackEvents.find((event) => event.id === eventId)
+          : undefined;
       }
 
       throw error;
@@ -227,7 +237,7 @@ export function createPrismaEventRepository({
 
   async function eventExists(eventId: string): Promise<boolean> {
     if (!hasDatabaseUrl()) {
-      return fallbackEventExists(fallbackEvents, eventId);
+      return allowFallbackEvents && fallbackEventExists(fallbackEvents, eventId);
     }
 
     try {
@@ -239,7 +249,7 @@ export function createPrismaEventRepository({
       );
     } catch (error) {
       if (isDatabaseUnavailableError(error)) {
-        return fallbackEventExists(fallbackEvents, eventId);
+        return allowFallbackEvents && fallbackEventExists(fallbackEvents, eventId);
       }
 
       throw error;

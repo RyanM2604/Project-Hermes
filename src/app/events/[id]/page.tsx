@@ -146,14 +146,16 @@ export default async function EventDetailPage({
                 ))}
               </div>
 
-              <a
-                href={event.sourceUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-8 inline-flex text-sm font-semibold text-white underline decoration-white/30 underline-offset-4 transition hover:decoration-white"
-              >
-                View original source
-              </a>
+              {event.sourceUrl && (
+                <a
+                  href={event.sourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-8 inline-flex text-sm font-semibold text-white underline decoration-white/30 underline-offset-4 transition hover:decoration-white"
+                >
+                  View original source
+                </a>
+              )}
             </div>
 
             <aside className="h-fit rounded-3xl border border-white/10 bg-black/25 p-5">

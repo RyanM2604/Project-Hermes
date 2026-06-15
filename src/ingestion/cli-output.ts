@@ -1,6 +1,12 @@
+import type { ClassifyEventsResult } from "@/lib/classification/classify-events";
+
 import type { IngestionRunResult } from "./types";
 
-export function buildCliOutput(run: IngestionRunResult) {
+export interface CliOutputRunResult extends IngestionRunResult {
+  classification?: ClassifyEventsResult;
+}
+
+export function buildCliOutput(run: CliOutputRunResult) {
   return {
     startedAt: run.startedAt,
     completedAt: run.completedAt,
@@ -15,6 +21,7 @@ export function buildCliOutput(run: IngestionRunResult) {
     eventCount: run.events.length,
     duplicateCount: run.duplicates.length,
     ...(run.persistence ? { persistence: run.persistence } : {}),
+    ...(run.classification ? { classification: run.classification } : {}),
     events: run.events.map((event) => ({
       source: event.source,
       sourceUrl: event.sourceUrl,

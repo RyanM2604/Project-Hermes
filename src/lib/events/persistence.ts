@@ -21,6 +21,7 @@ export interface EventPersistenceResult {
   persistedCount: number;
   changedCount: number;
   failedCount: number;
+  persistedEventIds: string[];
   failures: {
     eventId: string;
     code: "upsert-failed";
@@ -137,6 +138,7 @@ export async function persistEvents(
     persistedCount: 0,
     changedCount: 0,
     failedCount: 0,
+    persistedEventIds: [],
     failures: [],
   };
 
@@ -151,6 +153,7 @@ export async function persistEvents(
       const persisted = await repository.upsert(input);
       result.persistedCount += 1;
       result.changedCount += Number(persisted.changed);
+      result.persistedEventIds.push(persisted.eventId);
     } catch {
       result.failedCount += 1;
       result.failures.push({

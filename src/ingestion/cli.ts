@@ -1,17 +1,75 @@
+import { PrismaClient } from "@prisma/client";
+import { loadEnvConfig } from "@next/env";
+import { pathToFileURL } from "node:url";
+
+import { createCanonicalEventRefreshCoordinator } from "./refresh-canonical-events";
 import { buildCliOutput } from "./cli-output";
-import { runIngestion } from "./run-ingestion";
+import { createOpenAIClassifier } from "@/lib/classification/openai-classifier";
+import { createPrismaClassificationRepository } from "@/lib/classification/prisma-repository";
+import { createPrismaEventPersistenceRepository } from "@/lib/events/persistence";
+import type { CanonicalEventRefreshResult, CanonicalEventRefreshOptions } from "./types";
 
-async function main(): Promise<void> {
-  const result = await runIngestion();
+export interface RunCliOptions {
+  refresh?: (
+    options?: CanonicalEventRefreshOptions,
+  ) => Promise<CanonicalEventRefreshResult>;
+}
 
-  console.log(JSON.stringify(buildCliOutput(result), null, 2));
+function exitCodeForResult(result: CanonicalEventRefreshResult): number {
+  const allSourcesFailed =
+    result.sources.length === 0 ||
+    result.sources.every((source) => source.status === "failed");
+  const persistenceFailed = Boolean(
+    result.persistence && result.persistence.failedCount > 0,
+  );
 
-  if (result.sources.every((source) => source.status === "failed")) {
-    process.exitCode = 1;
+  return allSourcesFailed || persistenceFailed ? 1 : 0;
+}
+
+export async function runCli(options: RunCliOptions = {}): Promise<number> {
+  const refresh = options.refresh ?? getDefaultRefreshCoordinator().refresh;
+
+  try {
+    const result = await refresh({ force: true });
+    console.log(JSON.stringify(buildCliOutput(result), null, 2));
+
+    return exitCodeForResult(result);
+  } catch {
+    console.error("Event ingestion failed before a run result could be produced.");
+    return 1;
   }
 }
 
-void main().catch(() => {
-  console.error("Event ingestion failed before a run result could be produced.");
-  process.exitCode = 1;
-});
+async function main(): Promise<void> {
+  process.exitCode = await runCli();
+}
+
+function isDirectExecution(): boolean {
+  const entryPoint = process.argv[1];
+  return Boolean(entryPoint) && import.meta.url === pathToFileURL(entryPoint).href;
+}
+
+let defaultRefreshCoordinator:
+  | ReturnType<typeof createCanonicalEventRefreshCoordinator>
+  | undefined;
+
+function getDefaultRefreshCoordinator() {
+  if (!defaultRefreshCoordinator) {
+    loadEnvConfig(process.cwd());
+    const prisma = new PrismaClient();
+    defaultRefreshCoordinator = createCanonicalEventRefreshCoordinator({
+      persistence: createPrismaEventPersistenceRepository(prisma),
+      classificationRepository: createPrismaClassificationRepository(prisma),
+      classifier: createOpenAIClassifier(),
+    });
+  }
+
+  return defaultRefreshCoordinator;
+}
+
+if (isDirectExecution()) {
+  void main().catch(() => {
+    console.error("Event ingestion failed before a run result could be produced.");
+    process.exitCode = 1;
+  });
+}

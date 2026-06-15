@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { buildCliOutput } from "../cli-output";
+import type { CanonicalEventRefreshResult } from "../types";
 import type { IngestionRunResult } from "../types";
 
 const run: IngestionRunResult = {
@@ -40,6 +41,19 @@ const run: IngestionRunResult = {
   duplicates: [],
 };
 
+const refreshRun: CanonicalEventRefreshResult = {
+  ...run,
+  persistedEventIds: ["event-a"],
+  skipped: false,
+  classification: {
+    attemptedCount: 1,
+    classifiedCount: 1,
+    fallbackCount: 0,
+    skippedCount: 0,
+    failedCount: 0,
+  },
+};
+
 describe("buildCliOutput", () => {
   it("reports useful summaries without descriptions or rejection identifiers", () => {
     const output = buildCliOutput(run);
@@ -61,5 +75,19 @@ describe("buildCliOutput", () => {
     });
     expect(serialized).not.toContain("description");
     expect(serialized).not.toContain("contact@example.com");
+  });
+
+  it("includes classification counts when refresh output is available", () => {
+    const output = buildCliOutput(refreshRun);
+
+    expect(output).toMatchObject({
+      classification: {
+        attemptedCount: 1,
+        classifiedCount: 1,
+        fallbackCount: 0,
+        skippedCount: 0,
+        failedCount: 0,
+      },
+    });
   });
 });

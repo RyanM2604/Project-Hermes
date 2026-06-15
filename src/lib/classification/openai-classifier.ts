@@ -22,14 +22,17 @@ export type OpenAIClassifierUnavailableCode =
 
 export type OpenAIClassifierResult =
   | {
+      model: string;
       classification: Classification;
       status: "classified";
     }
   | {
+      model: string;
       code: OpenAIClassifierUnavailableCode;
       status: "unavailable";
     }
   | {
+      model: string;
       code: "invalid-output";
       status: "invalid-output";
     };
@@ -106,8 +109,11 @@ function parseClassification(outputText: string): Classification | null {
 
 export function createOpenAIClassifier(options: OpenAIClassifierOptions = {}) {
   const apiKey = options.apiKey ?? process.env.OPENAI_API_KEY;
-  const model = options.model ?? process.env.OPENAI_CLASSIFICATION_MODEL ?? DEFAULT_MODEL;
-  const timeoutMs = options.timeoutMs ?? parseTimeoutMs(process.env.OPENAI_CLASSIFICATION_TIMEOUT_MS);
+  const model =
+    options.model ?? process.env.OPENAI_CLASSIFICATION_MODEL ?? DEFAULT_MODEL;
+  const timeoutMs =
+    options.timeoutMs ??
+    parseTimeoutMs(process.env.OPENAI_CLASSIFICATION_TIMEOUT_MS);
   const client = options.client ?? (apiKey ? createOpenAIClient(apiKey) : undefined);
 
   return {
@@ -116,6 +122,7 @@ export function createOpenAIClassifier(options: OpenAIClassifierOptions = {}) {
     ): Promise<OpenAIClassifierResult> {
       if (!apiKey) {
         return {
+          model,
           code: "missing-api-key",
           status: "unavailable",
         };
@@ -145,24 +152,28 @@ export function createOpenAIClassifier(options: OpenAIClassifierOptions = {}) {
 
         if (!classification) {
           return {
+            model,
             code: "invalid-output",
             status: "invalid-output",
           };
         }
 
         return {
+          model,
           classification,
           status: "classified",
         };
       } catch (error) {
         if (isAbortError(error) || controller.signal.aborted) {
           return {
+            model,
             code: "timeout",
             status: "unavailable",
           };
         }
 
         return {
+          model,
           code: "provider-error",
           status: "unavailable",
         };

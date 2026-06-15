@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import type { IngestionSource } from "../types";
 import { runIngestion } from "../run-ingestion";
@@ -69,5 +69,33 @@ describe("runIngestion", () => {
       },
     ]);
     expect(JSON.stringify(result)).not.toContain("private payload");
+  });
+
+  it("rejects confirmed dead event source URLs before persistence", async () => {
+    const upsert = vi.fn(async () => ({
+      changed: true,
+      eventId: `event-${validEvent.sourceFingerprint}`,
+    }));
+
+    const result = await runIngestion({
+      sources: [successfulSource],
+      fetchText: async () => "raw",
+      validateSourceUrl: async (url) => url !== validEvent.sourceUrl,
+      persistence: { upsert },
+      now: () => new Date("2026-06-13T22:00:00.000Z"),
+    });
+
+    expect(result.events).toEqual([]);
+    expect(result.sources[0]).toMatchObject({
+      acceptedCount: 0,
+      rejectedCount: 2,
+      rejections: expect.arrayContaining([
+        expect.objectContaining({
+          recordId: validEvent.sourceFingerprint,
+          reason: "dead-source-url",
+        }),
+      ]),
+    });
+    expect(upsert).not.toHaveBeenCalled();
   });
 });

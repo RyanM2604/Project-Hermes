@@ -32,7 +32,7 @@ export interface HermesEvent {
   tags: EventTag[];
   primaryTag?: EventTag;
   imageUrl?: string;
-  sourceUrl: string;
+  sourceUrl?: string;
   isFreeFood: boolean;
   createdAt: string;
 }

@@ -410,4 +410,51 @@ describe("createPrismaEventRepository", () => {
       queryError,
     );
   });
+
+  it("does not expose fallback events in production when DATABASE_URL is missing", async () => {
+    vi.stubEnv("DATABASE_URL", "");
+    vi.stubEnv("NODE_ENV", "production");
+
+    try {
+      const repository = createPrismaEventRepository({
+        allowFallbackEvents: false,
+        client: createClient(),
+        fallbackEvents: [fallbackEvent],
+        now: () => fixedNow,
+      });
+
+      await expect(repository.getEvents()).resolves.toEqual([]);
+      await expect(
+        repository.getEventById(fallbackEvent.id),
+      ).resolves.toBeUndefined();
+      await expect(repository.eventExists(fallbackEvent.id)).resolves.toBe(false);
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("does not expose fallback events in production when the database is unavailable", async () => {
+    vi.stubEnv("DATABASE_URL", "postgresql://configured");
+    vi.stubEnv("NODE_ENV", "production");
+
+    try {
+      const client = createClient();
+      client.event.findMany.mockRejectedValue(databaseUnavailableError());
+      client.event.findUnique.mockRejectedValue(databaseUnavailableError());
+      const repository = createPrismaEventRepository({
+        allowFallbackEvents: false,
+        client,
+        fallbackEvents: [fallbackEvent],
+        now: () => fixedNow,
+      });
+
+      await expect(repository.getEvents()).resolves.toEqual([]);
+      await expect(
+        repository.getEventById(fallbackEvent.id),
+      ).resolves.toBeUndefined();
+      await expect(repository.eventExists(fallbackEvent.id)).resolves.toBe(false);
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
 });

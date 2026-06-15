@@ -10,6 +10,7 @@ export {
 export { runIngestion } from "./run-ingestion";
 export { normalizedEventCandidateSchema } from "./schema";
 export { liveEventSources } from "./sources/registry";
+export { validateSourceUrl } from "./validate-source-url";
 export type {
   CanonicalEventRefreshCoordinator,
   CanonicalEventRefreshOptions,

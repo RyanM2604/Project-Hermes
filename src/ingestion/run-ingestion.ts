@@ -15,13 +15,16 @@ import type {
   IngestionRunResult,
   IngestionSource,
   SourceIngestionResult,
+  ValidateSourceUrl,
 } from "./types";
+import { validateSourceUrl } from "./validate-source-url";
 
 interface RunIngestionOptions {
   sources?: readonly IngestionSource[];
   fetchText?: FetchText;
   now?: () => Date;
   persistence?: EventPersistenceRepository;
+  validateSourceUrl?: ValidateSourceUrl;
 }
 
 const ERROR_CODES = new Set<IngestionErrorCode>([
@@ -33,6 +36,7 @@ const ERROR_CODES = new Set<IngestionErrorCode>([
   "unexpected-content-type",
   "unknown-error",
 ]);
+const SOURCE_URL_VALIDATION_CONCURRENCY = 5;
 
 function errorCode(error: unknown, fallback: IngestionErrorCode): IngestionErrorCode {
   if (
@@ -51,6 +55,7 @@ function errorCode(error: unknown, fallback: IngestionErrorCode): IngestionError
 async function runSource(
   source: IngestionSource,
   fetchText: FetchText,
+  sourceUrlValidator: ValidateSourceUrl,
 ): Promise<{
   result: SourceIngestionResult;
   events: NormalizedEventCandidate[];
@@ -93,7 +98,7 @@ async function runSource(
     };
   }
 
-  const events: NormalizedEventCandidate[] = [];
+  const candidates: NormalizedEventCandidate[] = [];
   const rejections: IngestionRejection[] = [];
 
   for (const normalizationResult of normalizationResults) {
@@ -115,8 +120,46 @@ async function runSource(
       continue;
     }
 
-    events.push(validated.data);
+    candidates.push(validated.data);
   }
+
+  const sourceUrlAvailability = Array<boolean>(candidates.length);
+  let nextCandidateIndex = 0;
+
+  async function validateCandidateSources(): Promise<void> {
+    while (nextCandidateIndex < candidates.length) {
+      const candidate = candidates[nextCandidateIndex];
+      const candidateIndex = nextCandidateIndex;
+      nextCandidateIndex += 1;
+
+      sourceUrlAvailability[candidateIndex] = await sourceUrlValidator(
+        candidate.sourceUrl,
+      );
+    }
+  }
+
+  await Promise.all(
+    Array.from(
+      {
+        length: Math.min(SOURCE_URL_VALIDATION_CONCURRENCY, candidates.length),
+      },
+      () => validateCandidateSources(),
+    ),
+  );
+
+  const events = candidates.filter((candidate, index) => {
+    if (!sourceUrlAvailability[index]) {
+        rejections.push({
+          source: source.id,
+          recordId: candidate.sourceFingerprint,
+          reason: "dead-source-url",
+        });
+
+        return false;
+    }
+
+    return true;
+  });
 
   return {
     events,
@@ -138,7 +181,11 @@ export async function runIngestion(
   const startedAt = now().toISOString();
   const sourceRuns = await Promise.all(
     (options.sources ?? liveEventSources).map((source) =>
-      runSource(source, options.fetchText ?? fetchSourceText),
+      runSource(
+        source,
+        options.fetchText ?? fetchSourceText,
+        options.validateSourceUrl ?? validateSourceUrl,
+      ),
     ),
   );
   const deduplicated = deduplicateEvents(

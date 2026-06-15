@@ -1,6 +1,6 @@
 import { load } from "cheerio";
 
-import type { BuildingCode } from "@/types/event";
+import { resolveEventLocation } from "@/lib/events/location";
 
 import type {
   EventSourceAdapter,
@@ -21,13 +21,6 @@ interface UWaterlooEventRecord {
 }
 
 const SOURCE = "uwaterloo-events";
-const BUILDING_CODES = ["QNC", "TC", "SLC"] as const satisfies BuildingCode[];
-
-function deriveBuildingCode(location: string): BuildingCode | undefined {
-  return BUILDING_CODES.find((code) =>
-    new RegExp(`\\b${code}\\b`, "i").test(location),
-  );
-}
 
 function missingRequiredField(record: UWaterlooEventRecord): boolean {
   return (
@@ -119,7 +112,10 @@ function normalize(record: UWaterlooEventRecord): NormalizationResult {
   const locationName = record.location.trim();
   const description = record.description.trim();
   const imageUrl = record.image?.trim();
-  const buildingCode = deriveBuildingCode(locationName);
+  const resolvedLocation = resolveEventLocation({
+    description,
+    locationName,
+  });
 
   return {
     ok: true,
@@ -132,8 +128,8 @@ function normalize(record: UWaterlooEventRecord): NormalizationResult {
       clubName: record.organizer.trim(),
       startTime,
       endTime,
-      locationName,
-      ...(buildingCode ? { buildingCode } : {}),
+      locationName: resolvedLocation.locationName,
+      ...(resolvedLocation.buildingCode ? { buildingCode: resolvedLocation.buildingCode } : {}),
       tags: [],
       ...(imageUrl && isHttpUrl(imageUrl) ? { imageUrl } : {}),
       isFreeFood: false,

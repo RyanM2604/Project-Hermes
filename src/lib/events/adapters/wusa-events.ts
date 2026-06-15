@@ -1,6 +1,7 @@
 import { load } from "cheerio";
 
-import type { BuildingCode, EventTag } from "@/types/event";
+import type { EventTag } from "@/types/event";
+import { resolveEventLocation } from "@/lib/events/location";
 
 import type {
   EventSourceAdapter,
@@ -22,18 +23,11 @@ interface WusaEventRecord {
 }
 
 const SOURCE = "wusa-events";
-const BUILDING_CODES = ["SLC", "QNC", "TC"] as const satisfies BuildingCode[];
 const CATEGORY_TAGS: Readonly<Record<string, EventTag>> = {
   "Free Food": "free-food",
   Social: "chill-social",
   Career: "career-coop",
 };
-
-function deriveBuildingCode(location: string): BuildingCode | undefined {
-  return BUILDING_CODES.find((code) =>
-    new RegExp(`\\b${code}\\b`, "i").test(location),
-  );
-}
 
 function deriveTags(categories: string[]): EventTag[] {
   return [
@@ -140,7 +134,10 @@ function normalize(record: WusaEventRecord): NormalizationResult {
   const locationName = record.location.trim();
   const description = record.description.trim();
   const imageUrl = record.image?.trim();
-  const buildingCode = deriveBuildingCode(locationName);
+  const resolvedLocation = resolveEventLocation({
+    description,
+    locationName,
+  });
   const tags = deriveTags(record.categories);
 
   return {
@@ -154,8 +151,10 @@ function normalize(record: WusaEventRecord): NormalizationResult {
       clubName: record.organizer.trim(),
       startTime,
       endTime,
-      locationName,
-      ...(buildingCode ? { buildingCode } : {}),
+      locationName: resolvedLocation.locationName,
+      ...(resolvedLocation.buildingCode
+        ? { buildingCode: resolvedLocation.buildingCode }
+        : {}),
       tags,
       ...(imageUrl && isHttpUrl(imageUrl) ? { imageUrl } : {}),
       isFreeFood: tags.includes("free-food"),

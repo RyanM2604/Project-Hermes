@@ -1,8 +1,11 @@
+import type { SocialSubTag } from "@/lib/events/social-tags";
+
 export type EventTag =
   | "free-food"
   | "hack-dev"
   | "career-coop"
   | "chill-social"
+  | SocialSubTag
   | "music"
   | "reels"
   | "startup-pitch";
@@ -11,6 +14,7 @@ export type BuildingCode =
   | "AL"
   | "DC"
   | "E5"
+  | "EC5"
   | "E7"
   | "FED"
   | "MC"

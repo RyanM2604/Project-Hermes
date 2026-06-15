@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { socialSubTags } from "@/lib/events/social-tags";
+
 export const EVENT_TAGS = [
   "free-food",
   "hack-dev",
@@ -8,6 +10,7 @@ export const EVENT_TAGS = [
   "music",
   "reels",
   "startup-pitch",
+  ...socialSubTags,
 ] as const;
 
 export const VIBES = [

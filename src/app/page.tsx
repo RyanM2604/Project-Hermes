@@ -25,27 +25,27 @@ import BackgroundGlobe from "@/components/puslate-globe";
 
 const previewEvents = [
   {
-    building: "Live",
+    building: "Today",
     href: "/events",
-    title: "Source-backed campus events",
+    title: "Free food near you",
     club: "Official campus sources",
     time: "Updated regularly",
     location: "Across Waterloo",
     tag: "free-food",
   },
   {
-    building: "Current",
+    building: "Tonight",
     href: "/events",
-    title: "Verified event details",
-    club: "Original links attached",
+    title: "Career events before applications close",
+    club: "Original source attached",
     time: "Checked before listing",
     location: "Campus and nearby",
     tag: "hack-dev",
   },
   {
-    building: "Fresh",
+    building: "This week",
     href: "/events",
-    title: "What is actually happening",
+    title: "What is happening tonight",
     club: "Only source-backed listings",
     time: "Browse the live feed",
     location: "Waterloo",
@@ -57,26 +57,26 @@ const discoveryModes = [
   {
     icon: Sparkles,
     label: "For you",
-    title: "Start with what feels worth your time.",
+    title: "Start with events that start soon.",
     description:
-      "A timely feed that learns from saves and RSVPs without hiding fresh campus options.",
-    detail: "Personal signal, always explainable",
+      "Saved events, RSVPs, and recent clicks help surface the next useful thing without burying new listings.",
+    detail: "Built from your real activity",
   },
   {
     icon: Filter,
     label: "Explore",
-    title: "Narrow the campus when you know the vibe.",
+    title: "Filter by what you actually want.",
     description:
-      "Filter by free food, career, hack and dev, music, social events, or what starts soon.",
-    detail: "Structured discovery, one tap away",
+      "Jump straight to free food, career, hack and dev, music, social plans, or events starting soon.",
+    detail: "One tap to the right feed",
   },
   {
     icon: MapPin,
     label: "Near now",
-    title: "Turn the buildings around you into plans.",
+    title: "See if it is worth walking over.",
     description:
-      "Move from a campus location into a clear event detail without precise live tracking.",
-    detail: "Building-level context, privacy intact",
+      "Building-level locations keep the feed useful without asking for precise tracking.",
+    detail: "SLC, EC5, QNC, MC",
   },
 ] as const;
 
@@ -212,12 +212,12 @@ export default function App() {
         <section className="signal-section signal-feed-section">
           <ScrollReveal className="signal-section-copy">
             <h2 className="signal-title">
-              Decide what is worth doing before your next class.
+              See what is worth doing before your next class.
             </h2>
             <p className="signal-body">
-              Hermes turns scattered campus listings into one timely feed. The
-              important details stay visible: when, where, who is hosting, and
-              why it belongs on your radar.
+              Hermes turns scattered campus listings into one feed with the
+              details students actually scan: when it starts, where it is, and
+              who posted it.
             </p>
             <Link href="/events" className="signal-text-link">
               Browse the live feed
@@ -229,7 +229,7 @@ export default function App() {
             <div className="signal-product-heading">
               <div>
                 <span>Today at Waterloo</span>
-                <strong>Find something worth showing up for.</strong>
+                <strong>Find something worth going to.</strong>
               </div>
               <CalendarDays size={18} />
             </div>
@@ -246,7 +246,7 @@ export default function App() {
                 <span>Up next</span>
                 <strong>Starting Soon</strong>
               </div>
-              <small>Swipe to explore</small>
+              <small>Scroll for more</small>
             </div>
 
             <div className="signal-event-rail">
@@ -295,8 +295,8 @@ export default function App() {
                   </span>
                   <span className="signal-detail-building">E7</span>
                 </div>
-                <div className="signal-detail-themed-title">
-                  <p>Verified campus organiser</p>
+              <div className="signal-detail-themed-title">
+                  <p>Original source attached</p>
                   <h3>Source-backed event detail</h3>
                 </div>
               </div>
@@ -304,8 +304,8 @@ export default function App() {
                 <div>
                   <span className="signal-detail-overline">About this event</span>
                   <p>
-                    Every listing includes its original source, current event
-                    details, and a link students can verify.
+                    Every listing keeps the original source, current event
+                    details, and a link you can open before you go.
                   </p>
                   <span className="signal-product-tag signal-product-tag-cyan">
                     Hack Dev
@@ -336,17 +336,17 @@ export default function App() {
 
           <ScrollReveal direction="right" delay={100} className="signal-section-copy">
             <h2 className="signal-title">
-              Find the event. Stay for the community.
+              Find the event, then decide if it is worth going.
             </h2>
             <p className="signal-body">
-              Every event connects back to a durable organiser, so discovering
-              one good night can lead to the next workshop, meetup, or group.
+              Each event keeps its organiser and source visible, so one good
+              plan can lead to the next workshop, meetup, or free meal.
             </p>
             <ul className="signal-check-list">
               {[
-                "Follow organisers for recurring events",
-                "See official links and source provenance",
-                "Move naturally from save to going",
+                "See the source before you leave",
+                "Save events and RSVP when you are ready",
+                "Keep recurring organisers in view",
               ].map((item) => (
                 <li key={item}>
                   <Check size={16} />
@@ -370,9 +370,9 @@ export default function App() {
             <span className="signal-cta-node" aria-hidden="true">
               <Zap size={18} />
             </span>
-            <h2>Find the event. Follow what comes next.</h2>
+            <h2>Find something before your next class.</h2>
             <p>
-              Join Hermes with your UW email, or preview what is happening
+              Join Hermes with your UW email, or browse what is happening
               around campus right now.
             </p>
             <div className="signal-cta-actions">

@@ -42,6 +42,13 @@ describe("createFallbackClassification", () => {
       "music",
       "reels",
       "free-food",
+      "games",
+      "hangout",
+      "arts-crafts",
+      "outdoors",
+      "nightlife",
+      "wellness",
+      "movie-tv",
       "chill-social",
     ]);
 
@@ -83,5 +90,34 @@ describe("createFallbackClassification", () => {
       confidence: 0.2,
     });
     expect(classificationSchema.safeParse(fallback).success).toBe(true);
+  });
+
+  it("drops weak career signals that do not look like a career event", () => {
+    const fallback = createFallbackClassification({
+      title: "Toronto Blue Jays vs Texas Rangers Viewing",
+      description: "Catch the away game with friends.",
+      clubName: "Campus Social Club",
+      locationName: "Bingemans",
+      sourceTags: ["career-coop"],
+    });
+
+    expect(fallback).toMatchObject({
+      primaryTag: "chill-social",
+      tags: ["chill-social"],
+    });
+    expect(fallback.tags).not.toContain("career-coop");
+  });
+
+  it("maps board-game events to the games sub-tag", () => {
+    const fallback = createFallbackClassification({
+      title: "Board Game Night",
+      description: "Play Catan, Uno, and other games with friends.",
+      clubName: "Campus Social Club",
+      locationName: "SLC",
+      sourceTags: [],
+    });
+
+    expect(fallback.primaryTag).toBe("games");
+    expect(fallback.tags).toEqual(["games", "chill-social"]);
   });
 });

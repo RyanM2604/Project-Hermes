@@ -29,7 +29,7 @@ describe("wusaIcsSource", () => {
         endTime: "2026-06-18T23:00:00.000Z",
         locationName: "QNC 2501",
         buildingCode: "QNC",
-        tags: ["free-food", "chill-social"],
+        tags: ["free-food", "arts-crafts", "chill-social", "hangout"],
         isFreeFood: true,
       },
     });
@@ -40,7 +40,7 @@ describe("wusaIcsSource", () => {
       ok: true,
       event: {
         clubName: "Waterloo Undergraduate Student Association",
-        locationName: "Location not provided",
+        locationName: "See source for location",
         startTime: "2026-06-19T23:00:00.000Z",
       },
     });
@@ -110,7 +110,7 @@ describe("uwaterlooHtmlSource", () => {
         clubName: "University of Waterloo",
         startTime: "2026-06-15T17:30:00.000Z",
         endTime: "2026-06-15T19:00:00.000Z",
-        locationName: "Location not provided",
+        locationName: "See source for location",
         tags: ["startup-pitch"],
       },
     });

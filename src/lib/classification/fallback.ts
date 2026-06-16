@@ -15,6 +15,7 @@ export const FALLBACK_PRIMARY_TAG_PRIORITY = [
   "free-food",
   ...socialSubTags,
   "chill-social",
+  "general",
 ] as const satisfies readonly EventTag[];
 
 export interface FallbackClassificationInput {
@@ -135,6 +136,13 @@ const PRIMARY_TAG_METADATA: Readonly<
     rationale: "The event appears to be startup or pitch oriented.",
     vibes: ["energetic", "focused"],
   },
+  general: {
+    audiences: ["all-students"],
+    confidence: 0.15,
+    format: "other",
+    rationale: "The event does not clearly fit a narrower category.",
+    vibes: ["relaxed"],
+  },
 };
 
 function uniqueInOrder(tags: EventTag[]): EventTag[] {
@@ -160,7 +168,7 @@ function sortByPriority(tags: EventTag[]): EventTag[] {
 }
 
 function derivePrimaryTag(tags: EventTag[]): EventTag {
-  return sortByPriority(tags)[0] ?? "chill-social";
+  return sortByPriority(tags)[0] ?? "general";
 }
 
 function collectTags(input: FallbackClassificationInput): EventTag[] {
@@ -191,7 +199,7 @@ function collectTags(input: FallbackClassificationInput): EventTag[] {
     return ordered;
   }
 
-  return ["chill-social"];
+  return ["general"];
 }
 
 export function createFallbackClassification(

@@ -8,6 +8,7 @@ const supportedTags: EventTag[] = [
   "free-food",
   "hack-dev",
   "career-coop",
+  "general",
   "chill-social",
   "music",
   "reels",

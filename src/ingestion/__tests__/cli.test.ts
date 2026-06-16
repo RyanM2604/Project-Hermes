@@ -28,6 +28,11 @@ function createRefreshResult(
       fallbackCount: 0,
       skippedCount: 0,
       failedCount: 0,
+      diagnostics: {
+        invalidOutputCount: 0,
+        unavailable: {},
+        unexpectedErrorCount: 0,
+      },
     },
     ...overrides,
   };
@@ -54,7 +59,7 @@ describe("runCli", () => {
 
     try {
       await expect(runCli({ refresh })).resolves.toBe(0);
-      expect(refresh).toHaveBeenCalledWith({ force: true });
+      expect(refresh).toHaveBeenCalledWith({ force: true, reclassify: false });
       expect(log).toHaveBeenCalled();
     } finally {
       log.mockRestore();
@@ -80,7 +85,7 @@ describe("runCli", () => {
 
     try {
       await expect(runCli({ refresh })).resolves.toBe(1);
-      expect(refresh).toHaveBeenCalledWith({ force: true });
+      expect(refresh).toHaveBeenCalledWith({ force: true, reclassify: false });
       expect(log).toHaveBeenCalled();
     } finally {
       log.mockRestore();
@@ -112,9 +117,27 @@ describe("runCli", () => {
 
     try {
       await expect(runCli({ refresh })).resolves.toBe(1);
-      expect(refresh).toHaveBeenCalledWith({ force: true });
+      expect(refresh).toHaveBeenCalledWith({ force: true, reclassify: false });
       expect(log).toHaveBeenCalled();
     } finally {
+      log.mockRestore();
+    }
+  });
+
+  it("passes reclassify mode to refresh when requested", async () => {
+    vi.resetModules();
+    const { runCli } = await import("../cli");
+    const refresh = vi.fn(async () => createRefreshResult());
+    const log = vi.spyOn(console, "log").mockImplementation(() => undefined);
+    const originalArgv = process.argv;
+
+    process.argv = [...originalArgv, "--reclassify"];
+
+    try {
+      await expect(runCli({ refresh })).resolves.toBe(0);
+      expect(refresh).toHaveBeenCalledWith({ force: true, reclassify: true });
+    } finally {
+      process.argv = originalArgv;
       log.mockRestore();
     }
   });

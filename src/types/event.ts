@@ -4,6 +4,7 @@ export type EventTag =
   | "free-food"
   | "hack-dev"
   | "career-coop"
+  | "general"
   | "chill-social"
   | SocialSubTag
   | "music"

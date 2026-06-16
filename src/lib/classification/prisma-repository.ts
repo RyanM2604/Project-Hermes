@@ -28,6 +28,26 @@ interface ClassificationReadClient {
       locationName: string;
       sourceTags: string[];
     } | null>;
+    findUnique(args: {
+      where: {
+        id: string;
+      };
+      select: {
+        id: true;
+        title: true;
+        description: true;
+        clubName: true;
+        locationName: true;
+        sourceTags: true;
+      };
+    }): Promise<{
+      id: string;
+      title: string;
+      description: string;
+      clubName: string;
+      locationName: string;
+      sourceTags: string[];
+    } | null>;
     update(args: {
       where: { id: string };
       data: { classificationStatus: "classified" | "fallback" };
@@ -82,23 +102,29 @@ export function createPrismaClassificationRepository(
   client: ClassificationReadClient & ClassificationWriteClient,
 ): ClassificationRepository {
   return {
-    async getClassificationCandidate(eventId) {
-      const record = await client.event.findFirst({
-        where: {
-          id: eventId,
-          classificationStatus: {
-            in: ["pending", "retry"],
-          },
-        },
-        select: {
-          id: true,
-          title: true,
-          description: true,
-          clubName: true,
-          locationName: true,
-          sourceTags: true,
-        },
-      });
+    async getClassificationCandidate(eventId, options) {
+      const select = {
+        id: true,
+        title: true,
+        description: true,
+        clubName: true,
+        locationName: true,
+        sourceTags: true,
+      } as const;
+      const record = options?.includeClassified
+        ? await client.event.findUnique({
+            where: { id: eventId },
+            select,
+          })
+        : await client.event.findFirst({
+            where: {
+              id: eventId,
+              classificationStatus: {
+                in: ["pending", "retry"],
+              },
+            },
+            select,
+          });
 
       return record
         ? {

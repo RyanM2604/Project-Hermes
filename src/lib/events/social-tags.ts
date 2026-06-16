@@ -28,6 +28,7 @@ const topLevelTagLabels: Record<string, string> = {
   "free-food": "Free Food",
   "hack-dev": "Hack + Dev",
   "career-coop": "Career + Co-op",
+  general: "General",
   "chill-social": "Chill + Social",
   music: "Music",
   reels: "Reels + Media",

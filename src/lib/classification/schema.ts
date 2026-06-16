@@ -6,6 +6,7 @@ export const EVENT_TAGS = [
   "free-food",
   "hack-dev",
   "career-coop",
+  "general",
   "chill-social",
   "music",
   "reels",
@@ -55,7 +56,7 @@ function dedupe<T>(values: T[]): T[] {
 export const classificationSchema = z
   .object({
     primaryTag: eventTagSchema,
-    tags: z.array(eventTagSchema).min(1).max(5).transform(dedupe),
+    tags: z.array(eventTagSchema).min(1).max(3).transform(dedupe),
     vibes: z.array(vibeSchema).max(3).transform(dedupe),
     audiences: z.array(audienceSchema).max(3).transform(dedupe),
     format: formatSchema,

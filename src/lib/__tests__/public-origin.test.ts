@@ -22,4 +22,11 @@ describe("public app origin", () => {
       "NEXT_PUBLIC_APP_URL must not point to localhost in production",
     );
   });
+
+  it("falls back to the browser origin when the env var is missing", async () => {
+    vi.stubGlobal("window", { location: { origin: "https://hermes.example" } });
+    const { getPublicAppOrigin } = await import("../public-origin");
+
+    expect(getPublicAppOrigin()).toBe("https://hermes.example");
+  });
 });

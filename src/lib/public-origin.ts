@@ -21,12 +21,12 @@ export function getPublicAppOrigin() {
     return origin;
   }
 
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("Missing NEXT_PUBLIC_APP_URL in production");
-  }
-
   if (typeof window !== "undefined" && window.location.origin) {
     return window.location.origin;
+  }
+
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("Missing NEXT_PUBLIC_APP_URL in production");
   }
 
   return "https://example.com";

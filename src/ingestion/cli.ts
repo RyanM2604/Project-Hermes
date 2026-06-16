@@ -22,15 +22,19 @@ function exitCodeForResult(result: CanonicalEventRefreshResult): number {
   const persistenceFailed = Boolean(
     result.persistence && result.persistence.failedCount > 0,
   );
+  const classificationFailed = Boolean(
+    result.classification && result.classification.failedCount > 0,
+  );
 
-  return allSourcesFailed || persistenceFailed ? 1 : 0;
+  return allSourcesFailed || persistenceFailed || classificationFailed ? 1 : 0;
 }
 
 export async function runCli(options: RunCliOptions = {}): Promise<number> {
   const refresh = options.refresh ?? getDefaultRefreshCoordinator().refresh;
+  const reclassify = process.argv.includes("--reclassify");
 
   try {
-    const result = await refresh({ force: true });
+    const result = await refresh({ force: true, reclassify });
     console.log(JSON.stringify(buildCliOutput(result), null, 2));
 
     return exitCodeForResult(result);

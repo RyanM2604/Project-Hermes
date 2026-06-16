@@ -49,8 +49,6 @@ describe("classificationSchema", () => {
           "hack-dev",
           "career-coop",
           "chill-social",
-          "music",
-          "reels",
         ],
       }).success,
     ).toBe(false);

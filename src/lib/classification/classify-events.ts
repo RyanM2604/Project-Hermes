@@ -7,7 +7,10 @@ import {
 } from "./fallback";
 import { sanitizeClassification } from "./guardrails";
 import type { Classification } from "./schema";
-import type { OpenAIClassifierResult } from "./openai-classifier";
+import type {
+  OpenAIClassifierResult,
+  OpenAIClassifierUnavailableCode,
+} from "./openai-classifier";
 
 export interface ClassificationCandidate extends FallbackClassificationInput {
   eventId: string;
@@ -16,6 +19,9 @@ export interface ClassificationCandidate extends FallbackClassificationInput {
 export interface ClassificationRepository {
   getClassificationCandidate(
     eventId: string,
+    options?: {
+      includeClassified?: boolean;
+    },
   ): Promise<ClassificationCandidate | null>;
   saveClassification(
     eventId: string,
@@ -39,6 +45,7 @@ export interface ClassifyEventsOptions {
   eventIds: readonly string[];
   repository: ClassificationRepository;
   promptVersion?: string;
+  reclassify?: boolean;
 }
 
 export interface ClassifyEventsResult {
@@ -47,6 +54,11 @@ export interface ClassifyEventsResult {
   fallbackCount: number;
   skippedCount: number;
   failedCount: number;
+  diagnostics: {
+    invalidOutputCount: number;
+    unavailable: Partial<Record<OpenAIClassifierUnavailableCode, number>>;
+    unexpectedErrorCount: number;
+  };
 }
 
 const CONCURRENCY = 2;
@@ -56,7 +68,10 @@ async function processCandidate(
   options: Pick<ClassifyEventsOptions, "classifier" | "repository"> & {
     promptVersion: string;
   },
-): Promise<"classified" | "fallback"> {
+): Promise<{
+  diagnostic?: ClassificationFailureCode;
+  status: "classified" | "fallback";
+}> {
   const classificationResult = await options.classifier.classify(
     candidate,
   );
@@ -75,7 +90,7 @@ async function processCandidate(
         status: "fallback",
       });
 
-      return "fallback";
+      return { status: "fallback" };
     }
 
     await options.repository.saveClassification(candidate.eventId, {
@@ -85,17 +100,56 @@ async function processCandidate(
       status: "classified",
     });
 
-    return "classified";
+    return { status: "classified" };
   }
 
-  await options.repository.saveClassification(candidate.eventId, {
-    classification: createFallbackClassification(candidate),
-    model: classificationResult.model,
-    promptVersion: options.promptVersion,
-    status: "fallback",
-  });
+  if (classificationResult.status === "invalid-output") {
+    await options.repository.saveClassification(candidate.eventId, {
+      classification: createFallbackClassification(candidate),
+      model: classificationResult.model,
+      promptVersion: options.promptVersion,
+      status: "fallback",
+    });
 
-  return "fallback";
+    return { diagnostic: "invalid-output", status: "fallback" };
+  }
+
+  if (classificationResult.status === "unavailable") {
+    await options.repository.saveClassification(candidate.eventId, {
+      classification: createFallbackClassification(candidate),
+      model: classificationResult.model,
+      promptVersion: options.promptVersion,
+      status: "fallback",
+    });
+
+    return { diagnostic: classificationResult.code, status: "fallback" };
+  }
+
+  const _exhaustive: never = classificationResult;
+  throw new Error(`Unhandled classifier result: ${String(_exhaustive)}`);
+}
+
+type ClassificationFailureCode =
+  | "invalid-output"
+  | OpenAIClassifierUnavailableCode
+  | "unexpected-error";
+
+function incrementDiagnostic(
+  result: ClassifyEventsResult,
+  code: ClassificationFailureCode,
+) {
+  if (code === "invalid-output") {
+    result.diagnostics.invalidOutputCount += 1;
+    return;
+  }
+
+  if (code === "unexpected-error") {
+    result.diagnostics.unexpectedErrorCount += 1;
+    return;
+  }
+
+  result.diagnostics.unavailable[code] =
+    (result.diagnostics.unavailable[code] ?? 0) + 1;
 }
 
 export async function classifyEvents(
@@ -107,6 +161,11 @@ export async function classifyEvents(
     fallbackCount: 0,
     skippedCount: 0,
     failedCount: 0,
+    diagnostics: {
+      invalidOutputCount: 0,
+      unavailable: {},
+      unexpectedErrorCount: 0,
+    },
   };
   const promptVersion = options.promptVersion ?? CLASSIFICATION_PROMPT_VERSION;
   let nextIndex = 0;
@@ -120,6 +179,7 @@ export async function classifyEvents(
       try {
         const candidate = await options.repository.getClassificationCandidate(
           eventId,
+          { includeClassified: options.reclassify },
         );
 
         if (!candidate) {
@@ -128,19 +188,24 @@ export async function classifyEvents(
         }
 
         result.attemptedCount += 1;
-        const status = await processCandidate(candidate, {
+        const outcome = await processCandidate(candidate, {
           classifier: options.classifier,
           repository: options.repository,
           promptVersion,
         });
 
-        if (status === "classified") {
+        if (outcome.diagnostic) {
+          incrementDiagnostic(result, outcome.diagnostic);
+        }
+
+        if (outcome.status === "classified") {
           result.classifiedCount += 1;
         } else {
           result.fallbackCount += 1;
         }
-      } catch {
+      } catch (error) {
         result.failedCount += 1;
+        incrementDiagnostic(result, "unexpected-error");
       }
     }
   }

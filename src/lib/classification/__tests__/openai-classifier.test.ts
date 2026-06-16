@@ -40,6 +40,16 @@ describe("createOpenAIClassifier", () => {
       },
     });
     expect(create).toHaveBeenCalledTimes(1);
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: {
+          format: expect.objectContaining({
+            type: "json_schema",
+          }),
+        },
+      }),
+      expect.any(Object),
+    );
   });
 
   it("returns unavailable without calling OpenAI when the API key is missing", async () => {
@@ -56,6 +66,50 @@ describe("createOpenAIClassifier", () => {
       model: "test-model",
     });
     expect(create).not.toHaveBeenCalled();
+  });
+
+  it("retries with the fallback model when the configured model is unavailable", async () => {
+    const modelError = Object.assign(new Error("model unavailable"), {
+      status: 400,
+      code: "model_not_found",
+    });
+    const create = vi
+      .fn()
+      .mockRejectedValueOnce(modelError)
+      .mockResolvedValueOnce({
+        output_text: JSON.stringify({
+          primaryTag: "hack-dev",
+          tags: ["hack-dev"],
+          vibes: ["focused"],
+          audiences: ["technical"],
+          format: "workshop",
+          confidence: 0.9,
+          rationale: "A technical workshop.",
+        }),
+      });
+
+    const { createOpenAIClassifier } = await import("../openai-classifier");
+    const classifier = createOpenAIClassifier({
+      apiKey: "test-api-key",
+      client: { responses: { create } },
+      fallbackModel: "fallback-model",
+      model: "missing-model",
+    });
+
+    await expect(classifier.classify(promptInput)).resolves.toMatchObject({
+      status: "classified",
+      model: "fallback-model",
+    });
+    expect(create).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ model: "missing-model" }),
+      expect.any(Object),
+    );
+    expect(create).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ model: "fallback-model" }),
+      expect.any(Object),
+    );
   });
 
   it("returns a constrained failure for invalid structured output", async () => {

@@ -35,7 +35,7 @@ export function deriveTags(...values: string[]): EventTag[] {
     tags.push("hack-dev");
   }
   if (
-    /\b(career fair|career|co-op|coop|internship|intern|resume|résumé|job|jobs|hiring|recruit(?:ing)?|networking|interview|employer|professional development)\b/.test(
+    /\b(career fair|co-op|coop|internship|intern|resume|résumé|job|jobs|hiring|recruit(?:ing)?|networking|interview|employer|professional development)\b/.test(
       text,
     )
   ) {
@@ -71,7 +71,11 @@ export function deriveTags(...values: string[]): EventTag[] {
     tags.push("movie-tv");
     tags.push("chill-social");
   }
-  if (/\b(social|mingle|bonfire)\b/.test(text)) {
+  if (
+    /\b(social hour|social event|social night|social mixer|mingle|bonfire)\b/.test(
+      text,
+    )
+  ) {
     tags.push("chill-social");
   }
   if (/\b(music|concert|performance|dj)\b/.test(text)) {
@@ -80,7 +84,7 @@ export function deriveTags(...values: string[]): EventTag[] {
   if (/\b(reels?|film|video|showcase)\b/.test(text)) {
     tags.push("reels");
   }
-  if (/\b(startup|pitch|velocity|innovation challenge)\b/.test(text)) {
+  if (/\b(startup|start-up|pitch|founder|founders|venture|demo day|investor|incubator)\b/.test(text)) {
     tags.push("startup-pitch");
   }
 

@@ -104,6 +104,7 @@ describe("classifyEvents", () => {
       }),
     );
     expect(result.fallbackCount).toBe(1);
+    expect(result.diagnostics.unavailable).toEqual({ "missing-api-key": 1 });
   });
 
   it("skips events that are no longer pending", async () => {
@@ -120,6 +121,64 @@ describe("classifyEvents", () => {
 
     expect(classifier.classify).not.toHaveBeenCalled();
     expect(result.skippedCount).toBe(1);
+  });
+
+  it("can reclassify events that already have a stored classification", async () => {
+    const repository = createRepository();
+    const classifier = createClassifier();
+
+    repository.getClassificationCandidate.mockResolvedValue(candidate);
+    classifier.classify.mockResolvedValue({
+      model: "gpt-5.1-mini",
+      status: "classified",
+      classification: {
+        primaryTag: "hack-dev",
+        tags: ["hack-dev"],
+        vibes: ["focused"],
+        audiences: ["technical"],
+        format: "workshop",
+        confidence: 0.91,
+        rationale: "A technical workshop.",
+      },
+    });
+
+    const result = await classifyEvents({
+      repository: repository as never,
+      classifier: classifier as never,
+      eventIds: ["event-a"],
+      reclassify: true,
+    });
+
+    expect(repository.getClassificationCandidate).toHaveBeenCalledWith(
+      "event-a",
+      { includeClassified: true },
+    );
+    expect(result.classifiedCount).toBe(1);
+  });
+
+  it("records invalid provider output diagnostics while saving fallback", async () => {
+    const repository = createRepository();
+    const classifier = createClassifier();
+
+    repository.getClassificationCandidate.mockResolvedValue(candidate);
+    classifier.classify.mockResolvedValue({
+      model: "gpt-5.1-mini",
+      status: "invalid-output",
+      code: "invalid-output",
+    });
+
+    const result = await classifyEvents({
+      repository: repository as never,
+      classifier: classifier as never,
+      eventIds: ["event-a"],
+    });
+
+    expect(repository.saveClassification).toHaveBeenCalledWith(
+      "event-a",
+      expect.objectContaining({ status: "fallback" }),
+    );
+    expect(result.fallbackCount).toBe(1);
+    expect(result.diagnostics.invalidOutputCount).toBe(1);
   });
 
   it("falls back when a provider classification uses weak career wording", async () => {
@@ -153,14 +212,14 @@ describe("classifyEvents", () => {
         model: "gpt-5.1-mini",
         status: "fallback",
         classification: expect.objectContaining({
-          primaryTag: "chill-social",
+          primaryTag: "general",
         }),
       }),
     );
     expect(result.fallbackCount).toBe(1);
   });
 
-  it("keeps weak social events in chill-social without forcing a sub-tag", async () => {
+  it("keeps explicit casual meetup language in a social sub-tag", async () => {
     const repository = createRepository();
     const classifier = createClassifier();
 
@@ -188,13 +247,13 @@ describe("classifyEvents", () => {
     expect(repository.saveClassification).toHaveBeenCalledWith(
       "event-c",
       expect.objectContaining({
-        status: "classified",
+        status: "fallback",
         classification: expect.objectContaining({
-          primaryTag: "chill-social",
-          tags: ["chill-social"],
+          primaryTag: "hangout",
+          tags: ["hangout", "chill-social"],
         }),
       }),
     );
-    expect(result.classifiedCount).toBe(1);
+    expect(result.fallbackCount).toBe(1);
   });
 });

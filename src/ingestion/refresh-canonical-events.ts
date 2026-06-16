@@ -131,6 +131,7 @@ export function createCanonicalEventRefreshCoordinator(
             classifier,
             repository: classificationRepository,
             eventIds: persistedEventIds,
+            reclassify: options.reclassify,
           });
         }
 

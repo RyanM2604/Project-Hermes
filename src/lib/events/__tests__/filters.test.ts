@@ -44,6 +44,7 @@ describe("event filters", () => {
     expect(parseEventTag("free-food")).toBe("free-food");
     expect(parseEventTag("hack-dev")).toBe("hack-dev");
     expect(parseEventTag("games")).toBe("games");
+    expect(parseEventTag("general")).toBe("general");
   });
 
   it("ignores unsupported or repeated tag parameters", () => {
@@ -70,6 +71,12 @@ describe("event filters", () => {
 
     expect(filterEventsByTag(socialEvents, "chill-social")).toHaveLength(2);
     expect(filterEventsByTag(socialEvents, "games")).toHaveLength(1);
+  });
+
+  it("filters general events by the neutral bucket", () => {
+    const generalEvents = [makeEvent(["general"]), makeEvent(["free-food"])];
+
+    expect(filterEventsByTag(generalEvents, "general")).toHaveLength(1);
   });
 
   it("returns all events when no tag is selected", () => {

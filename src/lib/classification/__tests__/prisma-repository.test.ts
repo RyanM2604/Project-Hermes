@@ -20,6 +20,7 @@ function createClient() {
   };
   const event = {
     findFirst: vi.fn(),
+    findUnique: vi.fn(),
     update: vi.fn(),
   };
   const transaction = { eventClassification, event };
@@ -73,6 +74,47 @@ describe("createPrismaClassificationRepository", () => {
         sourceTags: true,
       },
     });
+  });
+
+  it("reads any event when reclassification includes stored classifications", async () => {
+    const { client, event } = createClient();
+    event.findUnique.mockResolvedValue({
+      id: "event-a",
+      title: "Technical Interview Workshop",
+      description: "Practice interviews with peers.",
+      clubName: "Engineering Society",
+      locationName: "E5 6006",
+      sourceTags: ["career-coop", "hack-dev"],
+    });
+    const repository = createPrismaClassificationRepository(
+      client as unknown as Pick<PrismaClient, "$transaction" | "event">,
+    );
+
+    await expect(
+      repository.getClassificationCandidate("event-a", {
+        includeClassified: true,
+      }),
+    ).resolves.toEqual({
+      eventId: "event-a",
+      title: "Technical Interview Workshop",
+      description: "Practice interviews with peers.",
+      clubName: "Engineering Society",
+      locationName: "E5 6006",
+      sourceTags: ["career-coop", "hack-dev"],
+    });
+
+    expect(event.findUnique).toHaveBeenCalledWith({
+      where: { id: "event-a" },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        clubName: true,
+        locationName: true,
+        sourceTags: true,
+      },
+    });
+    expect(event.findFirst).not.toHaveBeenCalled();
   });
 
   it("persists classification and status in one transaction", async () => {

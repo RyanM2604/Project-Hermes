@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 
+import { createFallbackClassification } from "@/lib/classification/fallback";
 import { prisma } from "@/lib/db/prisma";
 import type { BuildingCode, EventTag, HermesEvent } from "@/types/event";
 
@@ -48,6 +49,7 @@ const eventTags = new Set<EventTag>([
   "free-food",
   "hack-dev",
   "career-coop",
+  "general",
   "chill-social",
   "music",
   "reels",
@@ -124,12 +126,19 @@ export function toHermesEvent(record: PersistedEventRecord): HermesEvent {
     record.classificationStatus === "fallback"
       ? record.classification
       : null;
+  const fallbackClassification = createFallbackClassification({
+    title: record.title,
+    description: record.description,
+    clubName: record.clubName,
+    locationName: record.locationName,
+    sourceTags: [],
+  });
   const classificationTags = classification
     ? validTags(classification.tags)
     : [];
   const primaryTag = classification
-    ? parseEventTag(classification.primaryTag)
-    : undefined;
+    ? parseEventTag(classification.primaryTag) ?? fallbackClassification.primaryTag
+    : fallbackClassification.primaryTag;
   const buildingCode = parseBuildingCode(record.buildingCode);
 
   return {
@@ -144,8 +153,7 @@ export function toHermesEvent(record: PersistedEventRecord): HermesEvent {
     tags:
       classificationTags.length > 0
         ? classificationTags
-        : validTags(record.sourceTags),
-    // Source tags have no persisted primary-tag intent, so they are not used here.
+        : fallbackClassification.tags,
     ...(primaryTag ? { primaryTag } : {}),
     ...(record.imageUrl ? { imageUrl: record.imageUrl } : {}),
     sourceUrl: record.sourceUrl,

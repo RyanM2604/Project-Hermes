@@ -170,10 +170,10 @@ describe("toHermesEvent", () => {
     );
 
     expect(event.tags).toEqual(["music", "reels"]);
-    expect(event.primaryTag).toBeUndefined();
+    expect(event.primaryTag).toBe("general");
   });
 
-  it("uses valid source tags only when classification is absent", () => {
+  it("uses a sanitized fallback when classification is absent", () => {
     const event = toHermesEvent(
       persistedEvent({
         classification: null,
@@ -181,11 +181,11 @@ describe("toHermesEvent", () => {
       }),
     );
 
-    expect(event.tags).toEqual(["free-food", "chill-social"]);
-    expect(event.primaryTag).toBeUndefined();
+    expect(event.tags).toEqual(["general"]);
+    expect(event.primaryTag).toBe("general");
   });
 
-  it("uses valid source tags when classification has no valid tags", () => {
+  it("uses a sanitized fallback when classification has no valid tags", () => {
     const event = toHermesEvent(
       persistedEvent({
         classification: {
@@ -196,8 +196,8 @@ describe("toHermesEvent", () => {
       }),
     );
 
-    expect(event.tags).toEqual(["free-food", "chill-social"]);
-    expect(event.primaryTag).toBeUndefined();
+    expect(event.tags).toEqual(["general"]);
+    expect(event.primaryTag).toBe("general");
   });
 
   it.each(["pending", "retry"] as const)(
@@ -211,8 +211,8 @@ describe("toHermesEvent", () => {
         }),
       );
 
-      expect(event.tags).toEqual(["free-food", "chill-social"]);
-      expect(event.primaryTag).toBeUndefined();
+      expect(event.tags).toEqual(["general"]);
+      expect(event.primaryTag).toBe("general");
     },
   );
 

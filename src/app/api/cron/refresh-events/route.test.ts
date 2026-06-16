@@ -47,6 +47,11 @@ describe("cron refresh route", () => {
         fallbackCount: 0,
         skippedCount: 0,
         failedCount: 0,
+        diagnostics: {
+          invalidOutputCount: 0,
+          unavailable: {},
+          unexpectedErrorCount: 0,
+        },
       },
     });
     const { GET } = await import("./route");
@@ -73,6 +78,11 @@ describe("cron refresh route", () => {
         fallbackCount: 0,
         skippedCount: 0,
         failedCount: 0,
+        diagnostics: {
+          invalidOutputCount: 0,
+          unavailable: {},
+          unexpectedErrorCount: 0,
+        },
       },
     });
   });

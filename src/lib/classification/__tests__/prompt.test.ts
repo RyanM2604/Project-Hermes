@@ -42,7 +42,9 @@ describe("buildClassificationPrompt", () => {
 
     expect(prompt).toContain("only from the supplied evidence");
     expect(prompt).toContain("never invent facts");
-    expect(prompt).toContain("preserve supported source tags");
+    expect(prompt).toContain("be strict");
+    expect(prompt).toContain("at most 3 tags");
+    expect(prompt).toContain("use general for real events");
     expect(prompt).toContain("confidence");
     expect(prompt).toContain("structured data only");
   });

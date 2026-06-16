@@ -51,6 +51,11 @@ const refreshRun: CanonicalEventRefreshResult = {
     fallbackCount: 0,
     skippedCount: 0,
     failedCount: 0,
+    diagnostics: {
+      invalidOutputCount: 0,
+      unavailable: {},
+      unexpectedErrorCount: 0,
+    },
   },
 };
 
@@ -87,6 +92,11 @@ describe("buildCliOutput", () => {
         fallbackCount: 0,
         skippedCount: 0,
         failedCount: 0,
+        diagnostics: {
+          invalidOutputCount: 0,
+          unavailable: {},
+          unexpectedErrorCount: 0,
+        },
       },
     });
   });

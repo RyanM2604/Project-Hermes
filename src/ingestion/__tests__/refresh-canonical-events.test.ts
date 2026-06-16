@@ -93,6 +93,11 @@ describe("createCanonicalEventRefreshCoordinator", () => {
         fallbackCount: 0,
         skippedCount: 0,
         failedCount: 0,
+        diagnostics: {
+          invalidOutputCount: 0,
+          unavailable: {},
+          unexpectedErrorCount: 0,
+        },
       }));
       const coordinator = createCanonicalEventRefreshCoordinator({
         databaseUrl: "postgres://test",
@@ -123,6 +128,11 @@ describe("createCanonicalEventRefreshCoordinator", () => {
       fallbackCount: 0,
       skippedCount: 0,
       failedCount: 0,
+      diagnostics: {
+        invalidOutputCount: 0,
+        unavailable: {},
+        unexpectedErrorCount: 0,
+      },
     }));
     const coordinator = createCanonicalEventRefreshCoordinator({
       databaseUrl: "postgres://test",
@@ -144,6 +154,41 @@ describe("createCanonicalEventRefreshCoordinator", () => {
     );
   });
 
+  it("passes reclassification requests to classification", async () => {
+    const persistence = createPersistence();
+    const classificationRepository = createClassificationRepository();
+    const classifier = createClassifier();
+    const runIngestion = vi.fn(async () => createRunResult());
+    const classifyEvents = vi.fn(async () => ({
+      attemptedCount: 1,
+      classifiedCount: 1,
+      fallbackCount: 0,
+      skippedCount: 0,
+      failedCount: 0,
+      diagnostics: {
+        invalidOutputCount: 0,
+        unavailable: {},
+        unexpectedErrorCount: 0,
+      },
+    }));
+    const coordinator = createCanonicalEventRefreshCoordinator({
+      databaseUrl: "postgres://test",
+      now: () => fixedNow,
+      persistence,
+      classificationRepository,
+      classifier,
+      runIngestion,
+      classifyEvents,
+    });
+
+    await coordinator.refresh({ reclassify: true });
+
+    expect(classifyEvents).toHaveBeenCalledWith(
+      expect.objectContaining({ reclassify: true }),
+    );
+  });
+
+
   it("skips refresh while canonical data is fresh", async () => {
     const persistence = createPersistence();
     const classificationRepository = createClassificationRepository();
@@ -155,6 +200,11 @@ describe("createCanonicalEventRefreshCoordinator", () => {
       fallbackCount: 0,
       skippedCount: 0,
       failedCount: 0,
+      diagnostics: {
+        invalidOutputCount: 0,
+        unavailable: {},
+        unexpectedErrorCount: 0,
+      },
     }));
     const coordinator = createCanonicalEventRefreshCoordinator({
       databaseUrl: "postgres://test",
@@ -183,6 +233,11 @@ describe("createCanonicalEventRefreshCoordinator", () => {
       fallbackCount: 0,
       skippedCount: 0,
       failedCount: 0,
+      diagnostics: {
+        invalidOutputCount: 0,
+        unavailable: {},
+        unexpectedErrorCount: 0,
+      },
     }));
     const coordinator = createCanonicalEventRefreshCoordinator({
       databaseUrl: "postgres://test",

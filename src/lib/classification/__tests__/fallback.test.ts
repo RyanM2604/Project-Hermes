@@ -50,6 +50,7 @@ describe("createFallbackClassification", () => {
       "wellness",
       "movie-tv",
       "chill-social",
+      "general",
     ]);
 
     const event = {
@@ -72,7 +73,7 @@ describe("createFallbackClassification", () => {
     expect(second).toEqual(first);
   });
 
-  it("uses chill-social at low confidence when no tags can be derived", () => {
+  it("uses general when no tags can be derived", () => {
     const fallback = createFallbackClassification({
       title: "Campus Gathering",
       description: "More details coming soon.",
@@ -82,12 +83,12 @@ describe("createFallbackClassification", () => {
     });
 
     expect(fallback).toMatchObject({
-      primaryTag: "chill-social",
-      tags: ["chill-social"],
-      vibes: ["social", "relaxed"],
+      primaryTag: "general",
+      tags: ["general"],
+      vibes: ["relaxed"],
       audiences: ["all-students"],
-      format: "social",
-      confidence: 0.2,
+      format: "other",
+      confidence: 0.15,
     });
     expect(classificationSchema.safeParse(fallback).success).toBe(true);
   });
@@ -102,8 +103,8 @@ describe("createFallbackClassification", () => {
     });
 
     expect(fallback).toMatchObject({
-      primaryTag: "chill-social",
-      tags: ["chill-social"],
+      primaryTag: "general",
+      tags: ["general"],
     });
     expect(fallback.tags).not.toContain("career-coop");
   });

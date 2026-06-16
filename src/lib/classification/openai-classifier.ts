@@ -43,7 +43,9 @@ interface OpenAIResponsesClient {
       input: string;
       instructions: string;
       model: string;
-      response_format?: unknown;
+      text?: {
+        format: unknown;
+      };
     },
     options?: {
       signal?: AbortSignal;
@@ -60,16 +62,17 @@ export interface OpenAIClassifierClient {
 export interface OpenAIClassifierOptions {
   apiKey?: string;
   client?: OpenAIClassifierClient;
+  fallbackModel?: string;
   model?: string;
   timeoutMs?: number;
 }
 
-const DEFAULT_MODEL = "gpt-5.1-mini";
+const DEFAULT_MODEL = "gpt-4o-mini";
 const DEFAULT_TIMEOUT_MS = 15_000;
 
 const openAIClassificationResponseSchema = z.object({
   primaryTag: z.enum(EVENT_TAGS),
-  tags: z.array(z.enum(EVENT_TAGS)).min(1).max(5),
+  tags: z.array(z.enum(EVENT_TAGS)).min(1).max(3),
   vibes: z.array(z.enum(VIBES)).max(3),
   audiences: z.array(z.enum(AUDIENCES)).max(3),
   format: z.enum(FORMATS),
@@ -96,6 +99,17 @@ function createOpenAIClient(apiKey: string): OpenAIClassifierClient {
   }) as unknown as OpenAIClassifierClient;
 }
 
+function isModelNotFoundError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "status" in error &&
+    error.status === 400 &&
+    "code" in error &&
+    error.code === "model_not_found"
+  );
+}
+
 function parseClassification(outputText: string): Classification | null {
   try {
     const parsed = JSON.parse(outputText);
@@ -111,6 +125,7 @@ export function createOpenAIClassifier(options: OpenAIClassifierOptions = {}) {
   const apiKey = options.apiKey ?? process.env.OPENAI_API_KEY;
   const model =
     options.model ?? process.env.OPENAI_CLASSIFICATION_MODEL ?? DEFAULT_MODEL;
+  const fallbackModel = options.fallbackModel ?? DEFAULT_MODEL;
   const timeoutMs =
     options.timeoutMs ??
     parseTimeoutMs(process.env.OPENAI_CLASSIFICATION_TIMEOUT_MS);
@@ -132,34 +147,51 @@ export function createOpenAIClassifier(options: OpenAIClassifierOptions = {}) {
       const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
       try {
-        const response = await client!.responses.create(
-          {
-            input: buildClassificationPrompt(input),
-            instructions:
-              "Return a single JSON object that matches the Hermes event classification schema.",
-            model,
-            response_format: zodTextFormat(
+        const request = {
+          input: buildClassificationPrompt(input),
+          instructions:
+            "Return a single JSON object that matches the Hermes event classification schema.",
+          model,
+          text: {
+            format: zodTextFormat(
               openAIClassificationResponseSchema,
               "hermes_event_classification",
             ),
           },
-          {
+        };
+        let response: Awaited<ReturnType<OpenAIResponsesClient["create"]>>;
+        let responseModel = model;
+
+        try {
+          response = await client!.responses.create(request, {
             signal: controller.signal,
-          },
-        );
+          });
+        } catch (error) {
+          if (!isModelNotFoundError(error) || model === fallbackModel) {
+            throw error;
+          }
+
+          responseModel = fallbackModel;
+          response = await client!.responses.create(
+            { ...request, model: fallbackModel },
+            {
+              signal: controller.signal,
+            },
+          );
+        }
 
         const classification = parseClassification(response.output_text ?? "");
 
         if (!classification) {
           return {
-            model,
+            model: responseModel,
             code: "invalid-output",
             status: "invalid-output",
           };
         }
 
         return {
-          model,
+          model: responseModel,
           classification,
           status: "classified",
         };

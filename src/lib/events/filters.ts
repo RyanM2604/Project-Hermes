@@ -22,6 +22,7 @@ export const socialSubTagFilters = socialSubTags.map((tag) => ({
 
 const filterTags = new Set<EventTag>([
   ...eventTagFilters.map(({ tag }) => tag),
+  "general",
   ...socialSubTags,
 ]);
 
@@ -52,6 +53,10 @@ export function filterEventsByTag(
 
   if (tag === "chill-social") {
     return events.filter((event) => eventMatchesSocialBucket(event));
+  }
+
+  if (tag === "general") {
+    return events.filter((event) => event.tags.includes("general"));
   }
 
   return events.filter((event) => event.tags.includes(tag));

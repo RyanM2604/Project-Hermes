@@ -76,6 +76,10 @@ const themes = {
     motif: "lines",
     tagClassName: "border-emerald-300/30 bg-emerald-400/15 text-emerald-100",
   },
+  general: {
+    ...neutralTheme,
+    label: "General",
+  },
   "chill-social": socialTheme("Chill & social"),
   music: {
     accentTextClassName: "text-fuchsia-200",

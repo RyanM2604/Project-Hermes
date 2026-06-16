@@ -66,6 +66,7 @@ export interface CanonicalEventRefreshResult extends IngestionRunResult {
 
 export interface CanonicalEventRefreshOptions {
   force?: boolean;
+  reclassify?: boolean;
 }
 
 export interface CanonicalEventRefreshCoordinator {

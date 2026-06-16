@@ -1,13 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { getSafeRedirectPath } from "@/lib/auth/validation";
-import { getPublicAppOrigin } from "@/lib/public-origin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get("code");
   const next = getSafeRedirectPath(request.nextUrl.searchParams.get("next"));
-  const appOrigin = getPublicAppOrigin();
+  const appOrigin = request.nextUrl.origin;
 
   if (!code) {
     return NextResponse.redirect(new URL("/login?error=missing-code", appOrigin));

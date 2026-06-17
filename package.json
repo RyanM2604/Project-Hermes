@@ -11,7 +11,6 @@
     "start": "next start",
     "postinstall": "prisma generate",
     "ingest:events": "tsx src/ingestion/cli.ts",
-    "seed:uwaterloo": "tsx src/scripts/seed-uwaterloo-users.ts",
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest"

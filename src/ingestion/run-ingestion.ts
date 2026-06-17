@@ -7,9 +7,8 @@ import {
 import { deduplicateEvents } from "./dedupe-events";
 import { fetchSourceText } from "./fetch-source";
 import {
-  fetchScrapeFlyInstagramText,
-  fetchScrapeFlyText,
-} from "./fetch-scrapfly";
+  fetchApifyInstagramPosts,
+} from "./fetch-apify";
 import { normalizedEventCandidateSchema } from "./schema";
 import { liveEventSources } from "./sources/registry";
 import type {
@@ -44,7 +43,7 @@ const SOURCE_URL_VALIDATION_CONCURRENCY = 5;
 
 async function fetchTextForSource(source: IngestionSource): Promise<string> {
   if (source.id === "instagram-clubs") {
-    return fetchScrapeFlyInstagramText(source);
+    return JSON.stringify(await fetchApifyInstagramPosts(source));
   }
 
   return fetchSourceText(source);

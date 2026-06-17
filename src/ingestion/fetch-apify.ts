@@ -1,0 +1,224 @@
+import type { IngestionSource } from "./types";
+
+const APIFY_ACTOR_ID = "apify/instagram-post-scraper";
+const APIFY_RUN_SYNC_DATASET_ITEMS_ENDPOINT = `https://api.apify.com/v2/actors/${APIFY_ACTOR_ID.replace(
+  "/",
+  "~",
+)}/run-sync-get-dataset-items`;
+
+type FetchLike = (
+  input: string | URL | Request,
+  init?: RequestInit,
+) => Promise<Response>;
+
+export interface FetchApifyOptions {
+  apiToken?: string;
+  fetchImpl?: FetchLike;
+  resultsLimit?: number;
+  skipPinnedPosts?: boolean;
+  onlyPostsNewerThan?: string;
+  dataDetailLevel?: "basicData" | "detailedData";
+}
+
+export interface ApifyInstagramPost {
+  shortCode?: string;
+  shortcode?: string;
+  caption?: string;
+  firstComment?: string;
+  timestamp?: string;
+  createdAt?: string;
+  postedAt?: string;
+  locationName?: string;
+  displayUrl?: string;
+  thumbnailUrl?: string;
+  imageUrl?: string;
+  url?: string;
+  ownerUsername?: string;
+  ownerFullName?: string;
+  title?: string;
+  type?: string;
+  childPosts?: unknown[];
+  [key: string]: unknown;
+}
+
+function readToken(explicitToken?: string): string {
+  return (
+    explicitToken ??
+    process.env.APIFY_TOKEN ??
+    process.env.APIFY_API_TOKEN ??
+    ""
+  ).trim();
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function asString(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim().length > 0
+    ? value.trim()
+    : undefined;
+}
+
+function postFromValue(value: unknown): ApifyInstagramPost | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  const shortCode = asString(
+    value.shortCode ?? value.shortcode ?? value.id ?? value.code,
+  );
+
+  if (!shortCode) {
+    return null;
+  }
+
+  const post: ApifyInstagramPost = {
+    shortCode,
+  };
+
+  for (const key of [
+    "caption",
+    "firstComment",
+    "timestamp",
+    "createdAt",
+    "postedAt",
+    "locationName",
+    "displayUrl",
+    "thumbnailUrl",
+    "imageUrl",
+    "url",
+    "ownerUsername",
+    "ownerFullName",
+    "title",
+    "type",
+  ] as const) {
+    const valueText = asString(value[key]);
+
+    if (valueText) {
+      post[key] = valueText;
+    }
+  }
+
+  if (Array.isArray(value.childPosts)) {
+    post.childPosts = value.childPosts;
+  }
+
+  return post;
+}
+
+function collectPosts(value: unknown, posts: ApifyInstagramPost[]): void {
+  if (Array.isArray(value)) {
+    value.forEach((item) => collectPosts(item, posts));
+    return;
+  }
+
+  if (!isRecord(value)) {
+    return;
+  }
+
+  const directPost = postFromValue(value);
+
+  if (directPost) {
+    posts.push(directPost);
+  }
+
+  for (const nestedValue of Object.values(value)) {
+    if (Array.isArray(nestedValue) || isRecord(nestedValue)) {
+      collectPosts(nestedValue, posts);
+    }
+  }
+}
+
+function parseActorItems(raw: string): ApifyInstagramPost[] {
+  const trimmed = raw.trim();
+
+  if (!trimmed) {
+    return [];
+  }
+
+  let payload: unknown;
+
+  try {
+    payload = JSON.parse(trimmed);
+  } catch {
+    return [];
+  }
+
+  const posts: ApifyInstagramPost[] = [];
+  collectPosts(payload, posts);
+
+  const seen = new Set<string>();
+
+  return posts.filter((post) => {
+    const key = post.shortCode ?? post.shortcode;
+
+    if (!key || seen.has(key)) {
+      return false;
+    }
+
+    seen.add(key);
+    return true;
+  });
+}
+
+async function fetchApifyDatasetItems(
+  profileUrl: string,
+  sourceId: string,
+  options: FetchApifyOptions = {},
+): Promise<ApifyInstagramPost[]> {
+  const token = readToken(options.apiToken);
+
+  if (!token) {
+    throw new Error(`Missing APIFY_TOKEN for ${sourceId}`);
+  }
+
+  const endpoint = new URL(APIFY_RUN_SYNC_DATASET_ITEMS_ENDPOINT);
+  endpoint.searchParams.set("format", "json");
+
+  const response = await (options.fetchImpl ?? fetch)(endpoint, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "content-type": "application/json",
+      accept: "application/json",
+    },
+    body: JSON.stringify({
+      username: [profileUrl],
+      resultsLimit: options.resultsLimit ?? 12,
+      skipPinnedPosts: options.skipPinnedPosts ?? true,
+      ...(options.onlyPostsNewerThan
+        ? { onlyPostsNewerThan: options.onlyPostsNewerThan }
+        : {}),
+      dataDetailLevel: options.dataDetailLevel ?? "basicData",
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Apify request failed for ${sourceId} with ${response.status}`);
+  }
+
+  const contentType = response.headers.get("content-type") ?? "";
+  const body = contentType.toLowerCase().includes("json")
+    ? JSON.stringify(await response.json())
+    : await response.text();
+
+  const items = parseActorItems(body);
+
+  if (items.length === 0) {
+    if (body.trim().length === 0) {
+      throw new Error(`Apify response missing content for ${sourceId}`);
+    }
+
+    return [];
+  }
+
+  return items;
+}
+
+export async function fetchApifyInstagramPosts(
+  source: IngestionSource,
+  options: FetchApifyOptions = {},
+): Promise<ApifyInstagramPost[]> {
+  return fetchApifyDatasetItems(source.url, source.id, options);
+}

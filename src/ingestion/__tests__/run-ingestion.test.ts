@@ -1,7 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { createInstagramSource } from "../sources/instagram-public";
 import type { IngestionSource } from "../types";
 import { runIngestion } from "../run-ingestion";
+
+const fetchApifyInstagramPosts = vi.hoisted(() => vi.fn());
+
+vi.mock("../fetch-apify", () => ({
+  fetchApifyInstagramPosts,
+}));
 
 const validEvent = {
   source: "wusa-events" as const,
@@ -36,6 +43,14 @@ const failedSource: IngestionSource = {
   acceptedContentTypes: ["text/html"],
   parse: () => [],
 };
+
+const instagramSource = createInstagramSource({
+  clubName: "UW Cheese Club",
+  instagramHandle: "uwcheeseclub",
+  profileUrl: "https://www.instagram.com/uwcheeseclub/",
+  active: true,
+  priority: 1,
+});
 
 describe("runIngestion", () => {
   it("isolates source failures and rejects invalid normalized candidates", async () => {
@@ -98,5 +113,33 @@ describe("runIngestion", () => {
       ]),
     });
     expect(upsert).not.toHaveBeenCalled();
+  });
+
+  it("routes instagram-clubs through the Apify fetch helper", async () => {
+    fetchApifyInstagramPosts.mockResolvedValue([
+      {
+        shortCode: "DZpt0I1ESPa",
+        caption:
+          "UW Cheese Club Fall Social\nJoin us on June 20, 2026 at 7 PM in SLC for free pizza and games.",
+        timestamp: "2026-06-20T19:00:00.000Z",
+        locationName: "SLC Great Hall",
+        url: "https://www.instagram.com/p/DZpt0I1ESPa/",
+      },
+    ]);
+
+    const result = await runIngestion({
+      sources: [instagramSource],
+      validateSourceUrl: async () => true,
+      now: () => new Date("2026-06-13T22:00:00.000Z"),
+    });
+
+    expect(fetchApifyInstagramPosts).toHaveBeenCalledWith(instagramSource);
+    expect(result.sources[0]).toMatchObject({
+      source: "instagram-clubs",
+      status: "succeeded",
+      acceptedCount: 1,
+      rejectedCount: 0,
+    });
+    expect(result.events).toHaveLength(1);
   });
 });

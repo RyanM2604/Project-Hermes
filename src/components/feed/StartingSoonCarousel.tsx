@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { EventAttendeeStack } from "@/components/events/EventAttendeeStack";
 import { EventThemeMotif } from "@/components/events/EventThemeMotif";
 import { getEventThemeForEvent } from "@/lib/events/event-theme";
 import { formatEventLocation } from "@/lib/events/format";
@@ -7,6 +8,7 @@ import type { HermesEvent } from "@/types/event";
 
 interface StartingSoonCarouselProps {
   events: HermesEvent[];
+  goingCounts?: Record<string, number>;
 }
 
 const timeFormatter = new Intl.DateTimeFormat("en-CA", {
@@ -15,7 +17,10 @@ const timeFormatter = new Intl.DateTimeFormat("en-CA", {
   timeZone: "America/Toronto",
 });
 
-export function StartingSoonCarousel({ events }: StartingSoonCarouselProps) {
+export function StartingSoonCarousel({
+  events,
+  goingCounts = {},
+}: StartingSoonCarouselProps) {
   return (
     <section aria-labelledby="starting-soon-heading">
       <div className="mb-5 flex items-end justify-between gap-4">
@@ -72,6 +77,8 @@ export function StartingSoonCarousel({ events }: StartingSoonCarouselProps) {
                     {formatEventLocation(event)}
                   </p>
                 </div>
+
+                <EventAttendeeStack goingCount={goingCounts[event.id] ?? 0} />
               </div>
             </Link>
           );

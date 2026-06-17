@@ -5,9 +5,10 @@ import { TrackImpression } from "./TrackImpression";
 
 interface EventFeedProps {
   events: HermesEvent[];
+  goingCounts?: Record<string, number>;
 }
 
-export function EventFeed({ events }: EventFeedProps) {
+export function EventFeed({ events, goingCounts = {} }: EventFeedProps) {
   if (events.length === 0) {
     return (
       <section aria-labelledby="event-feed-heading">
@@ -45,7 +46,7 @@ export function EventFeed({ events }: EventFeedProps) {
       <div className="grid gap-6 lg:grid-cols-2">
         {events.map((event) => (
           <TrackImpression key={event.id} eventId={event.id}>
-            <EventCard event={event} />
+            <EventCard event={event} goingCount={goingCounts[event.id] ?? 0} />
           </TrackImpression>
         ))}
       </div>

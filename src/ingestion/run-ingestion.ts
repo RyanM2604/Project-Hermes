@@ -6,6 +6,10 @@ import {
 
 import { deduplicateEvents } from "./dedupe-events";
 import { fetchSourceText } from "./fetch-source";
+import {
+  fetchScrapeFlyInstagramText,
+  fetchScrapeFlyText,
+} from "./fetch-scrapfly";
 import { normalizedEventCandidateSchema } from "./schema";
 import { liveEventSources } from "./sources/registry";
 import type {
@@ -37,6 +41,14 @@ const ERROR_CODES = new Set<IngestionErrorCode>([
   "unknown-error",
 ]);
 const SOURCE_URL_VALIDATION_CONCURRENCY = 5;
+
+async function fetchTextForSource(source: IngestionSource): Promise<string> {
+  if (source.id === "instagram-clubs") {
+    return fetchScrapeFlyInstagramText(source);
+  }
+
+  return fetchSourceText(source);
+}
 
 function errorCode(error: unknown, fallback: IngestionErrorCode): IngestionErrorCode {
   if (
@@ -183,7 +195,7 @@ export async function runIngestion(
     (options.sources ?? liveEventSources).map((source) =>
       runSource(
         source,
-        options.fetchText ?? fetchSourceText,
+        options.fetchText ?? fetchTextForSource,
         options.validateSourceUrl ?? validateSourceUrl,
       ),
     ),

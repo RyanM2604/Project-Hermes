@@ -1,6 +1,7 @@
 import type { BuildingCode, EventTag } from "@/types/event";
 
 export type EventSourceId =
+  | "instagram-clubs"
   | "uwaterloo-events"
   | "wusa-events"
   | "wusa-clubs";

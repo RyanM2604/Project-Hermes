@@ -121,4 +121,32 @@ describe("createFallbackClassification", () => {
     expect(fallback.primaryTag).toBe("games");
     expect(fallback.tags).toEqual(["games", "chill-social"]);
   });
+
+  it("caps fallback tags to the schema limit", () => {
+    const fallback = createFallbackClassification({
+      title: "Startup pitch networking night with free food and music",
+      description: "Founders, recruiters, and a casual hangout.",
+      clubName: "Velocity",
+      locationName: "E7",
+      sourceTags: ["startup-pitch", "career-coop", "free-food", "music"],
+    });
+
+    expect(fallback.tags.length).toBeLessThanOrEqual(3);
+    expect(fallback.tags).toContain(fallback.primaryTag);
+    expect(classificationSchema.parse(fallback)).toEqual(fallback);
+  });
+
+  it("keeps social fallback tags within the schema limit after adding chill-social", () => {
+    const fallback = createFallbackClassification({
+      title: "Board games, trivia, and a picnic meetup",
+      description: "Games, crafts, and outdoor hangout.",
+      clubName: "Campus Social Club",
+      locationName: "SLC",
+      sourceTags: ["games", "hangout", "arts-crafts", "outdoors"],
+    });
+
+    expect(fallback.tags.length).toBeLessThanOrEqual(3);
+    expect(fallback.tags).toContain(fallback.primaryTag);
+    expect(classificationSchema.parse(fallback)).toEqual(fallback);
+  });
 });

@@ -143,9 +143,9 @@ export default function App() {
         </h1>
 
         <p className="hero-reveal hero-reveal-delay-3 mb-12 max-w-xl text-lg leading-relaxed font-medium text-zinc-500">
-          The central feed for Waterloo campus life.{" "}
+          Your one stop shop for all things UW events.{" "}
           <br className="hidden md:block" />
-          Clubs, events, and free food alerts, synced in real-time.
+          Clubs, events, and alerts, synced in real-time.
         </p>
 
         <div

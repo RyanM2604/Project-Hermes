@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
+import { EventAttendeeStack } from "@/components/events/EventAttendeeStack";
 import { EventThemeMotif } from "@/components/events/EventThemeMotif";
 import { getEventThemeForEvent } from "@/lib/events/event-theme";
 import { formatEventLocation } from "@/lib/events/format";
@@ -16,6 +17,7 @@ import type { HermesEvent } from "@/types/event";
 
 interface EventCardProps {
   event: HermesEvent;
+  goingCount?: number;
 }
 
 const dateFormatter = new Intl.DateTimeFormat("en-CA", {
@@ -35,7 +37,7 @@ function visibleEventTags(tags: HermesEvent["tags"]) {
   );
 }
 
-export function EventCard({ event }: EventCardProps) {
+export function EventCard({ event, goingCount = 0 }: EventCardProps) {
   const [isDismissed, setIsDismissed] = useState(false);
   const theme = getEventThemeForEvent(event);
   const themedTag = event.primaryTag ?? event.tags[0];
@@ -159,6 +161,8 @@ export function EventCard({ event }: EventCardProps) {
             </span>
           ))}
         </div>
+
+        <EventAttendeeStack goingCount={goingCount} />
 
         <a
           href={event.sourceUrl}

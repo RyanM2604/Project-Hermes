@@ -8,6 +8,8 @@ import {
 } from "@/components/events";
 import { getEventThemeForEvent } from "@/lib/events/event-theme";
 import { formatEventLocation } from "@/lib/events";
+import { EventAttendeeStack } from "@/components/events/EventAttendeeStack";
+import { loadEventGoingCounts } from "@/lib/events/rsvp-summary";
 import {
   formatEventTagLabel,
   getEventSocialSubTag,
@@ -46,7 +48,11 @@ export default async function EventDetailPage({
   const supabase = await createSupabaseServerClient();
   const [event, {
     data: { user },
-  }] = await Promise.all([eventPromise, supabase.auth.getUser()]);
+  }, goingCounts] = await Promise.all([
+    eventPromise,
+    supabase.auth.getUser(),
+    loadEventGoingCounts([id]),
+  ]);
 
   if (!event) {
     return (
@@ -214,6 +220,13 @@ export default async function EventDetailPage({
                   </div>
                 </div>
               </dl>
+
+              <div className="mt-6">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                  Attendees
+                </p>
+                <EventAttendeeStack goingCount={goingCounts[event.id] ?? 0} />
+              </div>
 
               <RSVPButton eventId={event.id} isAuthenticated={Boolean(user)} />
               <SaveEventButton eventId={event.id} />

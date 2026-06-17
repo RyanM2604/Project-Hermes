@@ -3,12 +3,14 @@ import { CalendarDays, Home, Map, Plus, UserRound } from "lucide-react";
 import { EventFeed, EventFilters, StartingSoonCarousel } from "@/components/feed";
 import { filterEventsByTag, parseEventTag } from "@/lib/events";
 import { loadFreshEvents } from "@/lib/events/load-events";
+import { loadEventGoingCounts } from "@/lib/events/rsvp-summary";
 
 export default async function EventsPage({ searchParams }: PageProps<"/events">) {
   const [params, events] = await Promise.all([searchParams, loadFreshEvents()]);
   const selectedTag = parseEventTag(params.tag);
   const filteredEvents = filterEventsByTag(events, selectedTag);
   const startingSoonEvents = events.slice(0, 5);
+  const goingCounts = await loadEventGoingCounts(events.map((event) => event.id));
 
   return (
     <div className="min-h-screen bg-[#050505] text-white">
@@ -28,10 +30,13 @@ export default async function EventsPage({ searchParams }: PageProps<"/events">)
 
         <EventFilters events={events} selectedTag={selectedTag} />
 
-        <StartingSoonCarousel events={startingSoonEvents} />
+        <StartingSoonCarousel
+          events={startingSoonEvents}
+          goingCounts={goingCounts}
+        />
 
         <div id="event-feed" className="mt-16 scroll-mt-28">
-          <EventFeed events={filteredEvents} />
+          <EventFeed events={filteredEvents} goingCounts={goingCounts} />
         </div>
       </main>
 

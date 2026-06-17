@@ -3,6 +3,7 @@ import { z } from "zod";
 import { socialSubTags } from "@/lib/events/social-tags";
 
 const eventSourceSchema = z.enum([
+  "instagram-clubs",
   "uwaterloo-events",
   "wusa-events",
   "wusa-clubs",

@@ -42,7 +42,7 @@ export function deriveTags(...values: string[]): EventTag[] {
     tags.push("career-coop");
   }
   if (
-    /\b(board games?|game night|cards?|uno|catan|trivia|poker)\b/.test(text)
+    /\b(board games?|game night|games?|cards?|uno|catan|trivia|poker)\b/.test(text)
   ) {
     tags.push("games");
     tags.push("chill-social");

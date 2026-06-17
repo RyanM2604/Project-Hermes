@@ -167,6 +167,16 @@ function sortByPriority(tags: EventTag[]): EventTag[] {
   return [...tags].sort((left, right) => priorityIndex(left) - priorityIndex(right));
 }
 
+function capTagsToSchema(tags: EventTag[], primaryTag: EventTag): EventTag[] {
+  const capped = tags.slice(0, 3);
+
+  if (capped.includes(primaryTag)) {
+    return capped;
+  }
+
+  return [primaryTag, ...capped.filter((tag) => tag !== primaryTag)].slice(0, 3);
+}
+
 function derivePrimaryTag(tags: EventTag[]): EventTag {
   return sortByPriority(tags)[0] ?? "general";
 }
@@ -196,7 +206,8 @@ function collectTags(input: FallbackClassificationInput): EventTag[] {
       ordered.push("chill-social");
     }
 
-    return ordered;
+    const primaryTag = derivePrimaryTag(ordered);
+    return capTagsToSchema(ordered, primaryTag);
   }
 
   return ["general"];

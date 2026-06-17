@@ -49,6 +49,7 @@ describe("runIngestion", () => {
         }
         return "raw";
       },
+      validateSourceUrl: async () => true,
       now: () => new Date("2026-06-13T22:00:00.000Z"),
     });
 

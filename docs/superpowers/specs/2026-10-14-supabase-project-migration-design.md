@@ -3,9 +3,10 @@
 ## Goal
 
 Move Hermes from the existing Supabase project to the new empty Supabase
-project without losing authentication accounts, password hashes, active
-sessions, canonical event data, classifications, saves, RSVPs, or interaction
-history.
+project without losing authentication accounts, password hashes, Auth session
+records, canonical event data, classifications, saves, RSVPs, or interaction
+history. Existing browser sessions will not be carried across the project-ref
+change; users will sign in again after cutover.
 
 The migration must be reversible until the new deployment passes its
 post-restore checks. Database credentials, API keys, password hashes, and
@@ -44,8 +45,8 @@ transaction and with replication-role handling during the data phase.
 
 This approach is preferred over a custom table-copy query because Hermes data
 depends on Supabase-managed Auth tables. A supported full logical dump preserves
-users, password hashes, identities, sessions, constraints, grants, policies,
-and application data together.
+users, password hashes, identities, session records, constraints, grants,
+policies, and application data together.
 
 The dump files will live in a newly created, permission-restricted temporary
 directory outside the repository. They contain authentication data and must
@@ -58,7 +59,7 @@ successful, after which deletion will require explicit approval.
 ### Custom application-schema SQL plus Auth Admin API
 
 This could recreate the public tables and create user accounts, but it would
-not safely preserve existing password hashes and active sessions. It also risks
+not safely preserve existing password hashes or Auth history. It also risks
 changing user IDs, which would break the foreign keys and ownership semantics
 of saved events, RSVPs, and authenticated interactions.
 
@@ -105,20 +106,21 @@ The implementation must compare sanitized source and target project references
 before any dump or restore. It must abort if they are missing or equal. It must
 never print URL passwords.
 
-## Session Preservation
+## Authentication Cutover
 
-The user chose to preserve the three active sessions. Before the database
-restore, the old project's JWT secret will be configured on the new project.
-Changing the target JWT secret regenerates its anon and service-role API keys,
-so the new keys must be collected only after this change and then propagated to
-local and Vercel environment variables during cutover.
+The user chose not to add application compatibility for the old project's
+project-ref-namespaced Auth cookies. The new project will retain its own JWT
+signing configuration and API keys. Existing access tokens and browser cookies
+will not be reused, so users must sign in again after cutover.
 
-The database dump transfers Auth users, identities, refresh-token state, and
-sessions. Reusing the signing secret allows tokens issued by the old project to
-remain verifiable by the new project. Auth provider settings, redirect URLs,
-email templates, and other project-level configuration are not guaranteed to
-be contained in the database dump and must be compared separately before
-cutover.
+The database dump still transfers Auth users, password hashes, identities,
+refresh-token state, and session records for data parity. User IDs stay stable,
+so saves, RSVPs, and authenticated interactions retain their owners. A fresh
+sign-in against the new project is the acceptance test for authentication.
+
+Auth provider settings, redirect URLs, email templates, and other project-level
+configuration are not guaranteed to be contained in the database dump and must
+be compared separately before cutover.
 
 ## Migration Sequence
 
@@ -136,12 +138,12 @@ cutover.
 Preflight is read-only except for creating the local temporary directory. No
 target database write occurs during this phase.
 
-### 2. Session Configuration
+### 2. Auth Configuration
 
-1. Copy the old JWT secret to the new project's Auth/API settings.
-2. Record the newly generated target anon and service-role keys in the approved
-   secret-management locations.
-3. Verify the new Auth health and admin endpoints with the regenerated keys.
+1. Keep the new project's JWT signing configuration unchanged.
+2. Confirm the new project's anon and service-role keys are stored in the
+   approved secret-management locations.
+3. Verify the new Auth health and admin endpoints with the target keys.
 
 Secrets must be moved through the Supabase and Vercel dashboards or local
 environment files and must not be pasted into source files or command output.
@@ -190,18 +192,18 @@ Validation must confirm:
   enablement, and policies match the source.
 - Prisma can read events and classifications and can complete a transaction.
 - Supabase service-role reads succeed.
-- Auth health and admin endpoints authenticate with the regenerated target
-  keys.
+- Auth health and admin endpoints authenticate with the target keys.
 
 Validation is read-only. Any mismatch blocks cutover.
 
 ### 7. Application Cutover
 
-1. Update local and Vercel variables to the new Supabase URL, regenerated anon
-   and service-role keys, transaction-pooler `DATABASE_URL`, and session-pooler
+1. Update local and Vercel variables to the new Supabase URL, target anon and
+   service-role keys, transaction-pooler `DATABASE_URL`, and session-pooler
    `DIRECT_URL`.
 2. Redeploy Hermes.
-3. Verify login/session behavior, the events list, event details, save, RSVP,
+3. Verify that a migrated user can sign in again, then verify the events list,
+   event details, save, RSVP,
    interaction logging, and ingestion against the new project.
 4. Reopen writes only after all checks pass.
 
@@ -240,8 +242,9 @@ The migration is successful only when:
 
 1. Every baseline source count matches the target count.
 2. Schema, constraint, index, grant, and RLS comparisons pass.
-3. Existing user IDs, identities, password hashes, and session records are
-   preserved.
+3. Existing user IDs, identities, password hashes, and Auth session records are
+   preserved, while old browser sessions are expected to require a fresh
+   sign-in.
 4. Hermes reads the 87 canonical events and their classifications from the new
    database.
 5. Saves, RSVPs, and interaction history remain associated with the same user
@@ -254,7 +257,7 @@ The migration is successful only when:
 ## Execution Boundary
 
 Creating and committing this design specification does not authorize taking a
-backup, changing the target JWT secret, entering maintenance mode, restoring a
-database, changing Vercel variables, deploying, deleting temporary files, or
-modifying either Supabase project. Each external mutation will be described and
-explicitly approved before execution.
+backup, entering maintenance mode, restoring a database, changing Vercel
+variables, deploying, deleting temporary files, or modifying either Supabase
+project. Each external mutation will be described and explicitly approved
+before execution.

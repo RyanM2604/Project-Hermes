@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+/.playwright-cli/
+/output/
 
 # next.js
 /.next/
@@ -24,6 +26,13 @@
 .DS_Store
 *.pem
 .worktrees/
+/hermes_overview.txt
+/public/construction-hat.jpg
+/public/under-construction-cat.png
+
+# local agent tooling
+/.agents/
+/skills-lock.json
 
 # debug
 npm-debug.log*

@@ -1,22 +1,26 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { DM_Sans, Fraunces } from "next/font/google";
+import Script from "next/script";
 import { SiteNavbar } from "@/components/layout/SiteNavbar";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import "./globals.css";
+import "./hermes.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const dmSans = DM_Sans({
+  variable: "--font-hermes-sans",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const fraunces = Fraunces({
+  variable: "--font-hermes-display",
   subsets: ["latin"],
 });
+
+const themeInit = `(function(){var dark=window.matchMedia('(prefers-color-scheme: dark)').matches;try{var saved=localStorage.getItem('hermes-theme');if(saved==='dark'||saved==='light')dark=saved==='dark'}catch{}document.documentElement.classList.toggle('dark',dark);document.documentElement.style.colorScheme=dark?'dark':'light'})()`;
 
 export const metadata: Metadata = {
-  title: "Hermes",
-  description: "Hermes helps UWaterloo students discover events worth showing up for.",
+  title: "Hermes — What's on at Waterloo",
+  description: "One feed for Waterloo events, free food, and club nights. See what's on tonight.",
   icons: {
     icon: "/logo.svg",
     shortcut: "/logo.svg",
@@ -37,9 +41,11 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
+      className={`${dmSans.variable} ${fraunces.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <Script id="hermes-theme" strategy="beforeInteractive">{themeInit}</Script>
         <SiteNavbar isAuthenticated={Boolean(user)} />
         {children}
       </body>

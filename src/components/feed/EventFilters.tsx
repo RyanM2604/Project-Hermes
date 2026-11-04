@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-
 import {
   eventTagFilters,
   getEventTagCounts,
@@ -12,19 +11,19 @@ import { isSocialSubTag } from "@/lib/events/social-tags";
 import { logClientInteraction } from "@/lib/interactions/log-client-interaction";
 import type { EventTag, HermesEvent } from "@/types/event";
 
-interface EventFiltersProps {
+export function EventFilters({
+  events,
+  selectedTag,
+}: {
   events: HermesEvent[];
   selectedTag?: EventTag;
-}
-
-export function EventFilters({ events, selectedTag }: EventFiltersProps) {
+}) {
   const counts = getEventTagCounts(events);
-  const showSocialSubFilters =
-    selectedTag === "chill-social" ||
+  const showSocial = selectedTag === "chill-social" ||
     (selectedTag !== undefined && isSocialSubTag(selectedTag));
-  const visibleSocialSubTags = getVisibleSocialSubTags(counts, selectedTag);
+  const visibleSocial = getVisibleSocialSubTags(counts, selectedTag);
 
-  function logFilterClick(tag: EventTag | "all") {
+  function logClick(tag: EventTag | "all") {
     logClientInteraction({
       action: "filter_click",
       eventId: "event-feed",
@@ -33,78 +32,47 @@ export function EventFilters({ events, selectedTag }: EventFiltersProps) {
   }
 
   return (
-    <nav aria-label="Filter events by vibe" className="mb-8">
-      <div className="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5 pb-2 sm:-mx-8 sm:px-8 lg:mx-0 lg:px-0">
+    <nav className="hm-filter" aria-label="Filter events by category">
+      <div className="hm-filter-scroll">
         <Link
           href="/events#event-feed"
-          onClick={() => logFilterClick("all")}
-          aria-current={selectedTag ? undefined : "page"}
-          className={`shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition ${
-            selectedTag
-              ? "border-white/10 bg-white/[0.04] text-zinc-400 hover:border-white/20 hover:text-white"
-              : "border-white bg-white text-black"
-          }`}
+          onClick={() => logClick("all")}
+          aria-current={!selectedTag ? "page" : undefined}
         >
-          All Events <span className="ml-1 text-zinc-500">{counts.all}</span>
+          All events <span>{counts.all}</span>
         </Link>
-
         {eventTagFilters.map(({ tag, label }) => {
-          const isSelected =
-            selectedTag === tag ||
-            (tag === "chill-social" &&
-              selectedTag !== undefined &&
-              isSocialSubTag(selectedTag));
-          const count = counts[tag];
-
-          if (count === 0 && !isSelected) {
-            return null;
-          }
-
+          const active = selectedTag === tag ||
+            (tag === "chill-social" && selectedTag !== undefined && isSocialSubTag(selectedTag));
+          if (counts[tag] === 0 && !active) return null;
           return (
             <Link
               key={tag}
-              href={`/events?tag=${tag}#event-feed`}
-              onClick={() => logFilterClick(tag)}
-              aria-current={isSelected ? "page" : undefined}
-              className={`shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                isSelected
-                  ? "border-blue-300 bg-blue-300 text-black"
-                  : "border-white/10 bg-white/[0.04] text-zinc-400 hover:border-white/20 hover:text-white"
-              }`}
+              href={"/events?tag=" + tag + "#event-feed"}
+              onClick={() => logClick(tag)}
+              aria-current={active ? "page" : undefined}
             >
-              {label} <span className="ml-1 text-zinc-500">{count}</span>
+              {label} <span>{counts[tag]}</span>
             </Link>
           );
         })}
       </div>
-
-      {showSocialSubFilters && visibleSocialSubTags.length > 0 ? (
-        <div className="no-scrollbar -mx-5 mt-3 flex gap-2 overflow-x-auto px-5 pb-2 sm:-mx-8 sm:px-8 lg:mx-0 lg:px-0">
+      {showSocial && visibleSocial.length > 0 && (
+        <div className="hm-filter-scroll hm-filter-sub">
           {socialSubTagFilters
-            .filter(({ tag }) => visibleSocialSubTags.includes(tag))
-            .map(({ tag, label }) => {
-              const isSelected = selectedTag === tag;
-              const count = counts[tag] ?? 0;
-
-              return (
-                <Link
-                  key={tag}
-                  href={`/events?tag=${tag}#event-feed`}
-                  onClick={() => logFilterClick(tag)}
-                  aria-current={isSelected ? "page" : undefined}
-                  className={`shrink-0 rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                    isSelected
-                      ? "border-violet-300 bg-violet-300 text-black"
-                      : "border-white/10 bg-white/[0.04] text-zinc-400 hover:border-white/20 hover:text-white"
-                  }`}
-                >
-                  {label}{" "}
-                  <span className="ml-1 text-zinc-500">{count}</span>
-                </Link>
-              );
-            })}
+            .filter(({ tag }) => visibleSocial.includes(tag))
+            .map(({ tag, label }) => (
+              <Link
+                key={tag}
+                href={"/events?tag=" + tag + "#event-feed"}
+                onClick={() => logClick(tag)}
+                aria-current={selectedTag === tag ? "page" : undefined}
+              >
+                {label} <span>{counts[tag] ?? 0}</span>
+              </Link>
+            ))}
         </div>
-      ) : null}
+      )}
     </nav>
   );
 }

@@ -1,12 +1,6 @@
-import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { createInstagramSource } from "../sources/instagram-public";
-
-const fixture = readFileSync(
-  new URL("../__fixtures__/instagram-public-profile.html", import.meta.url),
-  "utf8",
-);
 
 const source = createInstagramSource({
   clubName: "UW Cheese Club",

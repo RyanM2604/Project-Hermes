@@ -19,8 +19,8 @@ const fraunces = Fraunces({
 const themeInit = `(function(){var dark=window.matchMedia('(prefers-color-scheme: dark)').matches;try{var saved=localStorage.getItem('hermes-theme');if(saved==='dark'||saved==='light')dark=saved==='dark'}catch{}document.documentElement.classList.toggle('dark',dark);document.documentElement.style.colorScheme=dark?'dark':'light'})()`;
 
 export const metadata: Metadata = {
-  title: "Hermes",
-  description: "Hermes helps UWaterloo students discover events worth showing up for.",
+  title: "Hermes — What's on at Waterloo",
+  description: "One feed for Waterloo events, free food, and club nights. See what's on tonight.",
   icons: {
     icon: "/logo.svg",
     shortcut: "/logo.svg",

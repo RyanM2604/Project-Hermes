@@ -1,28 +1,57 @@
 export default function EventsLoading() {
   return (
-    <main className="mx-auto min-h-screen max-w-6xl bg-[#050505] px-5 pb-32 pt-32 text-white sm:px-8 sm:pt-36">
-      <div className="mb-12 max-w-2xl">
-        <div className="mb-5 h-4 w-36 animate-pulse rounded-full bg-white/10" />
-        <div className="h-12 w-full max-w-xl animate-pulse rounded-2xl bg-white/10" />
-        <div className="mt-5 h-5 w-full max-w-lg animate-pulse rounded-full bg-white/[0.07]" />
-      </div>
+    <main className="hm-events-page hm-events-browse" aria-busy="true">
+      <div className="hermes-container">
+        <header className="hm-events-hero">
+          <h1>Find something worth showing up for.</h1>
+          <p>Events, free food, clubs, and opportunities happening around campus.</p>
+        </header>
 
-      <div className="mb-12 flex gap-3 overflow-hidden">
-        {[0, 1, 2, 3, 4].map((item) => (
-          <div
-            key={item}
-            className="h-10 w-28 shrink-0 animate-pulse rounded-full bg-white/[0.07]"
-          />
-        ))}
-      </div>
+        <span className="sr-only" role="status">Loading events</span>
+        <div className="hm-filter" aria-hidden="true">
+          <div className="hm-filter-scroll">
+            {[120, 112, 132, 130, 118].map((width, index) => (
+              <div
+                key={index}
+                className="h-11 shrink-0 rounded-full border border-[var(--hm-line)] bg-[var(--hm-card)] motion-safe:animate-pulse"
+                style={{ width }}
+              />
+            ))}
+          </div>
+        </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        {[0, 1, 2, 3].map((item) => (
-          <div
-            key={item}
-            className="h-96 animate-pulse rounded-3xl border border-white/10 bg-white/[0.04]"
-          />
-        ))}
+        <section className="hm-soon" aria-hidden="true">
+          <div className="hm-section-heading"><h2>Starting soon</h2></div>
+          <div className="hm-soon-rail">
+            {[0, 1, 2].map((item) => (
+              <div key={item} className="hm-soon-item motion-safe:animate-pulse">
+                <div className="h-4 w-24 rounded bg-black/10" />
+                <div className="space-y-3">
+                  <div className="h-3 w-20 rounded bg-black/10" />
+                  <div className="h-8 w-56 max-w-full rounded bg-black/10" />
+                  <div className="h-4 w-32 rounded bg-black/10" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="hm-feed" aria-hidden="true">
+          <div className="hm-section-heading"><h2>All events</h2></div>
+          <div className="hm-feed-list">
+            {[0, 1, 2, 3].map((item) => (
+              <div key={item} className="hm-event-card motion-safe:animate-pulse">
+                <div className="hm-event-media" />
+                <div className="hm-event-body space-y-4">
+                  <div className="h-3 w-28 rounded bg-[var(--hm-paper-deep)]" />
+                  <div className="h-8 w-4/5 rounded bg-[var(--hm-paper-deep)]" />
+                  <div className="h-4 w-2/3 rounded bg-[var(--hm-paper-deep)]" />
+                  <div className="h-4 w-1/2 rounded bg-[var(--hm-paper-deep)]" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
     </main>
   );

@@ -28,7 +28,8 @@ GitHub schedules can be delayed; ingestion is not a real-time service.
    Check extracted outcomes against original posts before a live account run.
 6. Run `npm run ingest:events -- --account uwcheeseclub`, inspect the result and
    card image URLs, then enable the scheduled workflow on the default branch.
-   Manual workflow runs default to dry-run. The former Vercel ingestion cron is
+   Manual workflow runs default to dry-run. Set `account` to `uwcheeseclub` for a
+   small first test; leave it empty for all sources. The former Vercel ingestion cron is
    removed to avoid overlapping schedules.
 
 The worker loads `src/ingestion/sources/instagram-accounts.json`, copied from
@@ -185,3 +186,42 @@ retain the previous coordinates only when the location input is unchanged.
 The cache is private (RLS enabled, no browser-role access); public snapshots expose
 only venue points and aggregate Going counts. Dry runs make no location requests
 and write nothing.
+
+## Diagnosing partial ingestion runs
+
+The workflow now accepts an optional `account` handle. Start with one account in
+dry-run mode, then run all sources with dry-run off to publish. To retry **saved**
+failed/held posts after a live run, check `retry_failed` and turn dry-run off;
+this skips paid Apify recollection and reuses valid saved extraction. A dry-run
+saves no posts, so it cannot be resumed with `retry_failed`.
+
+Progress lines show account collection and extraction totals every ten processed
+posts. The final `outcome` is `completed`, `completed_with_warnings`, or
+`incomplete`. GitHub's summary includes unavailable accounts and budget status.
+
+Apify `not_found` / `no_items` responses are visible account-availability warnings,
+not global provider failures. The account stays configured and is checked again
+on future collection runs. Private/empty accounts cannot be repaired by changing
+API keys. Unknown provider failures, timeouts after retry, invalid output,
+pending images, and unfinished processing still return nonzero exits.
+
+Extraction allows 45 seconds per attempt, with one additional attempt only for a
+timeout or an invalid slide index. The shared worker deadline bounds retries.
+Invalid indices are never used to select a photograph. Dry-run extraction uses
+two workers, matching live extraction; it still makes paid AI/image requests.
+A deadline that leaves work unevaluated now sets `budgetExhausted: true`.
+Missing or conflicting date/location evidence remains held, never guessed.
+
+On November 14, 2026 the failed dry-run's existing Apify datasets showed six
+`not_found` handles and one `no_items` handle. Corrected sources:
+
+| Previous | Verified handle | Reference |
+| --- | --- | --- |
+| `mathsocuw` | `uwmathsoc` | [MathSoc's mathNEWS introduction](https://mathnews.uwaterloo.ca/wp-content/uploads/2024/09/mathNEWS-156-0-divide.pdf) |
+| `uwaterloo_ess` | `uw_ess` | [ESS homepage Instagram link](https://uwaterloo.ca/environment-students-society/) |
+| `cityofwaterloo` | `citywaterloo` | [City social accounts](https://www.waterloo.ca/news-and-service-updates/follow-the-city-on-social-media/) |
+| `uwdsc` | `uwaterloodsc` | [DSC's January 2026 mathNEWS column](https://mathnews.uwaterloo.ca/wp-content/uploads/2026/01/mathNEWS-160-1.pdf) |
+| `uwux` | `uw_ux` | [UW/UX's Instagram link](https://linktr.ee/uwux) |
+
+`thingstodoinkw` had no verified replacement, and `whynotrunclub` was empty/private;
+they remain visible availability warnings instead of silently disappearing.

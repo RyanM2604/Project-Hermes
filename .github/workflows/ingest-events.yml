@@ -8,6 +8,14 @@ on:
         description: Evaluate extraction without database or bucket writes
         type: boolean
         default: true
+      account:
+        description: Optional Instagram handle; leave empty for all sources
+        type: string
+        default: ''
+      retry_failed:
+        description: Retry saved failed/held posts without recollecting (turn dry_run off)
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -24,6 +32,9 @@ jobs:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      INGEST_ACCOUNT: ${{ inputs.account || '' }}
+      INGEST_DRY_RUN: ${{ inputs.dry_run || false }}
+      INGEST_RETRY: ${{ inputs.retry_failed || false }}
       EVENT_IMAGES_BUCKET: event-images
       OPENAI_EXTRACTION_MODEL: ${{ vars.OPENAI_EXTRACTION_MODEL || 'gpt-4o-mini' }}
       GEOCODING_BASE_URL: ${{ vars.GEOCODING_BASE_URL || 'https://nominatim.openstreetmap.org/' }}
@@ -41,9 +52,11 @@ jobs:
           for name in DATABASE_URL APIFY_TOKEN OPENAI_API_KEY NEXT_PUBLIC_SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY; do
             if [ -z "${!name}" ]; then echo "::error::Missing worker configuration: $name"; exit 1; fi
           done
-      - name: Evaluate pipeline
-        if: github.event_name == 'workflow_dispatch' && inputs.dry_run
-        run: npm run ingest:events -- --dry-run
-      - name: Collect and publish
-        if: github.event_name != 'workflow_dispatch' || !inputs.dry_run
-        run: npm run ingest:events
+      - name: Run ingestion
+        shell: bash
+        run: |
+          args=()
+          if [ "$INGEST_DRY_RUN" = "true" ]; then args+=(--dry-run); fi
+          if [ "$INGEST_RETRY" = "true" ]; then args+=(--retry); fi
+          if [ -n "$INGEST_ACCOUNT" ]; then args+=(--account "$INGEST_ACCOUNT"); fi
+          npm run ingest:events -- "${args[@]}"

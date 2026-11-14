@@ -54,6 +54,7 @@ export interface SocialExtractorOptions {
   model?: string;
   client?: SocialExtractorClient;
   timeoutMs?: number;
+  deadline?: number;
 }
 export type SocialExtractionResult =
   | { status: "extracted"; data: ExtractedPost; model: string; inputTokens: number; outputTokens: number }
@@ -75,45 +76,57 @@ For missing details explain the issue in reason. Do not classify events; extract
 export function createSocialExtractor(options: SocialExtractorOptions = {}) {
   const apiKey = (options.apiKey ?? process.env.OPENAI_API_KEY ?? "").trim();
   const model = options.model ?? process.env.OPENAI_EXTRACTION_MODEL ?? "gpt-4o-mini";
-  const timeoutMs = Number.isFinite(options.timeoutMs) && (options.timeoutMs ?? 0) > 0 ? options.timeoutMs! : 30_000;
+  const timeoutMs = Number.isFinite(options.timeoutMs) && (options.timeoutMs ?? 0) > 0 ? options.timeoutMs! : 45_000;
   const client = options.client ?? (apiKey ? new OpenAI({ apiKey, maxRetries: 0 }) as unknown as SocialExtractorClient : undefined);
 
   return {
     async extract(input: SocialExtractionInput): Promise<SocialExtractionResult> {
       if (input.images.length > 10) return { status: "failed", code: "too-many-images" };
       if (!client) return { status: "failed", code: "missing-api-key" };
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), timeoutMs);
-      try {
-        const response = await client.responses.create({
-          model,
-          instructions: INSTRUCTIONS,
-          store: false,
-          input: [{ role: "user", content: [
-            { type: "input_text", text: JSON.stringify({ caption: input.caption, postedAt: input.postedAt, accountName: input.accountName, imageCount: input.images.length }) },
-            ...input.images.map(({ dataUrl }) => ({ type: "input_image" as const, image_url: dataUrl, detail: "high" as const })),
-          ] }],
-          text: { format: zodTextFormat(extractedPostSchema, "hermes_social_events") },
-        }, { signal: controller.signal });
-        if (response.output?.some((item) => item.content?.some((content) => content.type === "refusal"))) {
-          return { status: "failed", code: "refused" };
+      let invalidImage = false;
+      let inputTokens = 0, outputTokens = 0;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const remaining = Math.min(timeoutMs, (options.deadline ?? Infinity) - Date.now());
+        if (remaining <= 0) return { status: "failed", code: "timeout" };
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), remaining);
+        try {
+          const response = await client.responses.create({
+            model,
+            instructions: `${INSTRUCTIONS}\nValid imageIndex values for this request: ${input.images.map((_, index) => index).join(", ") || "none"}; null is always allowed.${invalidImage ? " Previous response used an invalid imageIndex. Correct the slide references; do not invent indices." : ""}`,
+            store: false,
+            input: [{ role: "user", content: [
+              { type: "input_text", text: JSON.stringify({ caption: input.caption, postedAt: input.postedAt, accountName: input.accountName, imageCount: input.images.length }) },
+              ...input.images.map(({ dataUrl }) => ({ type: "input_image" as const, image_url: dataUrl, detail: "high" as const })),
+            ] }],
+            text: { format: zodTextFormat(extractedPostSchema, "hermes_social_events") },
+          }, { signal: controller.signal });
+          inputTokens += response.usage?.input_tokens ?? 0;
+          outputTokens += response.usage?.output_tokens ?? 0;
+          if (response.output?.some((item) => item.content?.some((content) => content.type === "refusal"))) {
+            return { status: "failed", code: "refused" };
+          }
+          if (response.status && response.status !== "completed") return { status: "failed", code: "incomplete" };
+          let parsed: unknown;
+          try { parsed = JSON.parse(response.output_text ?? ""); } catch { return { status: "failed", code: "invalid-output" }; }
+          const result = extractedPostSchema.safeParse(parsed);
+          if (!result.success || (result.data.disposition === "events" && result.data.events.length === 0) || (result.data.disposition === "not-event" && result.data.events.length > 0)) {
+            return { status: "failed", code: "invalid-output" };
+          }
+          if (result.data.events.some((event) => event.imageIndex !== null && event.imageIndex >= input.images.length)) {
+            if (attempt === 0) { invalidImage = true; continue; }
+            return { status: "failed", code: "invalid-image-index" };
+          }
+          return { status: "extracted", data: result.data, model, inputTokens, outputTokens };
+        } catch (error) {
+          const timedOut = controller.signal.aborted || (error instanceof Error && error.name === "AbortError");
+          if (timedOut && attempt === 0) continue;
+          return { status: "failed", code: timedOut ? "timeout" : "provider-error" };
+        } finally {
+          clearTimeout(timeout);
         }
-        if (response.status && response.status !== "completed") return { status: "failed", code: "incomplete" };
-        let parsed: unknown;
-        try { parsed = JSON.parse(response.output_text ?? ""); } catch { return { status: "failed", code: "invalid-output" }; }
-        const result = extractedPostSchema.safeParse(parsed);
-        if (!result.success || (result.data.disposition === "events" && result.data.events.length === 0) || (result.data.disposition === "not-event" && result.data.events.length > 0)) {
-          return { status: "failed", code: "invalid-output" };
-        }
-        if (result.data.events.some((event) => event.imageIndex !== null && event.imageIndex >= input.images.length)) {
-          return { status: "failed", code: "invalid-image-index" };
-        }
-        return { status: "extracted", data: result.data, model, inputTokens: response.usage?.input_tokens ?? 0, outputTokens: response.usage?.output_tokens ?? 0 };
-      } catch (error) {
-        return { status: "failed", code: controller.signal.aborted || (error instanceof Error && error.name === "AbortError") ? "timeout" : "provider-error" };
-      } finally {
-        clearTimeout(timeout);
       }
+      return { status: "failed", code: "timeout" };
     },
   };
 }

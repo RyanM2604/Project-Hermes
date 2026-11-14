@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { ApifyAccountUnavailableError } from "../fetch-apify";
 import { runSocialIngestion } from "./worker";
 import type { SocialRepository, ClaimedPost } from "./repository";
 const event = { title: "Games", description: "Games at SLC", startLocal: "2026-11-05T18:00", endLocal: null, locationName: "SLC", imageIndex: null, evidence: { start: "November 5, 2026, 6pm", location: "SLC" }, conflicts: [] };
@@ -9,6 +10,28 @@ function setup(extraction: unknown = null) {
   return { repository, extract, post };
 }
 describe("durable social worker", () => {
+  it("reports unavailable accounts as warnings and real provider failures as errors", async () => {
+    const { repository } = setup();
+    const accounts = ["gone", "bad"].map(instagramHandle => ({ instagramHandle, clubName: instagramHandle, profileUrl: `https://www.instagram.com/${instagramHandle}/`, active: true }));
+    const result = await runSocialIngestion({ repository, accounts, dryRun: true, fetchPosts: async source => { if (source.url.includes("gone")) throw new ApifyAccountUnavailableError("account-not-found"); throw new Error("private credential detail"); } });
+    expect(result.accounts).toContainEqual({ handle: "gone", collected: 0, failed: false, skipped: true, reason: "account-not-found" });
+    expect(result.accounts).toContainEqual({ handle: "bad", collected: 0, failed: true, reason: "account-collection-failed" });
+    expect(JSON.stringify(result)).not.toContain("credential");
+  });
+  it("evaluates dry-run posts with bounded concurrency and no writes", async () => {
+    const { repository } = setup(); let active = 0, maxActive = 0;
+    const result = await runSocialIngestion({ repository, accounts: [{ instagramHandle: "club", clubName: "Club", profileUrl: "https://www.instagram.com/club/", active: true }], dryRun: true, fetchPosts: async () => ["one", "two", "three"].map(shortCode => ({ shortCode })), extractor: { extract: async () => { active++; maxActive = Math.max(maxActive, active); await new Promise(resolve => setTimeout(resolve, 1)); active--; return { status: "extracted", data: { disposition: "not-event", events: [], reason: null }, model: "test", inputTokens: 1, outputTokens: 1 }; } } });
+    expect(maxActive).toBe(2); expect(result).toMatchObject({ complete: true, processed: 3, ignored: 3 });
+    expect(repository.publish).not.toHaveBeenCalled(); expect(repository.collect).not.toHaveBeenCalled();
+  });
+  it("reports unfinished dry-run work when the deadline is reached", async () => {
+    const { repository, extract } = setup();
+    let clock = Date.now(); const spy = vi.spyOn(Date, "now").mockImplementation(() => clock);
+    try {
+      const result = await runSocialIngestion({ repository, dryRun: true, budgetMs: 10, accounts: [{ instagramHandle: "club", clubName: "Club", profileUrl: "https://www.instagram.com/club/", active: true }], fetchPosts: async () => [{ shortCode: "one" }, { shortCode: "two" }], extractor: { extract: async () => { clock += 20; return extract(); } } });
+      expect(result.complete).toBe(false);
+    } finally { spy.mockRestore(); }
+  });
   it("validates, publishes, and classifies a supported event", async () => {
     const { repository, extract } = setup(); const classify = vi.fn(async () => undefined);
     const result = await runSocialIngestion({ repository, extractor: { extract }, accounts: [], now: () => new Date("2026-11-04T12:00:00Z"), classify });

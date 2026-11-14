@@ -53,6 +53,9 @@ describe("fetchApifyInstagramPosts", () => {
   it.each(["not json", "{}", '[{"error":"account unavailable"}]', '[{}]'])("fails closed on malformed or upstream-error datasets: %s", async (body) => {
     await expect(fetchApifyInstagramPosts({ id: "instagram-clubs", url: "https://www.instagram.com/club/", acceptedContentTypes: [], parse: () => [] }, { apiToken: "test-token", fetchImpl: async () => new Response(body) })).rejects.toThrow();
   });
+  it.each([["not_found", "account-not-found"], ["no_items", "account-empty-or-private"]])("preserves the actionable source reason for %s", async (error, code) => {
+    await expect(fetchApifyInstagramPosts({ id: "instagram-clubs", url: "https://www.instagram.com/club/", acceptedContentTypes: [], parse: () => [] }, { apiToken: "test-token", fetchImpl: async () => new Response(JSON.stringify([{ error, errorDescription: "private upstream details" }])) })).rejects.toMatchObject({ code, message: code });
+  });
   it("accepts an explicitly empty dataset", async () => {
     await expect(fetchApifyInstagramPosts({ id: "instagram-clubs", url: "https://www.instagram.com/club/", acceptedContentTypes: [], parse: () => [] }, { apiToken: "test-token", fetchImpl: async () => new Response("[]") })).resolves.toEqual([]);
   });

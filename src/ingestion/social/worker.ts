@@ -1,4 +1,4 @@
-import { fetchApifyInstagramPosts } from "../fetch-apify";
+import { ApifyAccountUnavailableError, fetchApifyInstagramPosts } from "../fetch-apify";
 import { createInstagramSource } from "../sources/instagram-public";
 import { instagramAccounts, type InstagramAccount } from "../sources/instagram-accounts";
 import { deriveTags } from "../sources/utils";
@@ -10,7 +10,8 @@ import type { ClaimedPost, Publication, SocialRepository } from "./repository";
 import type { PreparedImage } from "./media";
 
 export interface SocialRunSummary {
-  accounts: { handle: string; collected: number; failed: boolean }[];
+  accounts: { handle: string; collected: number; failed: boolean; skipped?: boolean; reason?: string }[];
+  complete?: boolean;
   processed: number; published: number; held: number; ignored: number; failed: number; imagePending: number;
   inputTokens: number; outputTokens: number; uploadedImages: number; eventIds: string[];
   reasons: Record<string, number>; dryRun: boolean;
@@ -30,16 +31,17 @@ export interface SocialWorkerOptions {
   prepareImage?: (url: string) => Promise<PreparedImage>;
   storeImage?: (image: PreparedImage) => Promise<{ storagePath: string; publicUrl: string }>;
   classify?: (ids: string[]) => Promise<unknown>;
+  onProgress?: (progress: { stage: string; account?: string; collected?: number; processed?: number; reason?: string }) => void;
 }
 const addReason = (result: SocialRunSummary, reason: string) => { result.reasons[reason] = (result.reasons[reason] ?? 0) + 1; };
 
 export async function runSocialIngestion(options: SocialWorkerOptions): Promise<SocialRunSummary> {
   const now = options.now ?? (() => new Date());
   const deadline = Date.now() + (options.budgetMs ?? 35 * 60_000);
-  const extractor = options.extractor ?? createSocialExtractor();
+  const extractor = options.extractor ?? createSocialExtractor({ deadline });
   const prepare = options.prepareImage ?? (async (url: string) => (await import("./media")).prepareImage(url));
   const store = options.storeImage ?? (async (image: PreparedImage) => (await import("./media")).storeImage(image));
-  const result: SocialRunSummary = { accounts: [], processed: 0, published: 0, held: 0, ignored: 0, failed: 0, imagePending: 0, inputTokens: 0, outputTokens: 0, uploadedImages: 0, eventIds: [], reasons: {}, dryRun: !!options.dryRun };
+  const result: SocialRunSummary = { accounts: [], processed: 0, published: 0, held: 0, ignored: 0, failed: 0, imagePending: 0, inputTokens: 0, outputTokens: 0, uploadedImages: 0, eventIds: [], reasons: {}, dryRun: !!options.dryRun, complete: true };
   const accounts = (options.accounts ?? instagramAccounts).filter((account) => account.active && (!options.account || account.instagramHandle.toLowerCase() === options.account.toLowerCase())).sort((a, b) => (a.priority ?? 100) - (b.priority ?? 100));
   if (options.account && !accounts.length) throw new Error("unknown-account");
   let cursor = 0;
@@ -47,6 +49,7 @@ export async function runSocialIngestion(options: SocialWorkerOptions): Promise<
   async function collect() {
     while (cursor < accounts.length && Date.now() < deadline) {
       const account = accounts[cursor++];
+      options.onProgress?.({ stage: "collecting", account: account.instagramHandle });
       try {
         const posts = normalizeSocialPosts(await (options.fetchPosts ?? fetchApifyInstagramPosts)(createInstagramSource(account), { resultsLimit: 12, skipPinnedPosts: false, dataDetailLevel: "detailedData" }), account);
         for (const post of posts) {
@@ -54,40 +57,57 @@ export async function runSocialIngestion(options: SocialWorkerOptions): Promise<
           else await options.repository.collect(post, EXTRACTION_VERSION);
         }
         result.accounts.push({ handle: account.instagramHandle, collected: posts.length, failed: false });
-      } catch {
-        result.accounts.push({ handle: account.instagramHandle, collected: 0, failed: true });
-        addReason(result, "account-collection-failed");
+        options.onProgress?.({ stage: "collected", account: account.instagramHandle, collected: posts.length });
+      } catch (error) {
+        const unavailable = error instanceof ApifyAccountUnavailableError;
+        const reason = unavailable ? error.code : "account-collection-failed";
+        result.accounts.push({ handle: account.instagramHandle, collected: 0, failed: !unavailable, ...(unavailable ? { skipped: true } : {}), reason });
+        addReason(result, reason);
+        options.onProgress?.({ stage: unavailable ? "account-unavailable" : "collection-failed", account: account.instagramHandle, reason });
       }
     }
   }
   if (options.collectPosts !== false) await Promise.all([collect(), collect()]);
+  result.complete = cursor >= accounts.length || options.collectPosts === false;
+  options.onProgress?.({ stage: "extracting", processed: 0 });
   if (options.dryRun) {
-    result.eligible = 0; result.evaluations = [];
+    result.eligible = 0;
+    const evaluations: NonNullable<SocialRunSummary["evaluations"]> = [];
+    result.evaluations = evaluations;
     // A dry-run evaluates source content without creating work records or uploading objects.
-    for (const post of dryPosts) {
-      if (Date.now() >= deadline) break;
-      try {
-        if (post.incompleteMedia || post.media.length > 10) { result.held++; addReason(result, "too-many-images"); continue; }
-        const images: PreparedImage[] = [];
-        let missingImages = false;
-        for (const url of post.media) { try { images.push(await prepare(url)); } catch { missingImages = true; } }
-        const extraction = await extractor.extract({ caption: post.caption, postedAt: post.postedAt, accountName: post.accountName, images });
-        result.processed++;
-        if (extraction.status === "failed") { result.failed++; addReason(result, extraction.code); continue; }
-        result.inputTokens += extraction.inputTokens; result.outputTokens += extraction.outputTokens;
-        const evaluation: NonNullable<SocialRunSummary["evaluations"]>[number] = { sourceUrl: post.sourceUrl, disposition: extraction.data.disposition, events: [] };
-        result.evaluations.push(evaluation);
-        if (missingImages) { result.imagePending++; addReason(result, "image-preparation-pending"); }
-        if (missingImages && extraction.data.disposition !== "events") { result.failed++; addReason(result, "image-preparation-failed"); }
-        else if (extraction.data.disposition === "not-event") result.ignored++;
-        else if (extraction.data.disposition !== "events") { result.held++; addReason(result, extraction.data.disposition); }
-        else for (const item of extraction.data.events) {
-          const normalized = normalizeExtractedEvent(item, { postedAt: post.postedAt, now: now(), allowPast: true });
-          if (!normalized.ok) { result.held++; addReason(result, normalized.reason); evaluation.events.push({ title: item.title, heldReason: normalized.reason }); }
-          else { result.eligible++; evaluation.events.push({ title: normalized.event.title, startTime: normalized.event.startTime, locationName: normalized.event.locationName }); }
+    let dryCursor = 0;
+    async function evaluate() {
+      while (dryCursor < dryPosts.length && Date.now() < deadline) {
+        const post = dryPosts[dryCursor++];
+        try {
+          if (post.incompleteMedia || post.media.length > 10) { result.held++; addReason(result, "too-many-images"); continue; }
+          const images: PreparedImage[] = [];
+          let missingImages = false;
+          for (const url of post.media) { try { images.push(await prepare(url)); } catch { missingImages = true; } }
+          const extraction = await extractor.extract({ caption: post.caption, postedAt: post.postedAt, accountName: post.accountName, images });
+          result.processed++;
+          if (extraction.status === "failed") { result.failed++; addReason(result, extraction.code); continue; }
+          result.inputTokens += extraction.inputTokens; result.outputTokens += extraction.outputTokens;
+          const evaluation: NonNullable<SocialRunSummary["evaluations"]>[number] = { sourceUrl: post.sourceUrl, disposition: extraction.data.disposition, events: [] };
+          evaluations.push(evaluation);
+          if (missingImages) { result.imagePending++; addReason(result, "image-preparation-pending"); }
+          if (missingImages && extraction.data.disposition !== "events") { result.failed++; addReason(result, "image-preparation-failed"); }
+          else if (extraction.data.disposition === "not-event") result.ignored++;
+          else if (extraction.data.disposition !== "events") { result.held++; addReason(result, extraction.data.disposition); }
+          else for (const item of extraction.data.events) {
+            const normalized = normalizeExtractedEvent(item, { postedAt: post.postedAt, now: now(), allowPast: true });
+            if (!normalized.ok) { result.held++; addReason(result, normalized.reason); evaluation.events.push({ title: item.title, heldReason: normalized.reason }); }
+            else { result.eligible = (result.eligible ?? 0) + 1; evaluation.events.push({ title: normalized.event.title, startTime: normalized.event.startTime, locationName: normalized.event.locationName }); }
+          }
+        } catch { result.failed++; addReason(result, "image-preparation-failed"); }
+        finally {
+          if (result.processed > 0 && result.processed % 10 === 0) options.onProgress?.({ stage: "extracting", processed: result.processed });
         }
-      } catch { result.failed++; addReason(result, "image-preparation-failed"); }
+      }
     }
+    await Promise.all([evaluate(), evaluate()]);
+    result.complete &&= dryCursor >= dryPosts.length;
+    options.onProgress?.({ stage: result.complete ? "complete" : "deadline-reached", processed: result.processed });
     return result;
   }
   async function process(post: ClaimedPost) {
@@ -190,9 +210,12 @@ export async function runSocialIngestion(options: SocialWorkerOptions): Promise<
         if (message === "canonical-source-conflict") { result.held++; addReason(result, message); await options.repository.finish(post, "held", message); }
         else { result.failed++; addReason(result, code); await options.repository.fail(post, code, now()); }
       }
+      if (result.processed % 10 === 0) options.onProgress?.({ stage: "extracting", processed: result.processed });
     }
   }
   await Promise.all([drain(), drain()]);
+  if (Date.now() >= deadline) result.complete = false;
+  options.onProgress?.({ stage: result.complete ? "complete" : "deadline-reached", processed: result.processed });
   result.eventIds = [...new Set(result.eventIds)];
   if (result.eventIds.length && options.classify) await options.classify(result.eventIds);
   return result;

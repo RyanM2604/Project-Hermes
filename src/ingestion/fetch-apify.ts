@@ -1,5 +1,9 @@
 import type { IngestionSource } from "./types";
 
+export class ApifyAccountUnavailableError extends Error {
+  constructor(readonly code: "account-not-found" | "account-empty-or-private") { super(code); }
+}
+
 const APIFY_ACTOR_ID = "apify/instagram-post-scraper";
 const APIFY_RUN_SYNC_DATASET_ITEMS_ENDPOINT = `https://api.apify.com/v2/actors/${APIFY_ACTOR_ID.replace(
   "/",
@@ -115,6 +119,10 @@ function parseActorItems(raw: string): ApifyInstagramPost[] {
   let payload: unknown;
   try { payload = JSON.parse(raw); } catch { throw new Error("Invalid Apify dataset JSON"); }
   if (!Array.isArray(payload)) throw new Error("Invalid Apify dataset envelope");
+  if (payload.length === 1 && isRecord(payload[0])) {
+    if (payload[0].error === "not_found") throw new ApifyAccountUnavailableError("account-not-found");
+    if (payload[0].error === "no_items") throw new ApifyAccountUnavailableError("account-empty-or-private");
+  }
   const seen = new Set<string>();
   const posts: ApifyInstagramPost[] = [];
   for (const item of payload) {

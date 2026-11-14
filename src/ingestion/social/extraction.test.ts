@@ -54,6 +54,31 @@ describe("structured social extraction", () => {
     expect(await createSocialExtractor({ client: { responses: { create } } }).extract(input)).toEqual({ status: "failed", code });
   });
 
+  it("retries a wrong slide reference once with explicit valid indices", async () => {
+    const create = vi.fn().mockResolvedValueOnce({ output_text: JSON.stringify({ ...post, events: [{ ...posterEvent, imageIndex: 1 }] }) }).mockResolvedValueOnce({ output_text: JSON.stringify(post) });
+    expect(await createSocialExtractor({ client: { responses: { create } } }).extract(input)).toMatchObject({ status: "extracted", data: post });
+    expect(create).toHaveBeenCalledTimes(2);
+    expect(create.mock.calls[1][0].instructions).toContain("Previous response used an invalid imageIndex");
+  });
+  it("retries a transient timeout but stops after two attempts", async () => {
+    const create = vi.fn().mockRejectedValue(Object.assign(new Error("aborted"), { name: "AbortError" }));
+    expect(await createSocialExtractor({ client: { responses: { create } } }).extract(input)).toEqual({ status: "failed", code: "timeout" });
+    expect(create).toHaveBeenCalledTimes(2);
+  });
+  it("does not retry if a timeout has consumed the worker deadline", async () => {
+    let clock = Date.now(); const deadline = clock + 10;
+    const spy = vi.spyOn(Date, "now").mockImplementation(() => clock);
+    const create = vi.fn(async () => { clock += 20; throw Object.assign(new Error("aborted"), { name: "AbortError" }); });
+    try {
+      expect(await createSocialExtractor({ client: { responses: { create } }, deadline }).extract(input)).toMatchObject({ status: "failed", code: "timeout" });
+      expect(create).toHaveBeenCalledTimes(1);
+    } finally { spy.mockRestore(); }
+  });
+  it("does not start a provider request after the worker deadline", async () => {
+    const create = vi.fn();
+    expect(await createSocialExtractor({ client: { responses: { create } }, deadline: Date.now() - 1 }).extract(input)).toMatchObject({ status: "failed", code: "timeout" });
+    expect(create).not.toHaveBeenCalled();
+  });
   it("holds more than ten images rather than dropping slides", async () => {
     const create = vi.fn();
     expect(await createSocialExtractor({ client: { responses: { create } } }).extract({ ...input, images: Array(11).fill(input.images[0]) })).toEqual({ status: "failed", code: "too-many-images" });

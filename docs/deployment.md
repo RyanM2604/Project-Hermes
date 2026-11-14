@@ -87,7 +87,7 @@ Optional repository variables: `OPENAI_EXTRACTION_MODEL` (default `gpt-4o-mini`)
 and limited to a single worker/four requests per minute; use a hosted or
 self-hosted compatible provider if volume grows.
 
-Run the workflow manually with dry-run enabled first. Dry-run makes paid
+Run the workflow manually with dry-run enabled and `account=uwcheeseclub` first. Dry-run makes paid
 collection/AI requests but writes no events/images. Then run with dry-run off to
 publish. Details and local retry commands are in [ingestion.md](ingestion.md).
 

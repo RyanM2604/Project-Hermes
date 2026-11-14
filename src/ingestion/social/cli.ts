@@ -180,7 +180,8 @@ export async function runWorkerCli(argv = process.argv.slice(2), dependencies: W
     let social: SocialRunSummary | null = null;
     if (!options.officialOnly && !options.reclassify) {
       if (budget.processingRemainingMs() === 0) budgetExhausted = true;
-      else social = await (dependencies.runSocial ?? runSocialIngestion)({ repository: createSocialRepository(client), account: options.account, dryRun: options.dryRun, budgetMs: budget.processingRemainingMs(), collectPosts: !(options.retry || options.reextract) });
+      else social = await (dependencies.runSocial ?? runSocialIngestion)({ repository: createSocialRepository(client), account: options.account, dryRun: options.dryRun, budgetMs: budget.processingRemainingMs(), collectPosts: !(options.retry || options.reextract), onProgress: progress => console.log(JSON.stringify(progress)) });
+      budgetExhausted ||= social?.complete === false;
     }
     let locations: Awaited<ReturnType<typeof backfillLocations>> | null = null;
     if (!options.dryRun && !options.reclassify && budget.processingRemainingMs() >= 9000) {
@@ -207,8 +208,11 @@ export async function runWorkerCli(argv = process.argv.slice(2), dependencies: W
     }
     const classification = aggregateClassifications(classificationResults);
     const exitCode = workerExitCode({ officialFailed, imagesFailed, classificationFailed: classification?.failedCount, budgetExhausted, social }) || (locations?.failed ? 1 : 0);
-    console.log(JSON.stringify({ dryRun: options.dryRun, official, social, classification, locations, reconciled, budgetExhausted }, null, 2));
-    if (process.env.GITHUB_STEP_SUMMARY) await appendFile(process.env.GITHUB_STEP_SUMMARY, `## Event ingestion\n\n- Processed social posts: ${social?.processed ?? 0}\n- Published/upserted events: ${social?.published ?? 0}\n- Held posts: ${social?.held ?? 0}\n- Failed posts: ${social?.failed ?? 0}\n- Uploaded images: ${social?.uploadedImages ?? 0}\n- Pending images: ${social?.imagePending ?? 0}\n- Classification failures: ${classification?.failedCount ?? 0}\n- Extraction tokens: ${(social?.inputTokens ?? 0) + (social?.outputTokens ?? 0)}\n- Result: ${exitCode ? "partial failure or unfinished work; inspect logs" : "success"}\n`);
+    const unavailable = social?.accounts.filter(account => account.skipped) ?? [];
+    const outcome = exitCode ? "incomplete" : unavailable.length ? "completed_with_warnings" : "completed";
+    for (const account of unavailable) console.warn(`::warning::Instagram account ${account.handle}: ${account.reason}`);
+    console.log(JSON.stringify({ outcome, dryRun: options.dryRun, official, social, classification, locations, reconciled, budgetExhausted }, null, 2));
+    if (process.env.GITHUB_STEP_SUMMARY) await appendFile(process.env.GITHUB_STEP_SUMMARY, `## Event ingestion\n\n- Mode: ${options.dryRun ? "dry run (nothing published)" : "publish"}\n- Outcome: ${outcome}\n- Unavailable accounts: ${unavailable.map(account => `${account.handle} (${account.reason})`).join(", ") || "none"}\n- Budget exhausted: ${budgetExhausted}\n- Processed social posts: ${social?.processed ?? 0}\n- Published/upserted events: ${social?.published ?? 0}\n- Held posts: ${social?.held ?? 0}\n- Failed posts: ${social?.failed ?? 0}\n- Uploaded images: ${social?.uploadedImages ?? 0}\n- Pending images: ${social?.imagePending ?? 0}\n- Classification failures: ${classification?.failedCount ?? 0}\n- Extraction tokens: ${(social?.inputTokens ?? 0) + (social?.outputTokens ?? 0)}\n- Result: ${exitCode ? "partial failure or unfinished work; inspect logs" : "success"}\n`);
     return exitCode;
   } finally { await client.$disconnect(); }
 }

@@ -79,6 +79,19 @@ describe("CLI orchestration", () => {
     expect(backfillLocations).toHaveBeenCalledWith(client, expect.objectContaining({ where: { source: { not: "instagram-clubs" } }, dryRun: false }));
     expect(runOfficial).not.toHaveBeenCalled(); expect(runSocial).not.toHaveBeenCalled(); expect(classify).not.toHaveBeenCalled();
   });
+  it("marks an unfinished dry-run as budget exhausted", async () => {
+    env(); const client = fakeClient();
+    const code = await runWorkerCli(["--social", "--dry-run"], { createClient: () => client as unknown as PrismaClient, loadEnv: vi.fn(), nowMs: () => 0, runSocial: vi.fn().mockResolvedValue({ ...emptySocial, dryRun: true, complete: false }) });
+    expect(code).toBe(1);
+    const summary = JSON.parse(vi.mocked(console.log).mock.calls.at(-1)![0]);
+    expect(summary).toMatchObject({ outcome: "incomplete", budgetExhausted: true });
+  });
+  it("finishes with visible warnings when only an account is unavailable", async () => {
+    env(); vi.spyOn(console, "warn").mockImplementation(() => {}); const client = fakeClient();
+    const code = await runWorkerCli(["--social", "--dry-run"], { createClient: () => client as unknown as PrismaClient, loadEnv: vi.fn(), runSocial: vi.fn().mockResolvedValue({ ...emptySocial, accounts: [{ handle: "gone", collected: 0, failed: false, skipped: true, reason: "account-not-found" }] }) });
+    expect(code).toBe(0); expect(console.warn).toHaveBeenCalledWith(expect.stringContaining("gone: account-not-found"));
+    expect(JSON.parse(vi.mocked(console.log).mock.calls.at(-1)![0]).outcome).toBe("completed_with_warnings");
+  });
   it("performs no database/bucket/classification stages during a normal dry run", async () => {
     env();
     const client = fakeClient();

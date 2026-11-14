@@ -22,8 +22,8 @@
   },
   {
     "clubName": "Mathematics Society",
-    "instagramHandle": "mathsocuw",
-    "profileUrl": "https://www.instagram.com/mathsocuw/",
+    "instagramHandle": "uwmathsoc",
+    "profileUrl": "https://www.instagram.com/uwmathsoc/",
     "active": true,
     "priority": 0
   },
@@ -50,8 +50,8 @@
   },
   {
     "clubName": "Environment Students' Society",
-    "instagramHandle": "uwaterloo_ess",
-    "profileUrl": "https://www.instagram.com/uwaterloo_ess/",
+    "instagramHandle": "uw_ess",
+    "profileUrl": "https://www.instagram.com/uw_ess/",
     "active": true,
     "priority": 0
   },
@@ -148,8 +148,8 @@
   },
   {
     "clubName": "City of Waterloo",
-    "instagramHandle": "cityofwaterloo",
-    "profileUrl": "https://www.instagram.com/cityofwaterloo/",
+    "instagramHandle": "citywaterloo",
+    "profileUrl": "https://www.instagram.com/citywaterloo/",
     "active": true,
     "priority": 0
   },
@@ -176,8 +176,8 @@
   },
   {
     "clubName": "UW Data Science Club",
-    "instagramHandle": "uwdsc",
-    "profileUrl": "https://www.instagram.com/uwdsc/",
+    "instagramHandle": "uwaterloodsc",
+    "profileUrl": "https://www.instagram.com/uwaterloodsc/",
     "active": true,
     "priority": 1
   },
@@ -211,8 +211,8 @@
   },
   {
     "clubName": "UW/UX",
-    "instagramHandle": "uwux",
-    "profileUrl": "https://www.instagram.com/uwux/",
+    "instagramHandle": "uw_ux",
+    "profileUrl": "https://www.instagram.com/uw_ux/",
     "active": true,
     "priority": 1
   },

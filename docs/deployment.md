@@ -3,7 +3,7 @@
 ## Vercel
 
 The GitHub repository is `RyanM2604/Project-Hermes`; the existing production URL
-is `https://project-hermes-eight.vercel.app`.
+redirects to `https://hermes-uw.vercel.app`.
 
 In the project's Settings, check:
 
@@ -27,7 +27,7 @@ want preview deployments to access the same services:
 | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Matching project's public anon key |
-| `NEXT_PUBLIC_APP_URL` | `https://project-hermes-eight.vercel.app` (or your final custom domain) |
+| `NEXT_PUBLIC_APP_URL` | `https://hermes-uw.vercel.app` (or your final custom domain) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Matching project's server-only service-role key, required to aggregate Going counts |
 | `DATABASE_URL` | Matching Supabase Postgres connection URL; use transaction pooling on port 6543 for Vercel functions |
 | `DIRECT_URL` | Direct/session Postgres connection URL on port 5432, used for migrations |
@@ -49,7 +49,7 @@ No map provider API key or PostHog configuration is needed.
 Use the same Supabase project for all keys and database connections.
 
 - Under Authentication → URL Configuration, set Site URL to the production URL
-  and allow `https://project-hermes-eight.vercel.app/auth/callback`. Add the
+  and allow `https://hermes-uw.vercel.app/auth/callback`. Add the
   corresponding callback for a custom domain or preview domain you actually use.
 - Prisma migrations must be applied with `npx prisma migrate deploy` before the
   new worker runs. They are not applied by `npm run build`. Existing connected
@@ -100,3 +100,14 @@ images, Supabase signup/login redirects, saving, and Going RSVP updates. The
 References: [Vercel Git deployments](https://vercel.com/docs/git),
 [Vercel environment variables](https://vercel.com/docs/environment-variables),
 [Supabase redirect URLs](https://supabase.com/docs/guides/auth/redirect-urls).
+
+## Initial production check
+
+The November 14 deployment built successfully and `/` and `/map` returned HTTP
+200. `/api/map` returned HTTP 503 (`Event data is unavailable right now.`).
+Check the production `DATABASE_URL` and Vercel Function logs for the actual
+connection error before treating the map as ready. Verify the database URL,
+public Supabase URL/anon key, and service-role key all refer to the same project.
+The checked local database is migrated, but Vercel's environment values have not
+been inspected or changed. GitHub's repository homepage still lists the older
+`project-hermes-eight.vercel.app` alias, which redirects to `hermes-uw.vercel.app`.

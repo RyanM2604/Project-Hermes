@@ -18,6 +18,7 @@ export interface FetchApifyOptions {
   skipPinnedPosts?: boolean;
   onlyPostsNewerThan?: string;
   dataDetailLevel?: "basicData" | "detailedData";
+  timeoutMs?: number;
 }
 
 export interface ApifyInstagramPost {
@@ -38,6 +39,7 @@ export interface ApifyInstagramPost {
   title?: string;
   type?: string;
   childPosts?: unknown[];
+  images?: string[];
   [key: string]: unknown;
 }
 
@@ -100,6 +102,8 @@ function postFromValue(value: unknown): ApifyInstagramPost | null {
     }
   }
 
+  if (Array.isArray(value.images)) post.images = value.images.filter((image): image is string => typeof image === "string");
+
   if (Array.isArray(value.childPosts)) {
     post.childPosts = value.childPosts;
   }
@@ -107,59 +111,20 @@ function postFromValue(value: unknown): ApifyInstagramPost | null {
   return post;
 }
 
-function collectPosts(value: unknown, posts: ApifyInstagramPost[]): void {
-  if (Array.isArray(value)) {
-    value.forEach((item) => collectPosts(item, posts));
-    return;
-  }
-
-  if (!isRecord(value)) {
-    return;
-  }
-
-  const directPost = postFromValue(value);
-
-  if (directPost) {
-    posts.push(directPost);
-  }
-
-  for (const nestedValue of Object.values(value)) {
-    if (Array.isArray(nestedValue) || isRecord(nestedValue)) {
-      collectPosts(nestedValue, posts);
-    }
-  }
-}
-
 function parseActorItems(raw: string): ApifyInstagramPost[] {
-  const trimmed = raw.trim();
-
-  if (!trimmed) {
-    return [];
-  }
-
   let payload: unknown;
-
-  try {
-    payload = JSON.parse(trimmed);
-  } catch {
-    return [];
-  }
-
-  const posts: ApifyInstagramPost[] = [];
-  collectPosts(payload, posts);
-
+  try { payload = JSON.parse(raw); } catch { throw new Error("Invalid Apify dataset JSON"); }
+  if (!Array.isArray(payload)) throw new Error("Invalid Apify dataset envelope");
   const seen = new Set<string>();
-
-  return posts.filter((post) => {
-    const key = post.shortCode ?? post.shortcode;
-
-    if (!key || seen.has(key)) {
-      return false;
-    }
-
-    seen.add(key);
-    return true;
-  });
+  const posts: ApifyInstagramPost[] = [];
+  for (const item of payload) {
+    if (!isRecord(item) || item.error || item.errorDescription) throw new Error("Apify dataset contains an upstream error");
+    const post = postFromValue(item);
+    if (!post) throw new Error("Invalid Apify post record");
+    const key = post.shortCode!;
+    if (!seen.has(key)) { seen.add(key); posts.push(post); }
+  }
+  return posts;
 }
 
 async function fetchApifyDatasetItems(
@@ -178,6 +143,7 @@ async function fetchApifyDatasetItems(
 
   const response = await (options.fetchImpl ?? fetch)(endpoint, {
     method: "POST",
+    signal: AbortSignal.timeout(options.timeoutMs ?? 120_000),
     headers: {
       Authorization: `Bearer ${token}`,
       "content-type": "application/json",

@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 
 import { createFallbackClassification } from "@/lib/classification/fallback";
 import { prisma } from "@/lib/db/prisma";
+import type { EventPeriod } from "./feed-period";
 import type { BuildingCode, EventTag, HermesEvent } from "@/types/event";
 
 export interface PersistedEventRecord {
@@ -16,6 +17,8 @@ export interface PersistedEventRecord {
   buildingCode: string | null;
   sourceTags: string[];
   imageUrl: string | null;
+  endTimeEstimated?: boolean;
+  supersededById?: string | null;
   isFreeFood: boolean;
   createdAt: Date;
   classificationStatus: "pending" | "classified" | "fallback" | "retry";
@@ -29,8 +32,8 @@ interface EventReadClient {
   event: {
     findMany(args: {
       include: { classification: true };
-      orderBy: { startTime: "asc" };
-      where: { endTime: { gte: Date } };
+      orderBy: { startTime: "asc" | "desc" };
+      where: { endTime: { gte: Date } | { lt: Date }; supersededById: null; startTime?: { lt: Date } };
     }): Promise<PersistedEventRecord[]>;
     findUnique(args: {
       where: { id: string };
@@ -60,6 +63,7 @@ const buildingCodes = new Set<BuildingCode>([
   "AL",
   "DC",
   "E5",
+  "EC5",
   "E7",
   "FED",
   "MC",
@@ -156,6 +160,7 @@ export function toHermesEvent(record: PersistedEventRecord): HermesEvent {
         : fallbackClassification.tags,
     ...(primaryTag ? { primaryTag } : {}),
     ...(record.imageUrl ? { imageUrl: record.imageUrl } : {}),
+    ...(record.endTimeEstimated ? { endTimeEstimated: true } : {}),
     sourceUrl: record.sourceUrl,
     isFreeFood: record.isFreeFood,
     createdAt: record.createdAt.toISOString(),
@@ -166,10 +171,11 @@ export function createPrismaEventRepository({
   client,
   now = () => new Date(),
 }: CreatePrismaEventRepositoryOptions) {
-  async function getEvents(): Promise<HermesEvent[]> {
+  async function getEvents(options: { period?: EventPeriod; startsBefore?: Date; throwOnUnavailable?: boolean } = {}): Promise<HermesEvent[]> {
     const currentTime = now();
 
     if (!hasDatabaseUrl()) {
+      if (options.throwOnUnavailable) throw new Error("Event database is not configured");
       return [];
     }
 
@@ -178,11 +184,12 @@ export function createPrismaEventRepository({
     try {
       records = await client.event.findMany({
         include: { classification: true },
-        orderBy: { startTime: "asc" },
-        where: { endTime: { gte: currentTime } },
+        orderBy: { startTime: options.period === "past" ? "desc" : "asc" },
+        where: { endTime: options.period === "past" ? { lt: currentTime } : { gte: currentTime }, supersededById: null,
+          ...(options.startsBefore ? { startTime: { lt: options.startsBefore } } : {}) },
       });
     } catch (error) {
-      if (isDatabaseUnavailableError(error)) {
+      if (isDatabaseUnavailableError(error) && !options.throwOnUnavailable) {
         return [];
       }
 
@@ -214,7 +221,12 @@ export function createPrismaEventRepository({
       throw error;
     }
 
-    return record ? toHermesEvent(record) : undefined;
+    const visited = new Set<string>();
+    while (record?.supersededById && !visited.has(record.id)) {
+      visited.add(record.id);
+      record = await client.event.findUnique({ where: { id: record.supersededById }, include: { classification: true } }) as PersistedEventRecord | null;
+    }
+    return record && !record.supersededById ? toHermesEvent(record) : undefined;
   }
 
   async function eventExists(eventId: string): Promise<boolean> {

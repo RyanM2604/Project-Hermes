@@ -59,11 +59,17 @@ export const normalizedEventCandidateSchema = z
     endTime: isoDateSchema,
     locationName: z.string().trim().min(1).max(500),
     buildingCode: buildingCodeSchema.optional(),
+    latitude: z.number().finite().min(-90).max(90).optional(),
+    longitude: z.number().finite().min(-180).max(180).optional(),
     tags: z.array(eventTagSchema),
     imageUrl: httpUrlSchema.optional(),
+    endTimeEstimated: z.boolean().optional(),
     isFreeFood: z.boolean(),
   })
   .superRefine((candidate, context) => {
+    if ((candidate.latitude === undefined) !== (candidate.longitude === undefined)) {
+      context.addIssue({ code: "custom", message: "Coordinates require both latitude and longitude", path: ["latitude"] });
+    }
     if (new Date(candidate.endTime) < new Date(candidate.startTime)) {
       context.addIssue({
         code: "custom",

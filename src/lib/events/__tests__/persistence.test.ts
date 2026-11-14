@@ -159,6 +159,14 @@ describe("createPrismaEventPersistenceRepository", () => {
     );
   });
 
+  it("retains a stored image when only upstream signing parameters change", async () => {
+    const input = persistedInput({ imageUrl: "https://wusa.ca/photo.jpg?token=new" });
+    const harness = prismaRepositoryHarness(input.contentHash);
+    harness.transactionEvent.findUnique.mockImplementation(async () => ({ contentHash: input.contentHash, sourceImageUrl: "https://wusa.ca/photo.jpg?token=old", imageUrl: "https://project.supabase.co/storage/v1/object/public/event-images/hash.webp", imageContentHash: "hash" }));
+    await harness.repository.upsert(input);
+    expect(harness.upsert).toHaveBeenCalledWith(expect.objectContaining({ update: expect.objectContaining({ imageUrl: "https://project.supabase.co/storage/v1/object/public/event-images/hash.webp" }) }));
+  });
+
   it("sets classification status to pending when content changes", async () => {
     const input = persistedInput();
     const { repository, upsert } = prismaRepositoryHarness("old-content-hash");
@@ -205,6 +213,7 @@ describe("ingestion persistence", () => {
     const result = await runIngestion({
       sources: [source],
       fetchText: async () => "raw",
+      validateSourceUrl: async () => true,
       now: () => new Date("2026-06-13T22:00:00.000Z"),
     });
     const output = buildCliOutput(result);
@@ -229,6 +238,7 @@ describe("ingestion persistence", () => {
     const result = await runIngestion({
       sources: [source],
       fetchText: async () => "raw",
+      validateSourceUrl: async () => true,
       persistence,
       now: () => new Date("2026-06-13T22:00:00.000Z"),
     });

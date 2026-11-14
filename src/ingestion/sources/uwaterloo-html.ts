@@ -2,6 +2,7 @@ import { load } from "cheerio";
 
 import { createSourceFingerprint } from "@/lib/events/adapters";
 import { resolveEventLocation } from "@/lib/events/location";
+import { readSourceLocation } from "../source-location";
 import type {
   NormalizationResult,
   NormalizedEventCandidate,
@@ -141,9 +142,10 @@ function parse(raw: string): NormalizationResult[] {
         .map((_, tag) => $(tag).text())
         .get();
       const tags = deriveTags(title, description, ...sourceTags);
+      const sourceLocation = readSourceLocation($.html(element), title);
       const resolvedLocation = resolveEventLocation({
         description,
-        locationName: "Location not provided",
+        locationName: sourceLocation?.locationName ?? "Location not provided",
       });
       const imageUrl = toAbsoluteHttpUrl(
         card.find(".card__image img").first().attr("src") ?? "",
@@ -162,6 +164,7 @@ function parse(raw: string): NormalizationResult[] {
         tags,
         ...(imageUrl ? { imageUrl } : {}),
         isFreeFood: tags.includes("free-food"),
+        ...(sourceLocation?.latitude !== undefined && sourceLocation.longitude !== undefined ? { latitude: sourceLocation.latitude, longitude: sourceLocation.longitude } : {}),
       };
 
       return { ok: true, event };

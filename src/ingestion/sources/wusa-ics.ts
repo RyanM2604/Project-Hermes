@@ -1,5 +1,6 @@
 import { createSourceFingerprint } from "@/lib/events/adapters";
 import { resolveEventLocation } from "@/lib/events/location";
+import { coordinates } from "@/lib/events/geocoding";
 import type {
   NormalizationResult,
   NormalizedEventCandidate,
@@ -163,6 +164,8 @@ function normalizeEvent(properties: IcalProperty[]): NormalizationResult {
     first(properties, "ATTACH")?.value ?? "",
     SOURCE_URL,
   );
+  const geo = first(properties, "GEO")?.value.split(";");
+  const point = coordinates(geo?.[0], geo?.[1]);
   const event: NormalizedEventCandidate = {
     source: SOURCE,
     sourceUrl,
@@ -177,6 +180,7 @@ function normalizeEvent(properties: IcalProperty[]): NormalizationResult {
     tags,
     ...(imageUrl ? { imageUrl } : {}),
     isFreeFood: tags.includes("free-food"),
+    ...(point ? { latitude: point[1], longitude: point[0] } : {}),
   };
 
   return { ok: true, event };

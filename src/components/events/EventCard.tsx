@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowUpRight, MapPin, X } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { getEventThemeForEvent } from "@/lib/events/event-theme";
@@ -18,14 +19,24 @@ const dateFormatter = new Intl.DateTimeFormat("en-CA", {
   timeZone: "America/Toronto",
 });
 
+const pastDateFormatter = new Intl.DateTimeFormat("en-CA", {
+  weekday: "short", year: "numeric", month: "short", day: "numeric",
+  hour: "numeric", minute: "2-digit", timeZone: "America/Toronto",
+});
+
 export function EventCard({
   event,
   goingCount = 0,
+  isPast = false,
 }: {
   event: HermesEvent;
   goingCount?: number;
+  isPast?: boolean;
 }) {
   const [dismissed, setDismissed] = useState(false);
+  const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
+  const imageUrl = event.imageUrl?.trim();
+  const showImage = Boolean(imageUrl && imageUrl !== failedImageUrl);
   const theme = getEventThemeForEvent(event);
   const socialSubTag = getEventSocialSubTag(event.tags);
   const visibleTags = event.tags.filter(
@@ -57,10 +68,26 @@ export function EventCard({
       data-category={event.primaryTag ?? event.tags[0] ?? "general"}
     >
       <div className="hm-event-media">
-        <span className="hm-event-media-label">{theme.label}</span>
-        <span className="hm-event-media-mark" aria-hidden="true">
-          {event.buildingCode ?? theme.label.slice(0, 1)}
-        </span>
+        {showImage && imageUrl ? (
+          <Image
+            key={imageUrl}
+            src={imageUrl}
+            alt={event.title}
+            fill
+            unoptimized
+            loading="lazy"
+            className="hm-event-image"
+            referrerPolicy="no-referrer"
+            onError={() => setFailedImageUrl(imageUrl)}
+          />
+        ) : (
+          <>
+            <span className="hm-event-media-label">{theme.label}</span>
+            <span className="hm-event-media-mark" aria-hidden="true">
+              {event.buildingCode ?? theme.label.slice(0, 1)}
+            </span>
+          </>
+        )}
         {event.isFreeFood && <span className="hm-event-food">Free food</span>}
       </div>
       <button
@@ -79,8 +106,9 @@ export function EventCard({
           </Link>
         </h3>
         <div className="hm-event-facts">
+          {isPast && <span>Ended</span>}
           <time dateTime={event.startTime}>
-            {dateFormatter.format(new Date(event.startTime))}
+            {(isPast ? pastDateFormatter : dateFormatter).format(new Date(event.startTime))}
           </time>
           <span>
             <MapPin size={15} aria-hidden="true" />

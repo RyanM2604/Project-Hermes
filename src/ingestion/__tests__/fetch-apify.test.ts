@@ -50,4 +50,11 @@ describe("fetchApifyInstagramPosts", () => {
       }),
     ).rejects.toThrow(/Missing APIFY_TOKEN/);
   });
+  it.each(["not json", "{}", '[{"error":"account unavailable"}]', '[{}]'])("fails closed on malformed or upstream-error datasets: %s", async (body) => {
+    await expect(fetchApifyInstagramPosts({ id: "instagram-clubs", url: "https://www.instagram.com/club/", acceptedContentTypes: [], parse: () => [] }, { apiToken: "test-token", fetchImpl: async () => new Response(body) })).rejects.toThrow();
+  });
+  it("accepts an explicitly empty dataset", async () => {
+    await expect(fetchApifyInstagramPosts({ id: "instagram-clubs", url: "https://www.instagram.com/club/", acceptedContentTypes: [], parse: () => [] }, { apiToken: "test-token", fetchImpl: async () => new Response("[]") })).resolves.toEqual([]);
+  });
+
 });

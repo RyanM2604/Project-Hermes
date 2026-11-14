@@ -37,3 +37,8 @@ export function formatEventLocation({
 
   return `${resolved.locationName}, ${buildingCode}`;
 }
+
+/** Evaluate end status at request time; tests can provide a fixed clock. */
+export function hasEventEnded(endTime: string, now = new Date()): boolean {
+  return new Date(endTime).getTime() < now.getTime();
+}

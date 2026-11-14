@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { eventFeedHref, type EventPeriod } from "@/lib/events/feed-period";
 import {
   eventTagFilters,
   getEventTagCounts,
@@ -14,9 +15,11 @@ import type { EventTag, HermesEvent } from "@/types/event";
 export function EventFilters({
   events,
   selectedTag,
+  period = "upcoming",
 }: {
   events: HermesEvent[];
   selectedTag?: EventTag;
+  period?: EventPeriod;
 }) {
   const counts = getEventTagCounts(events);
   const showSocial = selectedTag === "chill-social" ||
@@ -35,7 +38,7 @@ export function EventFilters({
     <nav className="hm-filter" aria-label="Filter events by category">
       <div className="hm-filter-scroll">
         <Link
-          href="/events#event-feed"
+          href={eventFeedHref(period)}
           onClick={() => logClick("all")}
           aria-current={!selectedTag ? "page" : undefined}
         >
@@ -48,7 +51,7 @@ export function EventFilters({
           return (
             <Link
               key={tag}
-              href={"/events?tag=" + tag + "#event-feed"}
+              href={eventFeedHref(period, tag)}
               onClick={() => logClick(tag)}
               aria-current={active ? "page" : undefined}
             >
@@ -64,7 +67,7 @@ export function EventFilters({
             .map(({ tag, label }) => (
               <Link
                 key={tag}
-                href={"/events?tag=" + tag + "#event-feed"}
+                href={eventFeedHref(period, tag)}
                 onClick={() => logClick(tag)}
                 aria-current={selectedTag === tag ? "page" : undefined}
               >

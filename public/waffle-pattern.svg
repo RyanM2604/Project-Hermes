@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <filter id="recess" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation=".8"/>
+    </filter>
+  </defs>
+  <rect x="5" y="5" width="54" height="54" rx="3" fill="#242922" fill-opacity=".025"/>
+  <path d="M6 56V9a3 3 0 0 1 3-3h47" fill="none" stroke="#242922" stroke-opacity=".1" stroke-width="2" filter="url(#recess)"/>
+  <path d="M5 56V8a3 3 0 0 1 3-3h48" fill="none" stroke="#242922" stroke-opacity=".12"/>
+  <path d="M59 8v48a3 3 0 0 1-3 3H8" fill="none" stroke="#fff" stroke-opacity=".65"/>
+</svg>

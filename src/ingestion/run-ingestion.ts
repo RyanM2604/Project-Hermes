@@ -191,7 +191,7 @@ export async function runIngestion(
   const now = options.now ?? (() => new Date());
   const startedAt = now().toISOString();
   const sourceRuns = await Promise.all(
-    (options.sources ?? liveEventSources).map((source) =>
+    (options.sources ?? liveEventSources.filter((source) => source.id !== "instagram-clubs")).map((source) =>
       runSource(
         source,
         options.fetchText ?? fetchTextForSource,

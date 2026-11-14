@@ -42,12 +42,14 @@ Use these verbatim in their stated roles unless the product behaviour changes or
 | Hero alternate B | Never find out about the free pizza after it's gone. |
 | Signature line | Made for the moments between classes. |
 | Value headline | Everything happening, finally in one place. |
-| Trust headline | Every event shows where it came from. |
-| Three-step headline | Bored to there in three moves. |
+| Daytime photo headline | An hour between classes. |
+| Evening photo headline | A night worth staying for. |
 | Final CTA headline | Go find your thing. |
 | Footer | Built by Waterloo students, for Waterloo students. |
 
 Choose one hero line at a time. Keep the primary CTA identical throughout a page. Navigation labels such as “Events” and “Sign in” name destinations and are not alternate browse CTAs.
+
+The landing page pairs the daytime and evening headlines with student-life photography and one short paragraph each. Let the photos carry the atmosphere. Keep provenance visible in event cards rather than dedicating a marketing section to describing card fields. The former “Every event shows where it came from” and “Bored to there in three moves” sections are retired; do not reintroduce them as landing-page sections.
 
 ## Preferred patterns by surface
 

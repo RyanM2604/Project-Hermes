@@ -3,38 +3,290 @@
   "title": "Hermes design system",
   "extensions": {
     "colorMeta": {
-      "paper": { "role": "neutral", "displayName": "Paper", "canonical": "#f1f3ef", "tonalRamp": ["#fafbf8", "#f1f3ef", "#e6ebe5"] },
-      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#242922", "tonalRamp": ["#242922", "#5a655c"] },
-      "gold": { "role": "primary", "displayName": "Hermes Gold", "canonical": "#e5a92f", "tonalRamp": ["#f4d779", "#e5a92f", "#a34e29"] },
-      "copper": { "role": "accent", "displayName": "Copper", "canonical": "#a34e29", "tonalRamp": ["#e5a579", "#a34e29", "#78391f"] }
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "#f1f3ef",
+        "tonalRamp": [
+          "oklch(15.00% 0.00570 128.53)",
+          "oklch(26.43% 0.00570 128.53)",
+          "oklch(37.86% 0.00570 128.53)",
+          "oklch(49.29% 0.00570 128.53)",
+          "oklch(60.71% 0.00570 128.53)",
+          "oklch(72.14% 0.00570 128.53)",
+          "oklch(83.57% 0.00570 128.53)",
+          "oklch(95.00% 0.00570 128.53)"
+        ]
+      },
+      "paper-deep": {
+        "role": "neutral",
+        "displayName": "Paper Deep",
+        "canonical": "#e6ebe5",
+        "tonalRamp": [
+          "oklch(15.00% 0.00960 140.52)",
+          "oklch(26.43% 0.00960 140.52)",
+          "oklch(37.86% 0.00960 140.52)",
+          "oklch(49.29% 0.00960 140.52)",
+          "oklch(60.71% 0.00960 140.52)",
+          "oklch(72.14% 0.00960 140.52)",
+          "oklch(83.57% 0.00960 140.52)",
+          "oklch(95.00% 0.00960 140.52)"
+        ]
+      },
+      "card": {
+        "role": "neutral",
+        "displayName": "Card",
+        "canonical": "#fafbf8",
+        "tonalRamp": [
+          "oklch(15.00% 0.00408 121.56)",
+          "oklch(26.43% 0.00408 121.56)",
+          "oklch(37.86% 0.00408 121.56)",
+          "oklch(49.29% 0.00408 121.56)",
+          "oklch(60.71% 0.00408 121.56)",
+          "oklch(72.14% 0.00408 121.56)",
+          "oklch(83.57% 0.00408 121.56)",
+          "oklch(95.00% 0.00408 121.56)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#242922",
+        "tonalRamp": [
+          "oklch(15.00% 0.01453 136.70)",
+          "oklch(26.43% 0.01453 136.70)",
+          "oklch(37.86% 0.01453 136.70)",
+          "oklch(49.29% 0.01453 136.70)",
+          "oklch(60.71% 0.01453 136.70)",
+          "oklch(72.14% 0.01453 136.70)",
+          "oklch(83.57% 0.01453 136.70)",
+          "oklch(95.00% 0.01453 136.70)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "canonical": "#5a655c",
+        "tonalRamp": [
+          "oklch(15.00% 0.01956 150.77)",
+          "oklch(26.43% 0.01956 150.77)",
+          "oklch(37.86% 0.01956 150.77)",
+          "oklch(49.29% 0.01956 150.77)",
+          "oklch(60.71% 0.01956 150.77)",
+          "oklch(72.14% 0.01956 150.77)",
+          "oklch(83.57% 0.01956 150.77)",
+          "oklch(95.00% 0.01956 150.77)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Line",
+        "canonical": "#c8d2ca",
+        "tonalRamp": [
+          "oklch(15.00% 0.01539 151.73)",
+          "oklch(26.43% 0.01539 151.73)",
+          "oklch(37.86% 0.01539 151.73)",
+          "oklch(49.29% 0.01539 151.73)",
+          "oklch(60.71% 0.01539 151.73)",
+          "oklch(72.14% 0.01539 151.73)",
+          "oklch(83.57% 0.01539 151.73)",
+          "oklch(95.00% 0.01539 151.73)"
+        ]
+      },
+      "gold": {
+        "role": "primary",
+        "displayName": "Gold",
+        "canonical": "#e5a92f",
+        "tonalRamp": [
+          "oklch(15.00% 0.14618 80.15)",
+          "oklch(26.43% 0.14618 80.15)",
+          "oklch(37.86% 0.14618 80.15)",
+          "oklch(49.29% 0.14618 80.15)",
+          "oklch(60.71% 0.14618 80.15)",
+          "oklch(72.14% 0.14618 80.15)",
+          "oklch(83.57% 0.14618 80.15)",
+          "oklch(95.00% 0.14618 80.15)"
+        ]
+      },
+      "gold-light": {
+        "role": "primary",
+        "displayName": "Gold Light",
+        "canonical": "#f4d779",
+        "tonalRamp": [
+          "oklch(15.00% 0.11849 92.68)",
+          "oklch(26.43% 0.11849 92.68)",
+          "oklch(37.86% 0.11849 92.68)",
+          "oklch(49.29% 0.11849 92.68)",
+          "oklch(60.71% 0.11849 92.68)",
+          "oklch(72.14% 0.11849 92.68)",
+          "oklch(83.57% 0.11849 92.68)",
+          "oklch(95.00% 0.11849 92.68)"
+        ]
+      },
+      "copper": {
+        "role": "accent",
+        "displayName": "Copper",
+        "canonical": "#a34e29",
+        "tonalRamp": [
+          "oklch(15.00% 0.12338 42.70)",
+          "oklch(26.43% 0.12338 42.70)",
+          "oklch(37.86% 0.12338 42.70)",
+          "oklch(49.29% 0.12338 42.70)",
+          "oklch(60.71% 0.12338 42.70)",
+          "oklch(72.14% 0.12338 42.70)",
+          "oklch(83.57% 0.12338 42.70)",
+          "oklch(95.00% 0.12338 42.70)"
+        ]
+      },
+      "forest": {
+        "role": "accent",
+        "displayName": "Forest",
+        "canonical": "#3f5945",
+        "tonalRamp": [
+          "oklch(15.00% 0.04537 151.31)",
+          "oklch(26.43% 0.04537 151.31)",
+          "oklch(37.86% 0.04537 151.31)",
+          "oklch(49.29% 0.04537 151.31)",
+          "oklch(60.71% 0.04537 151.31)",
+          "oklch(72.14% 0.04537 151.31)",
+          "oklch(83.57% 0.04537 151.31)",
+          "oklch(95.00% 0.04537 151.31)"
+        ]
+      }
     },
-    "darkColors": { "paper": "#171c19", "paperDeep": "#202822", "card": "#263029", "ink": "#eef2eb", "muted": "#b7c6b8", "line": "#4b5a4e", "gold": "#e5a92f", "copper": "#e5a579" },
+    "darkColors": {
+      "paper": "#171c19",
+      "paperDeep": "#202822",
+      "card": "#263029",
+      "ink": "#eef2eb",
+      "muted": "#b7c6b8",
+      "line": "#4b5a4e",
+      "gold": "#e5a92f",
+      "copper": "#e5a579"
+    },
     "typographyMeta": {
-      "display": { "displayName": "Display", "purpose": "Landing page and major moments" },
-      "headline": { "displayName": "Headline", "purpose": "Page and section headings" },
-      "title": { "displayName": "Title", "purpose": "Event titles" },
-      "body": { "displayName": "Body", "purpose": "Reading and explanation" },
-      "label": { "displayName": "Label", "purpose": "Controls and metadata" }
+      "display": {
+        "displayName": "Display",
+        "purpose": "Landing page and major moments"
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Page and section headings"
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Event titles"
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Reading and explanation"
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Controls and metadata"
+      }
     },
-    "shadows": [{ "name": "form lift", "value": "0 20px 60px rgba(36,41,34,.08)", "purpose": "Only for structurally raised account forms" }],
-    "motion": [
-      { "name": "guide arrival", "value": "750–1200ms power3.out", "purpose": "One landing page onload sequence for headline, invitation, and guide cover" },
-      { "name": "section arrival", "value": "520–850ms power2.out", "purpose": "One-time landing section entrances; shorter and quieter on product pages" },
-      { "name": "day pages", "value": "scroll-linked scale 1 to 0.96 and rotation 0 to -1deg", "purpose": "Successive campus moments pass like pages of a guide on wide screens" },
-      { "name": "quiet response", "value": "200ms ease", "purpose": "Hover state and small tile lift" }
+    "shadows": [
+      {
+        "name": "form lift",
+        "value": "0 20px 60px rgba(36,41,34,.08)",
+        "purpose": "Only for structurally raised account forms"
+      }
     ],
-    "breakpoints": [{ "name": "mobile", "value": "700px" }, { "name": "compact desktop", "value": "900px" }]
+    "motion": [
+      {
+        "name": "guide arrival",
+        "value": "750–1200ms power3.out",
+        "purpose": "One landing page onload sequence for headline, invitation, and guide cover"
+      },
+      {
+        "name": "section arrival",
+        "value": "520–850ms power2.out",
+        "purpose": "One-time landing section entrances; shorter and quieter on product pages"
+      },
+      {
+        "name": "day pages",
+        "value": "scroll-linked scale 1 to 0.96 and rotation 0 to -1deg",
+        "purpose": "Successive campus moments pass like pages of a guide on wide screens"
+      },
+      {
+        "name": "quiet response",
+        "value": "200ms ease",
+        "purpose": "Hover state and small tile lift"
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "mobile",
+        "value": "700px"
+      },
+      {
+        "name": "compact desktop",
+        "value": "900px"
+      }
+    ]
   },
   "components": [
-    { "name": "Primary invitation", "kind": "button", "refersTo": "button-primary", "description": "Gold action with Ink label", "html": "<a class=\"hermes-button hermes-button-gold\">Explore events</a>", "css": ".hermes-button-gold{background:#e5a92f;color:#242922;border-radius:4px;padding:14px 20px}" },
-    { "name": "Event row", "kind": "card", "refersTo": "card-event", "description": "Date, category, title, organizer, location, and detail action", "html": "<article class=\"hm-event-card\"><div class=\"hm-event-date\">Nov 2</div><div class=\"hm-event-body\"><h3>Event title</h3></div></article>", "css": ".hm-event-card{display:grid;grid-template-columns:86px minmax(0,1fr) 35px;border-bottom:1px solid #c8d2ca;padding:24px 20px 25px 0}" }
+    {
+      "name": "Primary invitation",
+      "kind": "button",
+      "description": "Primary invitation using the existing Hermes color tokens.",
+      "html": "<button class=\"ds-button-gold\">See what's on</button>",
+      "css": ".ds-button-gold{min-height:52px;padding:14px 20px;border:0;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;gap:24px;font:750 14px var(--hm-sans);text-decoration:none;cursor:pointer;transition:background .2s ease,transform .2s ease;background:var(--hm-gold);color:var(--hm-on-gold);}.ds-button-gold:hover{background:var(--hm-gold-light);transform:translateY(-2px)}.ds-button-gold:focus-visible{outline:3px solid var(--hm-copper);outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-button-gold{transition:none}}",
+      "refersTo": "button-primary"
+    },
+    {
+      "name": "Routine action",
+      "kind": "button",
+      "description": "Routine action using the existing Hermes color tokens.",
+      "html": "<button class=\"ds-button-ink\">See what's on</button>",
+      "css": ".ds-button-ink{min-height:52px;padding:14px 20px;border:0;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;gap:24px;font:750 14px var(--hm-sans);text-decoration:none;cursor:pointer;transition:background .2s ease,transform .2s ease;background:var(--hm-ink);color:var(--hm-paper);}.ds-button-ink:hover{background:var(--hm-copper);transform:translateY(-2px)}.ds-button-ink:focus-visible{outline:3px solid var(--hm-copper);outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-button-ink{transition:none}}",
+      "refersTo": "button-secondary"
+    },
+    {
+      "name": "Closing invitation",
+      "kind": "button",
+      "description": "Closing invitation using the existing Hermes color tokens.",
+      "html": "<button class=\"ds-button-copper\">See what's on</button>",
+      "css": ".ds-button-copper{min-height:52px;padding:14px 20px;border:0;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;gap:24px;font:750 14px var(--hm-sans);text-decoration:none;cursor:pointer;transition:background .2s ease,transform .2s ease;background:var(--hm-copper);color:var(--hm-on-copper);}.ds-button-copper:hover{background:color-mix(in srgb,var(--hm-copper) 88%,var(--hm-on-copper));transform:translateY(-2px)}.ds-button-copper:focus-visible{outline:3px solid var(--hm-copper);outline-offset:3px}@media(prefers-reduced-motion:reduce){.ds-button-copper{transition:none}}"
+    },
+    {
+      "name": "Account field",
+      "kind": "input",
+      "description": "Paper field with a copper focus treatment.",
+      "html": "<input class=\"ds-input\" type=\"email\" aria-label=\"Waterloo email\" placeholder=\"Waterloo email\">",
+      "css": ".ds-input{background:var(--hm-paper);color:var(--hm-ink);border:1px solid var(--hm-line);border-radius:4px;font:inherit}.ds-input::placeholder{color:var(--hm-muted)}.ds-input:focus{border-color:var(--hm-copper)}.ds-input:focus-visible{outline:3px solid var(--hm-copper);outline-offset:3px}"
+    },
+    {
+      "name": "Navigation links",
+      "kind": "nav",
+      "description": "Muted links with a copper underline for the current page.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Main\"><a href=\"/events\" aria-current=\"page\">Events</a><a href=\"/clubs\">Clubs</a></nav>",
+      "css": ".ds-nav{display:flex;gap:32px;height:76px}.ds-nav a{height:100%;display:inline-flex;align-items:center;position:relative;color:var(--hm-ink);opacity:.72;font:650 14px var(--hm-sans);text-decoration:none;transition:opacity .2s ease}.ds-nav a:hover,.ds-nav a[aria-current=\"page\"]{opacity:1}.ds-nav a[aria-current=\"page\"]::after{content:\"\";position:absolute;height:3px;left:0;right:0;bottom:-1px;background:var(--hm-copper)}.ds-nav a:focus-visible{outline:3px solid var(--hm-copper);outline-offset:3px}"
+    },
+    {
+      "name": "Category filter",
+      "kind": "chip",
+      "description": "Compact category link; current category uses ink and paper.",
+      "html": "<a class=\"ds-filter\" href=\"/events\" aria-current=\"page\">All events <span>12</span></a>",
+      "css": ".ds-filter{display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:10px 16px;border:1px solid var(--hm-line);border-radius:999px;color:var(--hm-ink);background:var(--hm-card);text-decoration:none;font:700 13px var(--hm-sans);transition:background .2s ease,border-color .2s ease,transform .2s ease}.ds-filter:hover{border-color:var(--hm-copper);transform:translateY(-1px)}.ds-filter[aria-current=\"page\"]{background:var(--hm-ink);border-color:var(--hm-ink);color:var(--hm-paper)}.ds-filter span{font-size:11px;font-variant-numeric:tabular-nums;opacity:.7}.ds-filter:focus-visible{outline:3px solid var(--hm-copper);outline-offset:3px}"
+    },
+    {
+      "name": "Event row",
+      "kind": "card",
+      "refersTo": "card-event",
+      "description": "Documented date-led row with source context and a detail link.",
+      "html": "<article class=\"ds-event\"><time>Nov 2</time><div><h3><a href=\"/events\">Event title</a></h3><p>Organizer · Location · Original source</p></div></article>",
+      "css": ".ds-event{display:grid;grid-template-columns:86px minmax(0,1fr);border-bottom:1px solid var(--hm-line);padding:24px 20px 25px 0;color:var(--hm-ink)}.ds-event h3{font:550 30px/1.12 var(--hm-display)}.ds-event p{color:var(--hm-muted);font:400 14px var(--hm-sans)}.ds-event a{color:inherit;text-decoration:none}.ds-event a:hover{color:var(--hm-copper)}.ds-event a:focus-visible{outline:3px solid var(--hm-copper);outline-offset:3px}"
+    }
   ],
   "narrative": {
-    "northStar": "A pocket guide to the campus day",
-    "overview": "Cool mineral, editorial, useful campus discovery built from paper, ink, amber, and copper.",
-    "keyCharacteristics": ["Expressive Fraunces headlines", "Fast scanning in DM Sans", "Date-led event rows", "Gold as a deliberate invitation", "Source and location context before social signals"],
-    "rules": [{ "name": "Guide, not dashboard", "body": "Separate information with whitespace and rules rather than floating glass cards.", "section": "layout" }, { "name": "Gold has a job", "body": "Use amber for invitation and momentum, not background decoration everywhere.", "section": "colors" }],
-    "dos": ["Keep source provenance visible", "Use warm solid category stock colors", "Support keyboard focus and reduced motion"],
-    "donts": ["No blue glow or gradient text", "No repeated glass panels", "No fabricated event photos or generic widgets"]
-  }
+    "northStar": "",
+    "overview": "Hermes is a pocket guide to the campus day. It should feel collected, useful, and human: a page someone would keep in their bag, opened on a phone between classes. Cool mineral paper gives the interface daylight and breathing room. Amber suggests discovery and momentum; copper adds a richer editorial note. The reference is a well made city guide, not an illustration of the Greek god.\n\nThe product surfaces are **Operate**: students scan, filter, inspect, and decide quickly. The landing page is **Persuade**, with more expressive type and a guide cover composition. The same colors, type, and rules carry across both.\n",
+    "keyCharacteristics": [],
+    "rules": [],
+    "dos": [],
+    "donts": []
+  },
+  "generatedAt": "2026-11-04T19:05:35.686761Z"
 }

@@ -45,7 +45,8 @@ export async function runCli(options: RunCliOptions = {}): Promise<number> {
 }
 
 async function main(): Promise<void> {
-  process.exitCode = await runCli();
+  const { runWorkerCli } = await import("./social/cli");
+  process.exitCode = await runWorkerCli();
 }
 
 function isDirectExecution(): boolean {

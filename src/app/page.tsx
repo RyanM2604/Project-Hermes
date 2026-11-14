@@ -1,6 +1,11 @@
 import { ArrowUpRight } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { HermesMotion } from "@/components/motion/HermesMotion";
+import { HomeBackground } from "@/components/motion/HomeBackground";
+import { MorphLink } from "@/components/motion/LoginMorph";
+import { HeroEventPreview } from "@/components/events/HeroEventPreview";
+import { loadHeroEvents } from "@/lib/events/hero-preview";
 
 const examples = [
   { day: "Today", category: "Free food", title: "Pizza in the SLC", detail: "Time, location, organiser, and source on the live card" },
@@ -8,29 +13,24 @@ const examples = [
   { day: "This week", category: "Something new", title: "A workshop worth saving", detail: "Find the original post and make a plan" },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const heroEvents = await loadHeroEvents();
   return (
     <HermesMotion variant="home">
       <main className="hermes-home">
+        <HomeBackground />
         <section className="home-hero">
-          <div className="home-hero-inner hermes-container">
+          <div className={`home-hero-inner hermes-container${heroEvents.length ? "" : " home-hero-inner-empty"}`}>
             <div className="home-hero-copy">
-              <h1 data-motion="home-title">There&apos;s always something on. <em>Now you&apos;ll know in time.</em></h1>
-              <p data-motion="home-copy">Hermes gathers Waterloo events, free food, and club nights into one feed. See when, where, who&apos;s behind it, and the original source before you go.</p>
-              <div className="home-hero-actions" data-motion="home-actions">
-                <Link href="/events" className="hermes-button hermes-button-gold">See what&apos;s on <ArrowUpRight size={18} aria-hidden="true" /></Link>
-                <span>No account needed</span>
+              <h1><span>Life happens.</span>{" "}<span>Don&apos;t miss it.</span></h1>
+              <div className="home-hero-actions">
+                <MorphLink href="/signup" className="hermes-button hermes-button-gold home-cta-primary">Sign up for Hermes <ArrowUpRight size={23} aria-hidden="true" /></MorphLink>
+                <MorphLink href="/events" className="hermes-button home-cta-events">Explore events <ArrowUpRight size={23} aria-hidden="true" /></MorphLink>
               </div>
             </div>
-            <div className="home-feed-preview" data-motion="home-cover" aria-label="Examples of events you might find in the feed">
-              <div className="home-feed-preview-head"><span>In the feed</span><span>Examples</span></div>
-              <div className="home-feed-preview-card"><span>Free food · Today</span><strong>Pizza in the SLC</strong><small>Time, place, organiser, original source</small></div>
-              <div className="home-feed-preview-card"><span>Social · Tonight</span><strong>Open mic after class</strong><small>Details before you head over</small></div>
-              <div className="home-feed-preview-card"><span>Workshop · This week</span><strong>Something new to try</strong><small>A plan worth saving</small></div>
-              <p>Illustrative listings. Open the feed for current events.</p>
-            </div>
+            <HeroEventPreview events={heroEvents} />
           </div>
-          <div className="home-hero-foot hermes-container"><span>Made for the moments between classes.</span><span>Keep scrolling <span aria-hidden="true">↓</span></span></div>
+          <div className="home-hero-divider hermes-container" aria-hidden="true" />
         </section>
 
         <section className="home-intro hermes-container" id="features" data-motion="intro-section">
@@ -45,21 +45,34 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="home-trust hermes-container" data-motion="method-section">
-          <div data-motion="method-item"><h2>Every event shows where it came from.</h2></div>
-          <div data-motion="method-item"><p>Each live card shows the organiser, time, location, and a link to the original source. Check the details before you cross campus.</p></div>
+        <section className="home-campus-life hermes-container" aria-label="Between classes and after dark">
+          <article className="home-life-day" data-motion="method-section">
+            <div className="home-life-image" data-motion="method-item">
+              <Image src="/uni-students.jpg" alt="Two students sharing a book outside" fill sizes="(max-width: 700px) 100vw, 55vw" />
+            </div>
+            <div className="home-life-copy" data-motion="method-item">
+              <span>Between classes</span>
+              <h2>An hour between classes.</h2>
+              <p>A club meet-up, a guest talk, a workshop. Find something that fits before your next class.</p>
+            </div>
+          </article>
+          <article className="home-life-night" data-motion="join-section">
+            <div className="home-life-image" data-motion="join-item">
+              <Image src="/party-people.jpg" alt="People dancing together at a party, with a mirrored disco helmet in the crowd" fill sizes="(max-width: 700px) 100vw, 45vw" />
+            </div>
+            <div className="home-life-copy" data-motion="join-item">
+              <span>After dark</span>
+              <h2>A night worth staying for.</h2>
+              <p>Club socials, open mics, and games nights. Have an answer when the group chat asks for plans.</p>
+            </div>
+          </article>
         </section>
 
-        <section className="home-method" data-motion="join-section">
-          <div className="hermes-container home-method-inner">
-            <div data-motion="join-item"><h2>Bored to there in three moves.</h2></div>
-            <div data-motion="join-item"><ol><li>See what&apos;s starting soon.</li><li>Browse the categories that interest you.</li><li>Open a card for the details and original source.</li></ol><Link href="/events" className="hermes-button hermes-button-outline">See what&apos;s on <ArrowUpRight size={18} aria-hidden="true" /></Link></div>
-          </div>
-        </section>
-
-        <section className="home-join hermes-container">
+        <section className="home-join-band">
+          <div className="home-join hermes-container">
           <div><h2>Go find <em>your thing.</em></h2><p>Browsing needs no account. Use your Waterloo email to save events or RSVP when you&apos;re ready.</p></div>
           <div className="home-join-actions"><Link href="/events" className="hermes-button hermes-button-gold">See what&apos;s on <ArrowUpRight size={18} aria-hidden="true" /></Link><Link href="/login" className="hermes-text-link">Sign in with your Waterloo email</Link></div>
+          </div>
         </section>
         <footer className="home-footer hermes-container"><span>Built by Waterloo students, for Waterloo students.</span><span>© 2026 Hermes · Made for the moments between classes.</span></footer>
       </main>

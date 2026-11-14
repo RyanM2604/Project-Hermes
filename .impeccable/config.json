@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-font",
+        "value": "helvetica neue",
+        "createdAt": "2026-11-05T19:18:43.083Z",
+        "reason": "User requested a GUI matching real iPhones; the phone mockup uses the iOS system font stack to reproduce Messages."
+      }
+    ]
+  }
+}

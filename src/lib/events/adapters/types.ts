@@ -17,8 +17,11 @@ export interface NormalizedEventCandidate {
   endTime: string;
   locationName: string;
   buildingCode?: BuildingCode;
+  latitude?: number;
+  longitude?: number;
   tags: EventTag[];
   imageUrl?: string;
+  endTimeEstimated?: boolean;
   isFreeFood: boolean;
 }
 

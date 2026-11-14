@@ -1,0 +1,415 @@
+[
+  {
+    "clubName": "Waterloo Undergraduate Student Association",
+    "instagramHandle": "yourwusa",
+    "profileUrl": "https://www.instagram.com/yourwusa/",
+    "active": true,
+    "priority": 0
+  },
+  {
+    "clubName": "WUSA Clubs",
+    "instagramHandle": "wusaclubs",
+    "profileUrl": "https://www.instagram.com/wusaclubs/",
+    "active": true,
+    "priority": 0
+  },
+  {
+    "clubName": "UW Student Life",
+    "instagramHandle": "uwaterloolife",
+    "profileUrl": "https://www.instagram.com/uwaterloolife/",
+    "active": true,
+    "priority": 0
+  },
+  {
+    "clubName": "Mathematics Society",
+    "instagramHandle": "mathsocuw",
+    "profileUrl": "https://www.instagram.com/mathsocuw/",
+    "active": true,
+    "priority": 0
+  },
+  {
+    "clubName": "Engineering Society",
+    "instagramHandle": "uwengsoc",
+    "profileUrl": "https://www.instagram.com/uwengsoc/",
+    "active": true,
+    "priority": 0
+  },
+  {
+    "clubName": "Science Society",
+    "instagramHandle": "uwscisoc",
+    "profileUrl": "https://www.instagram.com/uwscisoc/",
+    "active": true,
+    "priority": 0
+  },
+  {
+    "clubName": "UW Arts Student Union",
+    "instagramHandle": "uw_asu",
+    "profileUrl": "https://www.instagram.com/uw_asu/",
+    "active": true,
+    "priority": 0
+  },
+  {
+    "clubName": "Environment Students' Society",
+    "instagramHandle": "uwaterloo_ess",
+    "profileUrl": "https://www.instagram.com/uwaterloo_ess/",
+    "active": true,
+    "priority": 0
+  },
+  {
+    "clubName": "Accounting & Finance Student Association",
+    "instagramHandle": "uwafsa",
+    "profileUrl": "https://www.instagram.com/uwafsa/",
+    "active": true,
+    "priority": 0
+  },
+  {
+    "clubName": "Waterloo Warriors Recreation",
+    "instagramHandle": "wloorec",
+    "profileUrl": "https://www.instagram.com/wloorec/",
+    "active": true,
+    "priority": 0
+  },
+  {
+    "clubName": "Waterloo Warriors",
+    "instagramHandle": "wloowarriors",
+    "profileUrl": "https://www.instagram.com/wloowarriors/",
+    "active": true,
+    "priority": 0
+  },
+  {
+    "clubName": "UW Faculty of Engineering",
+    "instagramHandle": "uwaterlooeng",
+    "profileUrl": "https://www.instagram.com/uwaterlooeng/",
+    "active": true,
+    "priority": 0
+  },
+  {
+    "clubName": "UW Faculty of Mathematics",
+    "instagramHandle": "waterloomath",
+    "profileUrl": "https://www.instagram.com/waterloomath/",
+    "active": true,
+    "priority": 0
+  },
+  {
+    "clubName": "University of Waterloo",
+    "instagramHandle": "uofwaterloo",
+    "profileUrl": "https://www.instagram.com/uofwaterloo/",
+    "active": true,
+    "priority": 0
+  },
+  {
+    "clubName": "Curated KW",
+    "instagramHandle": "curatedkw",
+    "profileUrl": "https://www.instagram.com/curatedkw/",
+    "active": true,
+    "priority": 0
+  },
+  {
+    "clubName": "Things To Do In KW",
+    "instagramHandle": "thingstodoinkw",
+    "profileUrl": "https://www.instagram.com/thingstodoinkw/",
+    "active": true,
+    "priority": 0
+  },
+  {
+    "clubName": "Explore Waterloo Region",
+    "instagramHandle": "explorewaterlooregion",
+    "profileUrl": "https://www.instagram.com/explorewaterlooregion/",
+    "active": true,
+    "priority": 0
+  },
+  {
+    "clubName": "Uptown Waterloo",
+    "instagramHandle": "uptownwaterloo",
+    "profileUrl": "https://www.instagram.com/uptownwaterloo/",
+    "active": true,
+    "priority": 0
+  },
+  {
+    "clubName": "Downtown Kitchener",
+    "instagramHandle": "dtkitchener",
+    "profileUrl": "https://www.instagram.com/dtkitchener/",
+    "active": true,
+    "priority": 0
+  },
+  {
+    "clubName": "Create Waterloo",
+    "instagramHandle": "create_waterloo",
+    "profileUrl": "https://www.instagram.com/create_waterloo/",
+    "active": true,
+    "priority": 0
+  },
+  {
+    "clubName": "Connected KW",
+    "instagramHandle": "connectedkw",
+    "profileUrl": "https://www.instagram.com/connectedkw/",
+    "active": true,
+    "priority": 0
+  },
+  {
+    "clubName": "City of Waterloo",
+    "instagramHandle": "cityofwaterloo",
+    "profileUrl": "https://www.instagram.com/cityofwaterloo/",
+    "active": true,
+    "priority": 0
+  },
+  {
+    "clubName": "City of Kitchener",
+    "instagramHandle": "cityofkitchener",
+    "profileUrl": "https://www.instagram.com/cityofkitchener/",
+    "active": true,
+    "priority": 0
+  },
+  {
+    "clubName": "KW Famous",
+    "instagramHandle": "kwfamous",
+    "profileUrl": "https://www.instagram.com/kwfamous/",
+    "active": true,
+    "priority": 0
+  },
+  {
+    "clubName": "UW Computer Science Club",
+    "instagramHandle": "uwcsclub",
+    "profileUrl": "https://www.instagram.com/uwcsclub/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "UW Data Science Club",
+    "instagramHandle": "uwdsc",
+    "profileUrl": "https://www.instagram.com/uwdsc/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "UW Blueprint",
+    "instagramHandle": "uwblueprint",
+    "profileUrl": "https://www.instagram.com/uwblueprint/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "Tech+ UW",
+    "instagramHandle": "techplusuw",
+    "profileUrl": "https://www.instagram.com/techplusuw/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "UW Women in Computer Science",
+    "instagramHandle": "uwaterloowics",
+    "profileUrl": "https://www.instagram.com/uwaterloowics/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "UW Women in Mathematics",
+    "instagramHandle": "uwaterloowim",
+    "profileUrl": "https://www.instagram.com/uwaterloowim/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "UW/UX",
+    "instagramHandle": "uwux",
+    "profileUrl": "https://www.instagram.com/uwux/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "UW Startups",
+    "instagramHandle": "uwstartups",
+    "profileUrl": "https://www.instagram.com/uwstartups/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "Socratica",
+    "instagramHandle": "socratica.info",
+    "profileUrl": "https://www.instagram.com/socratica.info/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "Velocity",
+    "instagramHandle": "uwvelocity",
+    "profileUrl": "https://www.instagram.com/uwvelocity/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "Hack the North",
+    "instagramHandle": "hackthenorth",
+    "profileUrl": "https://www.instagram.com/hackthenorth/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "UW Co-operative Education",
+    "instagramHandle": "uwaterloocoop_cee",
+    "profileUrl": "https://www.instagram.com/uwaterloocoop_cee/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "UW Engineering Competition",
+    "instagramHandle": "uwengcomp",
+    "profileUrl": "https://www.instagram.com/uwengcomp/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "UW Indian Cultural Association",
+    "instagramHandle": "uwindianca",
+    "profileUrl": "https://www.instagram.com/uwindianca/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "UW Chinese Students Association",
+    "instagramHandle": "uwcsa",
+    "profileUrl": "https://www.instagram.com/uwcsa/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "UW Association of Caribbean Students",
+    "instagramHandle": "uwaterlooacs",
+    "profileUrl": "https://www.instagram.com/uwaterlooacs/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "UW Ballroom Dance Club",
+    "instagramHandle": "uwballroom",
+    "profileUrl": "https://www.instagram.com/uwballroom/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "UW Music Society",
+    "instagramHandle": "uwmusoc",
+    "profileUrl": "https://www.instagram.com/uwmusoc/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "UW A Cappella Club",
+    "instagramHandle": "uwacc",
+    "profileUrl": "https://www.instagram.com/uwacc/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "UW Cheese Club",
+    "instagramHandle": "uwcheeseclub",
+    "profileUrl": "https://www.instagram.com/uwcheeseclub/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "UW Crafts4Charity",
+    "instagramHandle": "uw.crafts4charity",
+    "profileUrl": "https://www.instagram.com/uw.crafts4charity/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "UW Badminton Club",
+    "instagramHandle": "wloobadmintonclub",
+    "profileUrl": "https://www.instagram.com/wloobadmintonclub/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "UW GeoGuessr Club",
+    "instagramHandle": "uwgeoguessr",
+    "profileUrl": "https://www.instagram.com/uwgeoguessr/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "WUSA International & Canadian Student Network",
+    "instagramHandle": "wusaicsn",
+    "profileUrl": "https://www.instagram.com/wusaicsn/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "UW Actuarial Science Club",
+    "instagramHandle": "uwactsciclub",
+    "profileUrl": "https://www.instagram.com/uwactsciclub/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "Waterloo Nightlife",
+    "instagramHandle": "wloonightlife",
+    "profileUrl": "https://www.instagram.com/wloonightlife/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "Dallas Nightclub",
+    "instagramHandle": "dallasnightclubkw",
+    "profileUrl": "https://www.instagram.com/dallasnightclubkw/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "Revive Music",
+    "instagramHandle": "revivemusiclive",
+    "profileUrl": "https://www.instagram.com/revivemusiclive/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "Apollo Cinema",
+    "instagramHandle": "apollocinema",
+    "profileUrl": "https://www.instagram.com/apollocinema/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "THEMUSEUM",
+    "instagramHandle": "themuseumkitchener",
+    "profileUrl": "https://www.instagram.com/themuseumkitchener/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "K-W Oktoberfest",
+    "instagramHandle": "kwoktoberfest",
+    "profileUrl": "https://www.instagram.com/kwoktoberfest/",
+    "active": true,
+    "priority": 2
+  },
+  {
+    "clubName": "WHYNOT Run Club",
+    "instagramHandle": "whynotrunclub",
+    "profileUrl": "https://www.instagram.com/whynotrunclub/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "Laurier Students' Union",
+    "instagramHandle": "yourstudentsunion",
+    "profileUrl": "https://www.instagram.com/yourstudentsunion/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "Laurier Student Life",
+    "instagramHandle": "studentlifeatlaurier",
+    "profileUrl": "https://www.instagram.com/studentlifeatlaurier/",
+    "active": true,
+    "priority": 1
+  },
+  {
+    "clubName": "Laurier Off-Campus Students",
+    "instagramHandle": "locuslaurier",
+    "profileUrl": "https://www.instagram.com/locuslaurier/",
+    "active": true,
+    "priority": 1
+  }
+]

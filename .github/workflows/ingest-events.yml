@@ -1,0 +1,49 @@
+name: Ingest events
+on:
+  schedule:
+    - cron: '17 13 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Evaluate extraction without database or bucket writes
+        type: boolean
+        default: true
+permissions:
+  contents: read
+concurrency:
+  group: event-ingestion-production
+  cancel-in-progress: false
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DIRECT_URL: ${{ secrets.DIRECT_URL }}
+      APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      EVENT_IMAGES_BUCKET: event-images
+      OPENAI_EXTRACTION_MODEL: ${{ vars.OPENAI_EXTRACTION_MODEL || 'gpt-4o-mini' }}
+      GEOCODING_BASE_URL: ${{ vars.GEOCODING_BASE_URL || 'https://nominatim.openstreetmap.org/' }}
+      GEOCODING_USER_AGENT: ${{ vars.GEOCODING_USER_AGENT || 'Project-Hermes-Events/0.1 (Waterloo event discovery)' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Check worker configuration
+        shell: bash
+        run: |
+          for name in DATABASE_URL APIFY_TOKEN OPENAI_API_KEY NEXT_PUBLIC_SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY; do
+            if [ -z "${!name}" ]; then echo "::error::Missing worker configuration: $name"; exit 1; fi
+          done
+      - name: Evaluate pipeline
+        if: github.event_name == 'workflow_dispatch' && inputs.dry_run
+        run: npm run ingest:events -- --dry-run
+      - name: Collect and publish
+        if: github.event_name != 'workflow_dispatch' || !inputs.dry_run
+        run: npm run ingest:events

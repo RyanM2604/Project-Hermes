@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatEventLocation } from "../format";
+import { formatEventLocation, hasEventEnded } from "../format";
 
 describe("formatEventLocation", () => {
   it("adds a building code when the location does not include it", () => {
@@ -25,5 +25,13 @@ describe("formatEventLocation", () => {
     expect(formatEventLocation({ locationName: "Waterloo Park" })).toBe(
       "Waterloo Park",
     );
+  });
+});
+
+describe("hasEventEnded", () => {
+  it("uses the same exclusive past boundary as the feed query", () => {
+    const now = new Date("2026-11-05T00:00:00Z");
+    expect(hasEventEnded("2026-11-04T23:59:59Z", now)).toBe(true);
+    expect(hasEventEnded(now.toISOString(), now)).toBe(false);
   });
 });

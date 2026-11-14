@@ -55,7 +55,7 @@ function trimLocationClause(value: string): string {
   );
 }
 
-function isPlaceholderLocation(value: string): boolean {
+export function isPlaceholderLocation(value: string): boolean {
   return LOCATION_PLACEHOLDERS.has(normalizeAliases(value).toLowerCase());
 }
 

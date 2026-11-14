@@ -1,3 +1,5 @@
+import sources from "./instagram-accounts.json";
+
 export interface InstagramAccount {
   clubName: string;
   instagramHandle: string;
@@ -6,12 +8,5 @@ export interface InstagramAccount {
   priority?: number;
 }
 
-export const instagramAccounts: readonly InstagramAccount[] = [
-  {
-    clubName: "UW Cheese Club",
-    instagramHandle: "uwcheeseclub",
-    profileUrl: "https://www.instagram.com/uwcheeseclub/",
-    active: true,
-    priority: 1,
-  },
-] as const;
+// Keep this list in the repository so scheduled ingestion uses the same sources.
+export const instagramAccounts: readonly InstagramAccount[] = sources;

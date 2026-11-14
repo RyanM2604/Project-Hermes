@@ -137,6 +137,21 @@ describe("isDatabaseUnavailableError", () => {
   });
 });
 
+describe("strict map reads", () => {
+  it("surfaces an outage and bounds the start time without changing feed defaults", async () => {
+    const client = createClient();
+    const repository = createPrismaEventRepository({ client, now: () => fixedNow });
+    const startsBefore = new Date("2026-06-16T12:00:00Z");
+    await repository.getEvents({ startsBefore, throwOnUnavailable: true });
+    expect(client.event.findMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ startTime: { lt: startsBefore }, supersededById: null }),
+    }));
+    client.event.findMany.mockRejectedValue(databaseUnavailableError());
+    await expect(repository.getEvents({ throwOnUnavailable: true })).rejects.toThrow();
+    await expect(repository.getEvents()).resolves.toEqual([]);
+  });
+});
+
 describe("toHermesEvent", () => {
   it("maps persisted dates and valid classification tags", () => {
     const record = persistedEvent();
@@ -246,8 +261,15 @@ describe("createPrismaEventRepository", () => {
     expect(client.event.findMany).toHaveBeenCalledWith({
       include: { classification: true },
       orderBy: { startTime: "asc" },
-      where: { endTime: { gte: fixedNow } },
+      where: { endTime: { gte: fixedNow }, supersededById: null },
     });
+  });
+
+  it("queries past events newest first with no overlap at the end-time boundary", async () => {
+    const client = createClient([persistedEvent()]);
+    const repository = createPrismaEventRepository({ client, now: () => fixedNow });
+    await repository.getEvents({ period: "past" });
+    expect(client.event.findMany).toHaveBeenCalledWith({ include: { classification: true }, orderBy: { startTime: "desc" }, where: { endTime: { lt: fixedNow }, supersededById: null } });
   });
 
   it("includes events that have started but not ended", async () => {

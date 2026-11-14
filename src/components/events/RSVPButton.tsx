@@ -9,6 +9,7 @@ import { logClientInteraction } from "@/lib/interactions/log-client-interaction"
 interface RSVPButtonProps {
   eventId: string;
   isAuthenticated: boolean;
+  onSuccess?: () => void;
 }
 
 function getNextHref(eventId: string) {
@@ -27,7 +28,7 @@ function formatRsvpLabel(value: RsvpStatus) {
   return "Not going";
 }
 
-export function RSVPButton({ eventId, isAuthenticated }: RSVPButtonProps) {
+export function RSVPButton({ eventId, isAuthenticated, onSuccess }: RSVPButtonProps) {
   const router = useRouter();
   const [status, setStatus] = useState<RsvpStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -83,44 +84,51 @@ export function RSVPButton({ eventId, isAuthenticated }: RSVPButtonProps) {
     setIsLoading(true);
     setErrorMessage(undefined);
 
-    const response = await fetch(`/api/events/${eventId}/rsvp`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ status: nextStatus }),
-    });
+    try {
+      const response = await fetch(`/api/events/${eventId}/rsvp`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: nextStatus }),
+      });
 
-    if (response.status === 401) {
-      router.push(getNextHref(eventId));
-      return;
-    }
-
-    if (!response.ok) {
-      try {
-        const body = (await response.json()) as {
-          error?: string;
-        };
-        setErrorMessage(body.error ?? "Unable to update RSVP.");
-      } catch {
-        setErrorMessage("Unable to update RSVP.");
+      if (response.status === 401) {
+        router.push(getNextHref(eventId));
+        return;
       }
+
+      if (!response.ok) {
+        try {
+          const body = (await response.json()) as {
+            error?: string;
+          };
+          setErrorMessage(body.error ?? "Unable to update RSVP.");
+        } catch {
+          setErrorMessage("Unable to update RSVP.");
+        }
+        setIsLoading(false);
+        return;
+      }
+
+      const body = (await response.json()) as { status: RsvpStatus | null };
+      setStatus(body.status ?? null);
       setIsLoading(false);
-      return;
+
+      onSuccess?.();
+
+      logClientInteraction({
+        action: "rsvp",
+        eventId,
+        metadata: {
+          status: body.status ?? nextStatus,
+          surface: "event_detail",
+        },
+      });
+    } catch {
+      setErrorMessage("Unable to update RSVP. Please try again.");
+      setIsLoading(false);
     }
-
-    const body = (await response.json()) as { status: RsvpStatus | null };
-    setStatus(body.status ?? null);
-    setIsLoading(false);
-
-    logClientInteraction({
-      action: "rsvp",
-      eventId,
-      metadata: {
-        status: body.status ?? nextStatus,
-        surface: "event_detail",
-      },
-    });
   }
 
   if (!isAuthenticated) {

@@ -28,18 +28,20 @@ want preview deployments to access the same services:
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Matching project's public anon key |
 | `NEXT_PUBLIC_APP_URL` | `https://project-hermes-eight.vercel.app` (or your final custom domain) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Matching project's server-only service-role key, required to aggregate Going counts |
 | `DATABASE_URL` | Matching Supabase Postgres connection URL; use transaction pooling on port 6543 for Vercel functions |
 | `DIRECT_URL` | Direct/session Postgres connection URL on port 5432, used for migrations |
 | `CRON_SECRET` | Long random secret to protect the retained legacy refresh endpoint |
 
-Only the `NEXT_PUBLIC_` variables go to the browser. Keep database URLs and
-`CRON_SECRET` server-only. The connection helper adds `pgbouncer=true` for the
+Only the `NEXT_PUBLIC_` variables go to the browser. Keep database URLs, the
+service-role key, and `CRON_SECRET` server-only. The connection helper adds `pgbouncer=true` for the
 Supabase transaction pooler automatically. Environment variable changes require
 a new deployment; public values are embedded during the build. For previews,
 set `NEXT_PUBLIC_APP_URL` to the intended preview origin if testing auth there.
 
-The web app reads persisted events, so Apify/OpenAI/storage service-role keys are
-needed by the ingestion worker in GitHub Actions, not by normal Vercel page reads.
+The web app reads persisted events. It needs the service-role key server-side to
+aggregate Going counts; Apify/OpenAI keys belong to the separate ingestion worker
+in GitHub Actions.
 No map provider API key or PostHog configuration is needed.
 
 ## Supabase
@@ -76,8 +78,8 @@ secrets at Settings → Secrets and variables → Actions:
 - `OPENAI_API_KEY`
 
 No Actions secrets were listed at deployment preparation; add these before
-expecting scheduled ingestion to succeed. The service-role key belongs in the
-worker only. Do not prefix it `NEXT_PUBLIC_`.
+expecting scheduled ingestion to succeed. The service-role key belongs in trusted
+server environments (the worker and the Vercel server). Do not prefix it `NEXT_PUBLIC_`.
 
 Optional repository variables: `OPENAI_EXTRACTION_MODEL` (default `gpt-4o-mini`),
 `GEOCODING_BASE_URL` (default public Nominatim), and `GEOCODING_USER_AGENT`

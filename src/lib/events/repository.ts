@@ -2,7 +2,7 @@ import { Prisma } from "@prisma/client";
 
 import { createFallbackClassification } from "@/lib/classification/fallback";
 import { prisma } from "@/lib/db/prisma";
-import type { EventPeriod } from "./feed-period";
+import { torontoDayStart, type EventPeriod } from "./feed-period";
 import type { BuildingCode, EventTag, HermesEvent } from "@/types/event";
 
 export interface PersistedEventRecord {
@@ -33,7 +33,7 @@ interface EventReadClient {
     findMany(args: {
       include: { classification: true };
       orderBy: { startTime: "asc" | "desc" };
-      where: { endTime: { gte: Date } | { lt: Date }; supersededById: null; startTime?: { lt: Date } };
+      where: Prisma.EventWhereInput;
     }): Promise<PersistedEventRecord[]>;
     findUnique(args: {
       where: { id: string };
@@ -185,8 +185,15 @@ export function createPrismaEventRepository({
       records = await client.event.findMany({
         include: { classification: true },
         orderBy: { startTime: options.period === "past" ? "desc" : "asc" },
-        where: { endTime: options.period === "past" ? { lt: currentTime } : { gte: currentTime }, supersededById: null,
-          ...(options.startsBefore ? { startTime: { lt: options.startsBefore } } : {}) },
+        where: { supersededById: null,
+          ...(options.period === "past"
+            ? { OR: [{ endTime: { lt: currentTime } }, { startTime: { lt: torontoDayStart(currentTime) } }] }
+            : { endTime: { gte: currentTime } }),
+          ...((options.period === "upcoming" || options.startsBefore) ? { startTime: {
+            ...(options.period === "upcoming" ? { gte: torontoDayStart(currentTime) } : {}),
+            ...(options.startsBefore ? { lt: options.startsBefore } : {}),
+          } } : {}),
+        },
       });
     } catch (error) {
       if (isDatabaseUnavailableError(error) && !options.throwOnUnavailable) {

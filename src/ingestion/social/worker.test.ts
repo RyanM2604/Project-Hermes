@@ -10,6 +10,12 @@ function setup(extraction: unknown = null) {
   return { repository, extract, post };
 }
 describe("durable social worker", () => {
+  it("replays saved extraction without scraping, AI, downloading images, or writing", async () => {
+    const { repository, extract, post } = setup(); const fetchPosts = vi.fn(), prepareImage = vi.fn();
+    const result = await runSocialIngestion({ repository, dryRun: true, fetchPosts, prepareImage, extractor: { extract }, accounts: [], cachedPosts: [{ id: post.id, shortcode: post.shortcode, accountHandle: "club", accountName: "Club", sourceUrl: post.sourceUrl, caption: post.caption, postedAt: post.postedAt?.toISOString() ?? null, media: ["https://example.org/image.jpg"], extraction: { disposition: "events", events: [event], reason: null } }] });
+    expect(result.eligible).toBe(1); expect(result.inputTokens).toBe(0);
+    expect(fetchPosts).not.toHaveBeenCalled(); expect(prepareImage).not.toHaveBeenCalled(); expect(extract).not.toHaveBeenCalled(); expect(repository.publish).not.toHaveBeenCalled();
+  });
   it("reports unavailable accounts as warnings and real provider failures as errors", async () => {
     const { repository } = setup();
     const accounts = ["gone", "bad"].map(instagramHandle => ({ instagramHandle, clubName: instagramHandle, profileUrl: `https://www.instagram.com/${instagramHandle}/`, active: true }));

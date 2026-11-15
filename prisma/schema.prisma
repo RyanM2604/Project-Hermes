@@ -162,3 +162,29 @@ model SocialEventMapping {
   @@index([eventId])
   @@map("social_event_mappings")
 }
+
+// Private checkpoints and conservative charge reservations for paid collection.
+model SocialCollectionState {
+  accountHandle String @id @map("account_handle")
+  lastSuccessAt DateTime? @map("last_success_at") @db.Timestamptz(6)
+  lastReviewAt DateTime? @map("last_review_at") @db.Timestamptz(6)
+  nextCheckAt DateTime @default(now()) @map("next_check_at") @db.Timestamptz(6)
+  leaseUntil DateTime? @map("lease_until") @db.Timestamptz(6)
+  resultsLimit Int @default(12) @map("results_limit")
+  @@map("social_collection_state")
+}
+
+model ApifyCollectionRun {
+  id String @id
+  workflowId String @map("workflow_id")
+  accountHandle String @map("account_handle")
+  providerRunId String? @unique @map("provider_run_id")
+  reservedMicros Int @map("reserved_micros")
+  resultsLimit Int @default(12) @map("results_limit")
+  chargedMicros Int? @map("charged_micros")
+  processedAt DateTime? @map("processed_at") @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  @@index([createdAt])
+  @@index([workflowId])
+  @@map("apify_collection_runs")
+}

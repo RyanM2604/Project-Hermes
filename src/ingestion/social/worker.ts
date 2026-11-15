@@ -1,4 +1,4 @@
-import { ApifyAccountUnavailableError, fetchApifyInstagramPosts } from "../fetch-apify";
+import { ApifyCollectionDeferredError, ApifyAccountUnavailableError, fetchApifyInstagramPosts } from "../fetch-apify";
 import { createInstagramSource } from "../sources/instagram-public";
 import { instagramAccounts, type InstagramAccount } from "../sources/instagram-accounts";
 import { deriveTags } from "../sources/utils";
@@ -28,6 +28,9 @@ export interface SocialWorkerOptions {
   now?: () => Date;
   budgetMs?: number;
   fetchPosts?: typeof fetchApifyInstagramPosts;
+  collectAccount?: (account: InstagramAccount) => Promise<SocialPostInput[]>;
+  orderAccounts?: (accounts: readonly InstagramAccount[]) => Promise<InstagramAccount[]>;
+  cachedPosts?: readonly (SocialPostInput & { extraction?: unknown })[];
   prepareImage?: (url: string) => Promise<PreparedImage>;
   storeImage?: (image: PreparedImage) => Promise<{ storagePath: string; publicUrl: string }>;
   classify?: (ids: string[]) => Promise<unknown>;
@@ -42,24 +45,25 @@ export async function runSocialIngestion(options: SocialWorkerOptions): Promise<
   const prepare = options.prepareImage ?? (async (url: string) => (await import("./media")).prepareImage(url));
   const store = options.storeImage ?? (async (image: PreparedImage) => (await import("./media")).storeImage(image));
   const result: SocialRunSummary = { accounts: [], processed: 0, published: 0, held: 0, ignored: 0, failed: 0, imagePending: 0, inputTokens: 0, outputTokens: 0, uploadedImages: 0, eventIds: [], reasons: {}, dryRun: !!options.dryRun, complete: true };
-  const accounts = (options.accounts ?? instagramAccounts).filter((account) => account.active && (!options.account || account.instagramHandle.toLowerCase() === options.account.toLowerCase())).sort((a, b) => (a.priority ?? 100) - (b.priority ?? 100));
+  let accounts = (options.accounts ?? instagramAccounts).filter((account) => account.active && (!options.account || account.instagramHandle.toLowerCase() === options.account.toLowerCase())).sort((a, b) => (a.priority ?? 100) - (b.priority ?? 100));
+  if (options.orderAccounts && options.collectPosts !== false && options.cachedPosts === undefined) accounts = await options.orderAccounts(accounts);
   if (options.account && !accounts.length) throw new Error("unknown-account");
   let cursor = 0;
-  const dryPosts: SocialPostInput[] = [];
+  const dryPosts: (SocialPostInput & { extraction?: unknown })[] = [...(options.cachedPosts ?? [])];
   async function collect() {
     while (cursor < accounts.length && Date.now() < deadline) {
       const account = accounts[cursor++];
       options.onProgress?.({ stage: "collecting", account: account.instagramHandle });
       try {
-        const posts = normalizeSocialPosts(await (options.fetchPosts ?? fetchApifyInstagramPosts)(createInstagramSource(account), { resultsLimit: 12, skipPinnedPosts: false, dataDetailLevel: "detailedData" }), account);
+        const posts = options.collectAccount ? await options.collectAccount(account) : normalizeSocialPosts(await (options.fetchPosts ?? fetchApifyInstagramPosts)(createInstagramSource(account), { resultsLimit: 12, skipPinnedPosts: false, dataDetailLevel: "detailedData" }), account);
         for (const post of posts) {
           if (options.dryRun) dryPosts.push(post);
-          else await options.repository.collect(post, EXTRACTION_VERSION);
+          else if (!options.collectAccount) await options.repository.collect(post, EXTRACTION_VERSION);
         }
         result.accounts.push({ handle: account.instagramHandle, collected: posts.length, failed: false });
         options.onProgress?.({ stage: "collected", account: account.instagramHandle, collected: posts.length });
       } catch (error) {
-        const unavailable = error instanceof ApifyAccountUnavailableError;
+        const unavailable = error instanceof ApifyAccountUnavailableError || error instanceof ApifyCollectionDeferredError;
         const reason = unavailable ? error.code : "account-collection-failed";
         result.accounts.push({ handle: account.instagramHandle, collected: 0, failed: !unavailable, ...(unavailable ? { skipped: true } : {}), reason });
         addReason(result, reason);
@@ -67,8 +71,8 @@ export async function runSocialIngestion(options: SocialWorkerOptions): Promise<
       }
     }
   }
-  if (options.collectPosts !== false) await Promise.all([collect(), collect()]);
-  result.complete = cursor >= accounts.length || options.collectPosts === false;
+  if (options.collectPosts !== false && options.cachedPosts === undefined) await Promise.all([collect(), collect()]);
+  result.complete = cursor >= accounts.length || options.collectPosts === false || options.cachedPosts !== undefined;
   options.onProgress?.({ stage: "extracting", processed: 0 });
   if (options.dryRun) {
     result.eligible = 0;
@@ -81,10 +85,12 @@ export async function runSocialIngestion(options: SocialWorkerOptions): Promise<
         const post = dryPosts[dryCursor++];
         try {
           if (post.incompleteMedia || post.media.length > 10) { result.held++; addReason(result, "too-many-images"); continue; }
+          const cached = options.cachedPosts !== undefined ? extractedPostSchema.safeParse(post.extraction) : null;
+          if (cached && !cached.success) { result.held++; addReason(result, "cached-extraction-missing"); continue; }
           const images: PreparedImage[] = [];
           let missingImages = false;
-          for (const url of post.media) { try { images.push(await prepare(url)); } catch { missingImages = true; } }
-          const extraction = await extractor.extract({ caption: post.caption, postedAt: post.postedAt, accountName: post.accountName, images });
+          if (!cached?.success) for (const url of post.media) { try { images.push(await prepare(url)); } catch { missingImages = true; } }
+          const extraction = cached?.success ? { status: "extracted" as const, data: cached.data, inputTokens: 0, outputTokens: 0 } : await extractor.extract({ caption: post.caption, postedAt: post.postedAt, accountName: post.accountName, images });
           result.processed++;
           if (extraction.status === "failed") { result.failed++; addReason(result, extraction.code); continue; }
           result.inputTokens += extraction.inputTokens; result.outputTokens += extraction.outputTokens;

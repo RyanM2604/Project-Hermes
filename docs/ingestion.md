@@ -24,8 +24,8 @@ GitHub schedules can be delayed; ingestion is not a real-time service.
    image bucket. `EVENT_IMAGES_BUCKET` defaults to `event-images`; the migration
    provisions the default only. Custom buckets need this setup command.
 5. Start with `npm run ingest:events -- --account uwcheeseclub --dry-run`.
-   This calls paid collection/AI providers, but makes no database or bucket writes.
-   Check extracted outcomes against original posts before a live account run.
+   This previews saved extraction without calling Apify, OpenAI, or image hosts.
+   With no saved posts yet it reports an empty cache. Live ingestion fills it.
 6. Run `npm run ingest:events -- --account uwcheeseclub`, inspect the result and
    card image URLs, then enable the scheduled workflow on the default branch.
    Manual workflow runs default to dry-run. Set `account` to `uwcheeseclub` for a
@@ -38,9 +38,10 @@ accounts, including Cheese Club. Edit this repository JSON to change the list;
 the original Downloads file is not read at runtime. Lower priority numbers run
 first, and `active: false` disables an account. There is no 25-account cap;
 concurrency and the shared run-time budget bound each run, with collected work
-remaining in the durable queue. Each collection fetches the latest 12 posts
-including pinned posts. Older edited posts outside that window require a
-source configuration/backfill change; they are not continuously monitored.
+remaining in the durable queue. Collection now uses per-account checkpoints and a six-hour overlap. A first
+collection is a bounded seven-day/latest-12 bootstrap. Daily, 48-hour, or 72-hour
+cadence follows existing source priority. A weekly seven-day refresh checks recent
+edits. Older edits need an explicit backfill; they are not continuously monitored.
 
 `OPENAI_EXTRACTION_MODEL` defaults to `gpt-4o-mini`; classification uses its
 existing `OPENAI_CLASSIFICATION_MODEL` setting. Extraction prompt/schema versions
@@ -193,7 +194,7 @@ The workflow now accepts an optional `account` handle. Start with one account in
 dry-run mode, then run all sources with dry-run off to publish. To retry **saved**
 failed/held posts after a live run, check `retry_failed` and turn dry-run off;
 this skips paid Apify recollection and reuses valid saved extraction. A dry-run
-saves no posts, so it cannot be resumed with `retry_failed`.
+only reads stored extraction; it creates no additional work to resume.
 
 Progress lines show account collection and extraction totals every ten processed
 posts. The final `outcome` is `completed`, `completed_with_warnings`, or
@@ -208,7 +209,8 @@ pending images, and unfinished processing still return nonzero exits.
 Extraction allows 45 seconds per attempt, with one additional attempt only for a
 timeout or an invalid slide index. The shared worker deadline bounds retries.
 Invalid indices are never used to select a photograph. Dry-run extraction uses
-two workers, matching live extraction; it still makes paid AI/image requests.
+two workers, matching live extraction. Cached dry-runs make zero paid/image
+requests; missing cached extraction is held as `cached-extraction-missing`.
 A deadline that leaves work unevaluated now sets `budgetExhausted: true`.
 Missing or conflicting date/location evidence remains held, never guessed.
 
@@ -225,3 +227,50 @@ On November 14, 2026 the failed dry-run's existing Apify datasets showed six
 
 `thingstodoinkw` had no verified replacement, and `whynotrunclub` was empty/private;
 they remain visible availability warnings instead of silently disappearing.
+
+## Cost controls
+
+Apply `20261115030000_incremental_collection` before running the optimized worker.
+The private `social_collection_state` table stores checkpoints and cadence;
+`apify_collection_runs` stores charge reservations, actual settled costs, and
+provider IDs used to resume already-paid datasets after an interrupted write.
+Both have RLS and no browser-role access. Nothing new is required in Vercel.
+
+Set optional **GitHub repository variables**:
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `APIFY_MAX_RUN_USD` | `0.50` | Maximum reserved/settled scraper spend per workflow invocation |
+| `APIFY_MAX_MONTH_USD` | `15` | Maximum reserved/settled spend across tracked runs in a UTC calendar month |
+
+Zero disables new paid collection. Limits are checked atomically before starting
+an Actor; its `maxTotalChargeUsd` enforces each reservation. The allowance uses
+current free-tier detailed-post rates with headroom, not a promise about future
+pricing. Subscription fees, OpenAI, other actors, and spending before rollout
+are not included. Keep Apify account-level spending limits for total billing.
+Changing the token to a different billing account should use separate checkpoint /
+ledger data; the ledger assumes one Apify billing account for this deployment.
+
+Successful posts are saved before advancing the checkpoint. A saturated
+incremental window retains its checkpoint and increases the next result limit
+(up to 96); the bounded initial bootstrap retains the existing latest-12 ceiling.
+A budget-limited window remains deferred rather than silently skipping posts.
+Oldest-due / never-collected accounts run first so small budgets do not permanently
+starve sources. Unavailable accounts wait seven days before another collection.
+
+Failed/uncertain POSTs are never automatically repeated. Their maximum charge
+stays reserved unless a definite rejection or authenticated completed-run cost
+confirms otherwise. Cost statistics are allowed ten seconds to stabilize.
+Known paid run IDs are reused after persistence/download interruption. An
+unknown run ID after a lost POST response can leave a conservative reservation;
+inspect the ledger/provider dashboard instead of blindly clearing it.
+
+A normal `--dry-run` reads at most the 100 most recently updated saved posts in
+scope and reuses their current-version successful extraction. It never collects,
+uploads, classifies, or calls AI. Held/missing extraction is shown, not regenerated.
+Use the existing fixture tests to exercise prompt/parser changes; `--reextract`
+on one account is the explicit paid AI operation for saved posts.
+
+The final `collection` summary and GitHub summary show paid calls, confirmed cost,
+budget deferrals, and partial windows. A monthly cap can intentionally reduce
+coverage; raising a budget should be a conscious change, not an automatic retry.

@@ -81,14 +81,16 @@ No Actions secrets were listed at deployment preparation; add these before
 expecting scheduled ingestion to succeed. The service-role key belongs in trusted
 server environments (the worker and the Vercel server). Do not prefix it `NEXT_PUBLIC_`.
 
-Optional repository variables: `OPENAI_EXTRACTION_MODEL` (default `gpt-4o-mini`),
+Optional repository variables: `APIFY_MAX_RUN_USD` (default `0.50`),
+`APIFY_MAX_MONTH_USD` (default `15`), `OPENAI_EXTRACTION_MODEL` (default `gpt-4o-mini`),
 `GEOCODING_BASE_URL` (default public Nominatim), and `GEOCODING_USER_AGENT`
 (prefer an app identifier with a contact URL/email). Public geocoding is cached
 and limited to a single worker/four requests per minute; use a hosted or
 self-hosted compatible provider if volume grows.
 
-Run the workflow manually with dry-run enabled and `account=uwcheeseclub` first. Dry-run makes paid
-collection/AI requests but writes no events/images. Then run with dry-run off to
+Run the workflow manually with dry-run enabled and `account=uwcheeseclub` first.
+Dry-run previews cached extraction and makes no paid requests. An empty cache is
+expected before the first live collection. Then run with dry-run off to
 publish. Details and local retry commands are in [ingestion.md](ingestion.md).
 
 ## Verify a deployment

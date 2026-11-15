@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { getEventThemeForEvent } from "@/lib/events/event-theme";
-import { formatEventLocation } from "@/lib/events/format";
+import { hasEventEnded, formatEventLocation } from "@/lib/events/format";
 import { formatEventTagLabel, getEventSocialSubTag } from "@/lib/events/social-tags";
 import { logClientInteraction } from "@/lib/interactions/log-client-interaction";
 import type { HermesEvent } from "@/types/event";
@@ -106,7 +106,7 @@ export function EventCard({
           </Link>
         </h3>
         <div className="hm-event-facts">
-          {isPast && <span>Ended</span>}
+          {isPast && <span>{hasEventEnded(event.endTime) ? "Ended" : "Started earlier"}</span>}
           <time dateTime={event.startTime}>
             {(isPast ? pastDateFormatter : dateFormatter).format(new Date(event.startTime))}
           </time>

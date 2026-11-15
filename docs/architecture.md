@@ -100,3 +100,9 @@ depends on the existing ingestion workers.
 Event inclusion follows persisted start/end ranges. Recurring source series must
 provide individual occurrences for precise day-by-day schedules; the map does not
 invent recurrence rules. Previews display full dates for the stored range.
+
+Upcoming is evaluated per request using the current Toronto calendar day: events
+must start today or later and must not have ended. Earlier-started ranges move to
+Past even if their imported end date is weeks away. Today’s ongoing events remain
+in Upcoming; Starting soon excludes events that already started. Map visibility
+continues to use ongoing/today scope. Event history and RSVP references are retained.

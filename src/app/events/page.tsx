@@ -1,12 +1,14 @@
+import { connection } from "next/server";
 import Link from "next/link";
 import { EventFeed, EventFilters, StartingSoonCarousel } from "@/components/feed";
 import { HermesMotion } from "@/components/motion/HermesMotion";
 import { filterEventsByTag, parseEventTag } from "@/lib/events";
-import { eventFeedHref, parseEventPeriod } from "@/lib/events/feed-period";
+import { eventFeedHref, parseEventPeriod, startingSoon } from "@/lib/events/feed-period";
 import { loadFreshEvents } from "@/lib/events/load-events";
 import { loadEventGoingCounts } from "@/lib/events/rsvp-summary";
 
 export default async function EventsPage({ searchParams }: PageProps<"/events">) {
+  await connection();
   const params = await searchParams;
   const period = parseEventPeriod(params.view);
   const events = await loadFreshEvents({ period });
@@ -27,7 +29,7 @@ export default async function EventsPage({ searchParams }: PageProps<"/events">)
             <Link href={eventFeedHref("past", selectedTag).replace("#event-feed", "")} aria-current={period === "past" ? "page" : undefined}>Past events</Link>
           </nav>
           <EventFilters events={events} selectedTag={selectedTag} period={period} />
-          {period === "upcoming" && <StartingSoonCarousel events={events.slice(0, 5)} goingCounts={goingCounts} />}
+          {period === "upcoming" && <StartingSoonCarousel events={startingSoon(events)} goingCounts={goingCounts} />}
           <div id="event-feed" className="hm-events-feed-anchor">
             <EventFeed events={filteredEvents} goingCounts={goingCounts} period={period} />
           </div>

@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: Evaluate extraction without database or bucket writes
+        description: Preview saved extraction with zero paid requests
         type: boolean
         default: true
       account:
@@ -35,6 +35,8 @@ jobs:
       INGEST_ACCOUNT: ${{ inputs.account || '' }}
       INGEST_DRY_RUN: ${{ inputs.dry_run || false }}
       INGEST_RETRY: ${{ inputs.retry_failed || false }}
+      APIFY_MAX_RUN_USD: ${{ vars.APIFY_MAX_RUN_USD || '0.50' }}
+      APIFY_MAX_MONTH_USD: ${{ vars.APIFY_MAX_MONTH_USD || '15' }}
       EVENT_IMAGES_BUCKET: event-images
       OPENAI_EXTRACTION_MODEL: ${{ vars.OPENAI_EXTRACTION_MODEL || 'gpt-4o-mini' }}
       GEOCODING_BASE_URL: ${{ vars.GEOCODING_BASE_URL || 'https://nominatim.openstreetmap.org/' }}
@@ -49,7 +51,12 @@ jobs:
       - name: Check worker configuration
         shell: bash
         run: |
-          for name in DATABASE_URL APIFY_TOKEN OPENAI_API_KEY NEXT_PUBLIC_SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY; do
+          names=(DATABASE_URL)
+          if [ "$INGEST_DRY_RUN" != "true" ]; then
+            names+=(OPENAI_API_KEY NEXT_PUBLIC_SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY)
+            if [ "$INGEST_RETRY" != "true" ]; then names+=(APIFY_TOKEN); fi
+          fi
+          for name in "${names[@]}"; do
             if [ -z "${!name}" ]; then echo "::error::Missing worker configuration: $name"; exit 1; fi
           done
       - name: Run ingestion

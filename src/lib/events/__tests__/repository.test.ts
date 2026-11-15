@@ -265,11 +265,17 @@ describe("createPrismaEventRepository", () => {
     });
   });
 
+  it("excludes earlier-started ranges from Upcoming while retaining today's ongoing events", async () => {
+    const client = createClient();
+    const repository = createPrismaEventRepository({ client, now: () => fixedNow });
+    await repository.getEvents({ period: "upcoming" });
+    expect(client.event.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: { endTime: { gte: fixedNow }, startTime: { gte: new Date("2026-06-14T04:00:00Z") }, supersededById: null } }));
+  });
   it("queries past events newest first with no overlap at the end-time boundary", async () => {
     const client = createClient([persistedEvent()]);
     const repository = createPrismaEventRepository({ client, now: () => fixedNow });
     await repository.getEvents({ period: "past" });
-    expect(client.event.findMany).toHaveBeenCalledWith({ include: { classification: true }, orderBy: { startTime: "desc" }, where: { endTime: { lt: fixedNow }, supersededById: null } });
+    expect(client.event.findMany).toHaveBeenCalledWith({ include: { classification: true }, orderBy: { startTime: "desc" }, where: { OR: [{ endTime: { lt: fixedNow } }, { startTime: { lt: new Date("2026-06-14T04:00:00Z") } }], supersededById: null } });
   });
 
   it("includes events that have started but not ended", async () => {

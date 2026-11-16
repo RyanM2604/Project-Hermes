@@ -35,13 +35,18 @@ export function createSocialRepository(client: PrismaClient): SocialRepository {
       // cache-key improvements do not invalidate already successful extraction.
       const previousHash = old ? postContentHash({ ...post, caption: old.caption, postedAt: old.postedAt?.toISOString() ?? null, media: old.mediaUrls, incompleteMedia: old.incompleteMedia }) : null;
       const changed = previousHash !== contentHash || old?.extractionVersion !== version;
+      // CDN hosts and signatures expire without changing the underlying asset.
+      // Fresh URLs can recover media failures without discarding saved extraction.
+      const refreshedMediaFailure = old && ["pending", "failed"].includes(old.status)
+        && ["image-preparation-failed", "image-storage-pending"].includes(old.lastError ?? "")
+        && post.media.some((url, index) => url !== old.mediaUrls[index]);
       const common = { shortcode: post.shortcode, accountHandle: post.accountHandle, accountName: post.accountName, sourceUrl: post.sourceUrl, caption: post.caption, postedAt: post.postedAt ? new Date(post.postedAt) : null, mediaUrls: post.media, incompleteMedia: post.incompleteMedia ?? false, contentHash };
       if (!old) {
         try { await client.socialPost.create({ data: { id: post.id, ...common, extractionVersion: version } }); }
         catch (error) { if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") throw error; }
         return;
       }
-      await client.socialPost.updateMany({ where: { id: post.id, updatedAt: old.updatedAt, OR: [{ leaseUntil: null }, { leaseUntil: { lte: new Date() } }] }, data: { ...common, ...(changed ? { status: "pending", extraction: Prisma.DbNull, extractionVersion: version, attempts: 0, nextRetryAt: null, leaseToken: null, leaseUntil: null, lastError: null } : old.lastError === "event-ended" ? { status: "pending", attempts: 0, nextRetryAt: null, lastError: null } : {}) } });
+      await client.socialPost.updateMany({ where: { id: post.id, updatedAt: old.updatedAt, OR: [{ leaseUntil: null }, { leaseUntil: { lte: new Date() } }] }, data: { ...common, ...(changed ? { status: "pending", extraction: Prisma.DbNull, extractionVersion: version, attempts: 0, nextRetryAt: null, leaseToken: null, leaseUntil: null, lastError: null } : refreshedMediaFailure || old.lastError === "event-ended" ? { status: "pending", attempts: 0, nextRetryAt: null, lastError: null } : {}) } });
     },
     async claim(account, now, activeHandles) {
       for (let attempt = 0; attempt < 5; attempt++) {

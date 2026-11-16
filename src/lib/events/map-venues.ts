@@ -6,6 +6,10 @@ import { isPlaceholderLocation } from "./location";
 const source = "https://services5.arcgis.com/z87D0RdgTttiUQbV/arcgis/rest/services/BuildingsView/FeatureServer/0";
 
 export const mapVenues: readonly MapVenue[] = [
+  { id: "wlu-peters", name: "Frank C. Peters Building", buildingCodes: [], aliases: ["Peters Building"], coordinates: [-80.5306748, 43.4736587], city: "Waterloo", verifiedFrom: "https://students.wlu.ca/campus-services/classrooms-and-spaces/study-spaces/waterloo.html" },
+  { id: "waterloo-wonders", name: "Wonders of Winter, Waterloo Park", buildingCodes: [], aliases: ["Wonders of Winter"], coordinates: [-80.5334849, 43.4687026], city: "Waterloo", verifiedFrom: "https://www.wondersofwinter.ca/directions-parking/" },
+  { id: "uw-opt", name: "Optometry", buildingCodes: ["OPT", "OPTOM"], aliases: ["Optometry"], coordinates: [-80.5455298996192, 43.4759251698687], city: "Waterloo", verifiedFrom: source },
+  { id: "waterloo-splitsville", name: "Splitsville Waterloo", buildingCodes: [], aliases: ["Splitsville Waterloo", "341 Marsland Drive"], coordinates: [-80.519316718, 43.483088548], city: "Waterloo", verifiedFrom: "https://www.splitsvillebowl.ca/waterloo" },
   { id: "uw-lib", name: "Dana Porter Arts Library", buildingCodes: ["LIB"], aliases: ["Dana Porter Arts Library", "Dana Porter Library"], coordinates: [-80.5424293, 43.4698444], city: "Waterloo", verifiedFrom: source + "/8" },
   { id: "uw-al", name: "Arts Lecture Hall", buildingCodes: ["AL"], aliases: ["Arts Lecture Hall"], coordinates: [-80.5418714, 43.4689411], city: "Waterloo", verifiedFrom: source + "/9" },
   { id: "uw-rch", name: "J.R. Coutts Engineering Lecture Hall", buildingCodes: ["RCH"], aliases: ["J.R. Coutts Engineering Lecture Hall"], coordinates: [-80.5408414, 43.4703116], city: "Waterloo", verifiedFrom: source + "/11" },
@@ -40,11 +44,18 @@ function normalize(value: string): string {
   return value.toLowerCase().replace(/&/g, " and ").replace(/[^a-z0-9]+/g, " ").trim();
 }
 
-export function resolveMapLocation(input: { locationName: string; buildingCode?: string; description?: string }): MapLocation {
-  const structured = normalize(input.locationName);
+export function resolveMapLocation(input: { locationName: string; buildingCode?: string; description?: string; clubName?: string }): MapLocation {
+  let structured = normalize(input.locationName);
+  // Laurier's published room guide identifies MAC-121 in Milton, the Level
+  // One Lounge in Brantford, and P111 in Peters Building in Waterloo.
+  // Room-only labels remain ambiguous without the institution's context.
+  if (/\blaurier\b/i.test(input.clubName ?? "")) {
+    if (/^(mac 121|level 1 lounge)$/.test(structured)) return { venue: null, locationStatus: "outside" };
+    if (structured === "p111") structured = "peters building";
+  }
   if (/\b(online|virtual|zoom|teams meeting)\b/.test(structured)) return { venue: null, locationStatus: "online" };
-  if (/\b(kitchener|cambridge|toronto|stratford|guelph|elora|st marys)\b/.test(structured)) return { venue: null, locationStatus: "outside" };
-  const generic = isPlaceholderLocation(input.locationName) || /^(waterloo|university of waterloo campus|uwaterloo campus|uw campus|on campus|campus)$/.test(structured);
+  if (/\b(kitchener|cambridge|toronto|stratford|guelph|elora|st marys|milton|brantford|edmonton|university of alberta|one market)\b/.test(structured)) return { venue: null, locationStatus: "outside" };
+  const generic = isPlaceholderLocation(input.locationName) || /^(waterloo|university of waterloo(?: campus)?|uwaterloo campus|uw campus|on campus|campus)$/.test(structured);
   const name = generic ? normalize(input.description ?? input.locationName) : structured;
   // These venues are in Kitchener even when an imported city field says Waterloo.
   // https://www.kitchener.ca/news/posts/community-excitement-inspires-week-long-grand-opening-celebration-to-mark-the-opening-of-cowan-recreation-centre-at-rbj-schlegel-park-november-14-to-22/
@@ -64,5 +75,6 @@ export function resolveMapLocation(input: { locationName: string; buildingCode?:
     return { venue: null, locationStatus: "unlocated" };
   }
   const venue = matches[0] ?? fallback ?? null;
+  if (!venue && generic && /\b(?:virtual|online workshop|online event|held on zoom|via zoom)\b/.test(name)) return { venue: null, locationStatus: "online" };
   return { venue, locationStatus: venue ? venue.city === "outside" ? "outside" : "located" : "unlocated" };
 }

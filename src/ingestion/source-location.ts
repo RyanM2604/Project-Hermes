@@ -16,7 +16,7 @@ export function readSourceLocation(html: string, title: string): SourceLocation 
   $("script[type='application/ld+json']").each((_, node) => {
     try { visit(JSON.parse($(node).text())); } catch { /* Invalid optional metadata does not reject an event. */ }
   });
-  const named = events.filter(event => normalizePlace(String(event.name ?? "")) === normalizePlace(title));
+  const named = events.filter(event => normalizePlace(load(String(event.name ?? "")).text()) === normalizePlace(title));
   const event = named.length === 1 ? named[0] : events.length === 1 && !events[0].name ? events[0] : undefined;
   if (event) {
     const places = Array.isArray(event.location) ? event.location : [event.location];

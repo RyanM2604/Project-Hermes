@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="x-apple-disable-message-reformatting">
+    <title>Confirm your email for Hermes</title>
+    <style>
+      body { margin: 0; padding: 0; }
+      table { border-collapse: collapse; }
+      a:focus-visible { outline: 2px solid #a34e29; outline-offset: 4px; }
+      @media screen and (max-width: 600px) {
+        .outer { padding: 20px 12px !important; }
+        .content { padding: 32px 24px 36px !important; }
+        .headline { font-size: 36px !important; line-height: 40px !important; }
+        .footer { padding: 24px !important; }
+      }
+    </style>
+  </head>
+  <body style="margin:0;padding:0;background-color:#f1f3ef;color:#242922;font-family:Arial,Helvetica,sans-serif;-webkit-text-size-adjust:100%;">
+    <div style="display:none;font-size:1px;line-height:1px;color:#f1f3ef;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">Confirm your email, then find your next plan around Waterloo.</div>
+    <table role="presentation" width="100%" style="width:100%;background-color:#f1f3ef;">
+      <tr>
+        <td class="outer" align="center" style="padding:48px 20px;">
+          <!--[if mso]><table role="presentation" width="560" align="center"><tr><td><![endif]-->
+          <table role="presentation" width="100%" style="width:100%;max-width:560px;background-color:#fafbf8;">
+            <tr><td height="4" bgcolor="#e5a92f" style="height:4px;font-size:0;line-height:0;">&nbsp;</td></tr>
+            <tr>
+              <td class="content" style="padding:40px 44px 44px;">
+                <table role="presentation" style="margin:0 0 42px;">
+                  <tr>
+                    <td style="vertical-align:middle;padding-right:8px;"><img src="https://hermes-uw.vercel.app/hermes-logo.png" width="72" height="41" alt="" style="display:block;border:0;width:72px;height:41px;"></td>
+                    <td style="vertical-align:middle;font-family:Georgia,'Times New Roman',serif;font-size:34px;line-height:41px;letter-spacing:-1px;color:#242922;">hermes<span style="color:#a34e29;">.</span></td>
+                  </tr>
+                </table>
+                <h1 class="headline" style="margin:0 0 22px;font-family:Georgia,'Times New Roman',serif;font-size:44px;line-height:48px;font-weight:400;letter-spacing:-1px;color:#242922;">Your next plan<br>starts here.</h1>
+                <p style="margin:0 0 14px;font-size:16px;line-height:26px;color:#242922;">Welcome to Hermes.</p>
+                <p style="margin:0 0 28px;font-size:16px;line-height:26px;color:#5a655c;">Confirm your email to finish setting up your account. Then discover events, free food, and something worth showing up for around Waterloo.</p>
+                <table role="presentation" style="margin:0 0 26px;">
+                  <tr>
+                    <td bgcolor="#e5a92f" style="border-radius:4px;text-align:center;mso-padding-alt:16px 26px;">
+                      <a href="{{ .ConfirmationURL }}" style="display:inline-block;padding:16px 26px;border:1px solid #e5a92f;border-radius:4px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:20px;font-weight:700;color:#242922;text-decoration:none;text-align:center;mso-padding-alt:0;">Confirm my email</a>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:0;font-size:13px;line-height:21px;color:#5a655c;">Button not working? <a href="{{ .ConfirmationURL }}" style="color:#3f5945;text-decoration:underline;text-underline-offset:3px;">Confirm your email here.</a></p>
+                <table role="presentation" width="100%" style="width:100%;margin-top:32px;">
+                  <tr><td style="border-top:1px solid #c8d2ca;padding-top:24px;">
+                    <p style="margin:0;font-size:13px;line-height:21px;color:#5a655c;">If you didn’t sign up for Hermes, you can safely ignore this email.</p>
+                  </td></tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td class="footer" bgcolor="#e6ebe5" style="padding:26px 44px;">
+                <p style="margin:0 0 6px;font-family:Georgia,'Times New Roman',serif;font-size:20px;line-height:28px;color:#3f5945;">Life happens. Don’t miss it.</p>
+                <p style="margin:0;font-size:12px;line-height:20px;color:#5a655c;">Built by Waterloo students, for Waterloo students.</p>
+              </td>
+            </tr>
+          </table>
+          <!--[if mso]></td></tr></table><![endif]-->
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

@@ -40,7 +40,7 @@ export function torontoDateKey(date: Date): string {
 
 export function filterMapEvents(
   events: MapEvent[], now: Date,
-  filters: { nowOnly?: boolean; tag?: EventTag } = {},
+  filters: { nowOnly?: boolean; upcoming?: boolean; tag?: EventTag } = {},
 ): MapEvent[] {
   const categorized = filters.tag === "free-food"
     ? events.filter(event => event.isFreeFood || event.tags.includes("free-food"))
@@ -51,7 +51,7 @@ export function filterMapEvents(
     const start = new Date(event.startTime);
     const end = new Date(event.endTime);
     return Number.isFinite(+start) && Number.isFinite(+end) && +end > +now &&
-      torontoDateKey(start) <= today && (!filters.nowOnly || +start <= +now) &&
+      (filters.upcoming || torontoDateKey(start) <= today) && (!filters.nowOnly || +start <= +now) &&
       tagged.has(event.id) && event.locationStatus !== "outside";
   });
 }

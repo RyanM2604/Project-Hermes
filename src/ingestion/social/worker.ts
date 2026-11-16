@@ -34,7 +34,7 @@ export interface SocialWorkerOptions {
   prepareImage?: (url: string) => Promise<PreparedImage>;
   storeImage?: (image: PreparedImage) => Promise<{ storagePath: string; publicUrl: string }>;
   classify?: (ids: string[]) => Promise<unknown>;
-  onProgress?: (progress: { stage: string; account?: string; collected?: number; processed?: number; reason?: string }) => void;
+  onProgress?: (progress: { stage: string; account?: string; postId?: string; collected?: number; processed?: number; reason?: string }) => void;
 }
 const addReason = (result: SocialRunSummary, reason: string) => { result.reasons[reason] = (result.reasons[reason] ?? 0) + 1; };
 
@@ -44,6 +44,14 @@ export async function runSocialIngestion(options: SocialWorkerOptions): Promise<
   const extractor = options.extractor ?? createSocialExtractor({ deadline });
   const prepare = options.prepareImage ?? (async (url: string) => (await import("./media")).prepareImage(url));
   const store = options.storeImage ?? (async (image: PreparedImage) => (await import("./media")).storeImage(image));
+  function reportImageFailure(error: unknown, postId: string, account: string) {
+    const code = error && typeof error === "object" && "code" in error ? error.code : undefined;
+    const message = error instanceof Error ? error.message : "";
+    // Do not log signed CDN URLs, raw transport messages, or credentials.
+    const reason = code === "ENOTFOUND" || code === "EAI_AGAIN" ? "image-dns-failed"
+      : ["image-http-error", "image-timeout", "image-too-large", "invalid-image", "unsupported-image-format", "unsafe-image-url", "unsafe-image-address"].includes(message) ? message : "image-preparation-failed";
+    options.onProgress?.({ stage: "image-unavailable", account, postId, reason });
+  }
   const result: SocialRunSummary = { accounts: [], processed: 0, published: 0, held: 0, ignored: 0, failed: 0, imagePending: 0, inputTokens: 0, outputTokens: 0, uploadedImages: 0, eventIds: [], reasons: {}, dryRun: !!options.dryRun, complete: true };
   let accounts = (options.accounts ?? instagramAccounts).filter((account) => account.active && (!options.account || account.instagramHandle.toLowerCase() === options.account.toLowerCase())).sort((a, b) => (a.priority ?? 100) - (b.priority ?? 100));
   if (options.orderAccounts && options.collectPosts !== false && options.cachedPosts === undefined) accounts = await options.orderAccounts(accounts);
@@ -89,7 +97,7 @@ export async function runSocialIngestion(options: SocialWorkerOptions): Promise<
           if (cached && !cached.success) { result.held++; addReason(result, "cached-extraction-missing"); continue; }
           const images: PreparedImage[] = [];
           let missingImages = false;
-          if (!cached?.success) for (const url of post.media) { try { images.push(await prepare(url)); } catch { missingImages = true; } }
+          if (!cached?.success) for (const url of post.media) { try { images.push(await prepare(url)); } catch (error) { missingImages = true; reportImageFailure(error, post.id, post.accountHandle); } }
           const extraction = cached?.success ? { status: "extracted" as const, data: cached.data, inputTokens: 0, outputTokens: 0 } : await extractor.extract({ caption: post.caption, postedAt: post.postedAt, accountName: post.accountName, images });
           result.processed++;
           if (extraction.status === "failed") { result.failed++; addReason(result, extraction.code); continue; }
@@ -138,7 +146,7 @@ export async function runSocialIngestion(options: SocialWorkerOptions): Promise<
       const suppliedIndices: number[] = [];
       for (let i = 0; i < post.mediaUrls.length; i++) {
         try { images.push(await getImage(i)); suppliedIndices.push(i); }
-        catch { unavailableImages = true; }
+        catch (error) { unavailableImages = true; reportImageFailure(error, post.id, post.accountHandle); }
       }
       const response = await extractor.extract({ caption: post.caption, postedAt: post.postedAt?.toISOString() ?? null, accountName: post.accountName, images });
       if (response.status === "failed") throw new Error(response.code);

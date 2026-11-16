@@ -8,7 +8,7 @@ import { mapSavedLocation, type SavedGeocode } from "./geocoding";
 import { isPlaceholderLocation } from "./location";
 
 export async function loadMapSnapshot(now = new Date()): Promise<MapSnapshot> {
-  const events = await getEvents({ throwOnUnavailable: true, startsBefore: new Date(+now + 48 * 60 * 60 * 1000) });
+  const events = await getEvents({ throwOnUnavailable: true });
   let saved = new Map<string, SavedGeocode>();
   if (events.length) {
     try {
@@ -21,16 +21,16 @@ export async function loadMapSnapshot(now = new Date()): Promise<MapSnapshot> {
     return { ...event, ...location, goingCount: null,
       ...(location.venue && isPlaceholderLocation(event.locationName) ? { locationName: location.venue.name } : {}) };
   });
-  const today = filterMapEvents(candidates, now);
+  const active = filterMapEvents(candidates, now, { upcoming: true });
   let counts: Record<string, number> = {};
   let countsAvailable = true;
   try {
-    counts = await loadEventGoingCounts(today.map(event => event.id), { throwOnUnavailable: true });
+    counts = await loadEventGoingCounts(active.map(event => event.id), { throwOnUnavailable: true });
   } catch {
     countsAvailable = false;
   }
   return {
-    events: today.map(event => ({ ...event, goingCount: countsAvailable ? counts[event.id] ?? 0 : null })),
+    events: active.map(event => ({ ...event, goingCount: countsAvailable ? counts[event.id] ?? 0 : null })),
     serverTime: now.toISOString(), refreshedAt: new Date().toISOString(), countsAvailable,
   };
 }

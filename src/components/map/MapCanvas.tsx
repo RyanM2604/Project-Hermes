@@ -74,10 +74,10 @@ export default function MapCanvas({ groups, selectedVenue, onSelect }: {
         map.addLayer({
           id: "event-heat", type: "heatmap", source: "events",
           paint: {
-            // Fixed RSVP scale: even small gatherings get a cool patch, while
-            // larger gatherings develop warm cores. Filters never rescale it.
-            "heatmap-weight": ["interpolate", ["linear"], ["get", "going"],
-              0, 0, 1, 0.35, 5, 0.65, 15, 1.2, 30, 1.8, 60, 2.8, 100, 4],
+            // One RSVP contributes the same weight whether venues are grouped
+            // or overlap. Zero/unavailable counts produce no heat; filters keep
+            // the same scale instead of normalizing to the busiest visible pin.
+            "heatmap-weight": ["*", ["get", "going"], 0.04],
             "heatmap-intensity": 1,
             "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 9, 30, 11, 55, 13, 90, 15, 125, 17, 160],
             "heatmap-opacity": 0.88,

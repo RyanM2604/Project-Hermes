@@ -8,6 +8,27 @@
         "value": "helvetica neue",
         "createdAt": "2026-11-05T19:18:43.083Z",
         "reason": "User requested a GUI matching real iPhones; the phone mockup uses the iOS system font stack to reproduce Messages."
+      },
+      {
+        "rule": "design-system-font",
+        "value": "arial",
+        "createdAt": "2026-11-16T00:20:06.073Z",
+        "reason": "Agent chose Arial as an email-safe fallback for the static Supabase auth email; email clients cannot reliably load the website DM Sans font."
+      },
+      {
+        "rule": "tight-leading",
+        "value": "*",
+        "files": [
+          "supabase/templates/confirmation.html"
+        ],
+        "createdAt": "2026-11-16T00:21:27.696Z",
+        "reason": "Agent verified body copy uses 1.62–1.67 line height. Compact leading is intentional only for the large Georgia display heading, single-line wordmark/button, hidden preheader, and spacer; desktop/mobile screenshots reviewed with no clipping."
+      },
+      {
+        "rule": "overused-font",
+        "value": "arial",
+        "createdAt": "2026-11-16T00:21:27.747Z",
+        "reason": "Agent chose Arial as the email-safe body fallback for this Supabase auth template; reliable email-client rendering takes precedence over loading a distinctive web font. Existing Hermes branding is preserved."
       }
     ]
   }

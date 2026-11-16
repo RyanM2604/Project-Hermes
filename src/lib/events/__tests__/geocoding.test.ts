@@ -15,6 +15,7 @@ describe("automatic event locations", () => {
   it("fingerprints the input and does not search city-only or absent venues", () => {
     expect(locationKey(event)).not.toBe(locationKey({ ...event, locationName: "Elsewhere" }));
     expect(geocodingQuery({ locationName: "Revive Karaoke, 28 King St N, Waterloo, ON" })).toBe("28 King St N, Waterloo, ON");
+    expect(geocodingQuery({ locationName: "RARE Nightclub – 24 King St N, Waterloo, ON" })).toBe("24 King St N, Waterloo, ON");
     expect(geocodingQuery({ locationName: "Waterloo" })).toBeNull();
     expect(geocodingQuery({ locationName: "See source for location" })).toBeNull();
     expect(geocodingQuery({ locationName: "for Stock the Bank, WUSA’s annual food drive!" })).toBeNull();

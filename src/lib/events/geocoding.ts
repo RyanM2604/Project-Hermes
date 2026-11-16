@@ -4,7 +4,7 @@ import { isPlaceholderLocation, resolveEventLocation } from "./location";
 import { resolveMapLocation } from "./map-venues";
 import type { MapLocation } from "./map";
 
-export interface LocationInput { locationName: string; buildingCode?: string; description?: string; sourceUrl?: string }
+export interface LocationInput { locationName: string; buildingCode?: string; description?: string; sourceUrl?: string; clubName?: string }
 export interface SavedGeocode {
   locationKey: string; status: string; latitude: number | null; longitude: number | null;
   displayName: string | null; source: string;
@@ -51,7 +51,7 @@ export function geocodingQuery(input: LocationInput): string | null {
     .replace(/\b\d{1,5}-(?=\d{1,6}\s+[a-z])/gi, "").replace(/\s+/g, " ").trim();
   // Search the civic address when a business name precedes it. Providers may
   // know the building even when a tenant is absent from their place index.
-  return cleaned.replace(/^.*?,\s*(?=\d{1,6}[a-z]?\s+[a-z])/i, "");
+  return cleaned.replace(/^.*?(?:,\s*|\s+[–—-]\s+)(?=\d{1,6}[a-z]?\s+[a-z])/i, "");
 }
 
 function streetKey(value: string): string {

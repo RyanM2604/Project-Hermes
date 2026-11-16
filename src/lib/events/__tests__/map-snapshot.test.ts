@@ -42,8 +42,8 @@ describe("public map snapshot", () => {
     vi.mocked(getEvents).mockRejectedValue(new Error("offline"));
     await expect(loadMapSnapshot(now)).rejects.toThrow("offline");
   });
-  it("excludes tomorrow and confirmed outside-city events but retains unknown locations", async () => {
+  it("includes upcoming locations while excluding confirmed outside-city events", async () => {
     vi.mocked(getEvents).mockResolvedValue([event, { ...event, id: "outside", locationName: "Kitchener City Hall" }, { ...event, id: "unknown", locationName: "TBA" }, { ...event, id: "tomorrow", startTime: "2026-11-15T05:00:00Z", endTime: "2026-11-15T06:00:00Z" }]);
-    expect((await loadMapSnapshot(now)).events.map(e => e.id)).toEqual(["event", "unknown"]);
+    expect((await loadMapSnapshot(now)).events.map(e => e.id)).toEqual(["event", "unknown", "tomorrow"]);
   });
 });

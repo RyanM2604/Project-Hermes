@@ -66,6 +66,14 @@ npm run ingest:events -- --backfill-images --dry-run
 ```
 
 Retry/re-extraction work from saved posts without another Apify collection.
+If an `image-unavailable` progress entry reports `image-dns-failed`, the saved
+image hostname could not resolve. `not-due` is a normal collection scheduling
+skip, not a failure. Retrying saved posts cannot refresh expired CDN URLs: use
+normal collection with `retry_failed` off when the account is due. If collection
+returns changed media URLs for a pending/failed image error, the worker resets
+its retry allowance while preserving saved extraction. Completed posts remain
+cached. Older posts outside the collection window still require an explicit
+backfill; a fresh URL must come from the source, not a guessed CDN hostname.
 `--reclassify` runs classification only. These three state-changing operations
 cannot be combined with dry-run. Inspection does not start ingestion.
 Account/source scopes also constrain image backfill and classification recovery.

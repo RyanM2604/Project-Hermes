@@ -25,7 +25,7 @@ export function EventMap({ isAuthenticated }: { isAuthenticated: boolean }) {
   const [problem, setProblem] = useState<string | null>(null);
   const [connected, setConnected] = useState(false);
   const [refreshing, setRefreshing] = useState(true);
-  const [nowOnly, setNowOnly] = useState(false);
+  const [period, setPeriod] = useState<"upcoming" | "today" | "now">("upcoming");
   const [tag, setTag] = useState<EventTag>();
   const [selection, setSelection] = useState<string | null>(null);
   const [listOpen, setListOpen] = useState(true);
@@ -125,7 +125,7 @@ export function EventMap({ isAuthenticated }: { isAuthenticated: boolean }) {
     };
   }, []);
 
-  const events = useMemo(() => snapshot && clock ? filterMapEvents(snapshot.events, new Date(clock), { nowOnly, tag }) : [], [snapshot, clock, nowOnly, tag]);
+  const events = useMemo(() => snapshot && clock ? filterMapEvents(snapshot.events, new Date(clock), { upcoming: period === "upcoming", nowOnly: period === "now", tag }) : [], [snapshot, clock, period, tag]);
   const groups = useMemo(() => groupMapEvents(events), [events]);
   const selected = selection?.startsWith("event:") ? events.filter(event => `event:${event.id}` === selection) : events.filter(event => event.venue?.id === selection);
   const unlocated = events.filter(event => event.locationStatus === "unlocated");
@@ -139,7 +139,7 @@ export function EventMap({ isAuthenticated }: { isAuthenticated: boolean }) {
     const ongoing = clock && +new Date(event.startTime) <= clock;
     const timeLabel = ongoing
       ? +new Date(event.endTime) - +new Date(event.startTime) > 86400000 ? "Ongoing" : "On now"
-      : timeFormatter.format(new Date(event.startTime));
+      : (period === "upcoming" ? previewTimeFormatter : timeFormatter).format(new Date(event.startTime));
     const venueLabel = event.locationStatus === "online" ? "Online" : event.venue?.name ?? event.locationName;
     return <li key={event.id}>
       <button className="hm-map-event" type="button" aria-pressed={active} onClick={() => { setSelection(event.venue?.id ?? `event:${event.id}`); setListOpen(true); }}>
@@ -167,7 +167,7 @@ export function EventMap({ isAuthenticated }: { isAuthenticated: boolean }) {
         </div>
       </header>
       <div className="hm-map-toolbar">
-        <div className="hm-map-period" role="group" aria-label="Event time"><button type="button" aria-pressed={!nowOnly} onClick={() => setNowOnly(false)}>Today</button><button type="button" aria-pressed={nowOnly} onClick={() => setNowOnly(true)}>Happening now</button></div>
+        <div className="hm-map-period" role="group" aria-label="Event time"><button type="button" aria-pressed={period === "upcoming"} onClick={() => setPeriod("upcoming")}>Upcoming</button><button type="button" aria-pressed={period === "today"} onClick={() => setPeriod("today")}>Today</button><button type="button" aria-pressed={period === "now"} onClick={() => setPeriod("now")}>Happening now</button></div>
         <div className="hm-map-filter-options">
           <label className="hm-map-category"><span>Category</span><select aria-label="Category" value={tag ?? ""} onChange={event => setTag(parseEventTag(event.target.value))}><option value="">All categories</option>{eventTagFilters.map(item => <option key={item.tag} value={item.tag}>{item.label}</option>)}</select></label>
         </div>
@@ -177,11 +177,11 @@ export function EventMap({ isAuthenticated }: { isAuthenticated: boolean }) {
       <div className="hm-map-workspace">
         <div className="hm-map-surface"><MapCanvas groups={groups} selectedVenue={selected[0]?.venue?.id ?? null} onSelect={selectVenue} /></div>
         <aside className="hm-map-sidebar" aria-label="Events in Waterloo">
-          <div className="hm-map-list-head"><h2 id="map-events" tabIndex={-1}>{nowOnly ? "On right now" : "On today"} <span>{events.length}</span></h2><button type="button" className="hm-map-list-toggle" aria-expanded={listOpen} aria-controls="map-event-list" onClick={() => setListOpen(value => !value)}>{listOpen ? "Hide" : "Show"} list<ChevronDown size={16} /></button></div>
+          <div className="hm-map-list-head"><h2 id="map-events" tabIndex={-1}>{period === "now" ? "On right now" : period === "today" ? "On today" : "Upcoming events"} <span>{events.length}</span></h2><button type="button" className="hm-map-list-toggle" aria-expanded={listOpen} aria-controls="map-event-list" onClick={() => setListOpen(value => !value)}>{listOpen ? "Hide" : "Show"} list<ChevronDown size={16} /></button></div>
           <div id="map-event-list" className="hm-map-list-body" data-open={listOpen}>
             {selected.length > 0 && <section className="hm-map-preview" aria-label="Selected events"><div className="hm-map-preview-head"><h3>{selected[0].venue?.name ?? "Event details"}</h3><button type="button" aria-label="Close event preview" onClick={() => setSelection(null)}><X size={18} /></button></div>{selected.map(event => <article key={event.id}><p className="hm-map-event-time">{previewTimeFormatter.format(new Date(event.startTime))} – {previewTimeFormatter.format(new Date(event.endTime))}{event.endTimeEstimated && " (estimated end)"}</p><h4>{event.title}</h4><p>{event.clubName} · {event.locationName}</p><p><strong>{event.goingCount === null ? "Going count unavailable" : `${event.goingCount} going`}</strong></p><Link href={`/events/${event.id}`}>Event details <ArrowUpRight size={15} /></Link><RSVPButton eventId={event.id} isAuthenticated={isAuthenticated} onSuccess={refresh} /></article>)}</section>}
-            <p className="hm-map-result-count" role="status" aria-live="polite">{snapshot ? `${groups.length} mapped ${groups.length === 1 ? "venue" : "venues"}${unlocated.length ? ` · ${unlocated.length} not mapped yet` : ""}` : refreshing ? "Finding today’s events…" : "Events couldn’t load."}</p>
-            {snapshot && events.length === 0 && <div className="hm-map-empty"><h3>{nowOnly ? "A quiet moment." : "No events to show yet."}</h3><p>{nowOnly ? "Try Today to find something coming up." : tag ? "Try another category." : "Check back later or explore upcoming events."}</p>{nowOnly ? <button type="button" onClick={() => setNowOnly(false)}>See today’s events</button> : <Link href="/events">Explore upcoming events <ArrowUpRight size={15} /></Link>}</div>}
+            <p className="hm-map-result-count" role="status" aria-live="polite">{snapshot ? `${groups.length} mapped ${groups.length === 1 ? "venue" : "venues"}${unlocated.length ? ` · ${unlocated.length} not mapped yet` : ""}` : refreshing ? "Finding events…" : "Events couldn’t load."}</p>
+            {snapshot && events.length === 0 && <div className="hm-map-empty"><h3>{period === "now" ? "A quiet moment." : "No events to show yet."}</h3><p>{period === "now" ? "Try Today to find something coming up." : tag ? "Try another category." : "Check back later or explore upcoming events."}</p>{period === "now" ? <button type="button" onClick={() => setPeriod("today")}>See today’s events</button> : <Link href="/events">Explore upcoming events <ArrowUpRight size={15} /></Link>}</div>}
             {snapshot && events.length > 0 && groups.length === 0 && <p className="hm-map-list-note">These events don’t have confirmed map locations yet. Their details are available below.</p>}
             <ul className="hm-map-event-list">{events.filter(event => event.locationStatus === "located").map(eventRow)}</ul>
             {unlocated.length > 0 && <section><h3 className="hm-map-section-label">Not on the map yet <span>{unlocated.length}</span></h3><p className="hm-map-list-note">Locations are listed below; map pins aren’t available yet.</p><ul className="hm-map-event-list">{unlocated.map(eventRow)}</ul></section>}
@@ -189,7 +189,7 @@ export function EventMap({ isAuthenticated }: { isAuthenticated: boolean }) {
           </div>
         </aside>
       </div>
-      <footer className="hm-map-footer"><p>Heat reflects “Going” RSVPs on Hermes, not checked-in attendance. Events with no RSVPs still appear as pins.</p><a href="https://uwaterloo.ca/map/" target="_blank" rel="noreferrer">Campus locations: University of Waterloo <ArrowUpRight size={13} /></a></footer>
+      <footer className="hm-map-footer"><p>Heat reflects “Going” RSVPs across the selected events and dates, not checked-in attendance. Events with no RSVPs still appear as pins.</p><a href="https://uwaterloo.ca/map/" target="_blank" rel="noreferrer">Campus locations: University of Waterloo <ArrowUpRight size={13} /></a></footer>
     </div>
   </main>;
 }

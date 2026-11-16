@@ -3,6 +3,10 @@ import { readSourceLocation } from "../source-location";
 import { wusaIcsSource } from "../sources/wusa-ics";
 
 describe("source-supplied location facts", () => {
+  it("matches HTML-encoded source titles before reading the assigned venue", () => {
+    const html = `<script type="application/ld+json">${JSON.stringify({ "@type": "Event", name: "Club &#8211; Paint &amp; Sip", location: { name: "Optometry, OPTOM 1129" } })}</script>`;
+    expect(readSourceLocation(html, "Club – Paint & Sip")?.locationName).toBe("Optometry, OPTOM 1129");
+  });
   it("preserves an iCalendar GEO pair", () => {
     const [event] = wusaIcsSource.parse("BEGIN:VEVENT\nUID:geo-test\nSUMMARY:Meetup\nURL:https://wusa.ca/event/test\nDTSTART:20261114T180000Z\nDTEND:20261114T200000Z\nLOCATION:Campus venue\nGEO:43.472;-80.54\nEND:VEVENT");
     expect(event).toMatchObject({ ok: true, event: { latitude: 43.472, longitude: -80.54 } });

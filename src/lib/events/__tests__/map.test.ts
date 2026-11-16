@@ -15,6 +15,23 @@ function event(overrides: Partial<MapEvent> = {}): MapEvent {
 }
 
 describe("Waterloo map", () => {
+  it("shows every active event in Upcoming without changing Today or Now", () => {
+    const tomorrow = event({ id: "tomorrow", startTime: "2026-11-15T20:00:00Z", endTime: "2026-11-15T22:00:00Z" });
+    expect(filterMapEvents([event(), tomorrow], now, { upcoming: true }).map(e => e.id)).toEqual(["one", "tomorrow"]);
+    expect(filterMapEvents([event(), tomorrow], now).map(e => e.id)).toEqual(["one"]);
+  });
+  it("recovers explicit campus venues and virtual attendance from missing location text", () => {
+    expect(resolveMapLocation({ locationName: "See source for location", description: "Location: OPTOM 1129" }).venue?.id).toBe("uw-opt");
+    expect(resolveMapLocation({ locationName: "See source for location", description: "Coffee chats (virtual)." }).locationStatus).toBe("online");
+    expect(resolveMapLocation({ locationName: "SLC", description: "Bring an online ticket" }).locationStatus).toBe("located");
+    expect(resolveMapLocation({ locationName: "Gaming Lounge, Milton Campus" }).locationStatus).toBe("outside");
+    expect(resolveMapLocation({ locationName: "One Market Student Commons" }).locationStatus).toBe("outside");
+    expect(resolveMapLocation({ locationName: "P111", clubName: "Laurier Student Life" }).venue?.id).toBe("wlu-peters");
+    expect(resolveMapLocation({ locationName: "P111" }).venue).toBeNull();
+    expect(resolveMapLocation({ locationName: "MAC-121", clubName: "Laurier Student Life" }).locationStatus).toBe("outside");
+    expect(resolveMapLocation({ locationName: "Level 1 Lounge", clubName: "Laurier Student Life" }).locationStatus).toBe("outside");
+    expect(resolveMapLocation({ locationName: "See source for location", description: "Meet in SLC with a virtual option" }).locationStatus).toBe("located");
+  });
   it("uses Toronto dates on both daylight-saving transitions", () => {
     expect(torontoDateKey(new Date("2026-03-08T04:30:00Z"))).toBe("2026-03-07");
     expect(torontoDateKey(new Date("2026-03-08T07:30:00Z"))).toBe("2026-03-08");

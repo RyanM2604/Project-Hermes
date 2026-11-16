@@ -16,6 +16,10 @@ on:
         description: Retry saved failed/held posts without recollecting (turn dry_run off)
         type: boolean
         default: false
+      refresh_media:
+        description: Fetch fresh Instagram media now for one account (set account; turn dry_run and retry_failed off)
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -35,6 +39,7 @@ jobs:
       INGEST_ACCOUNT: ${{ inputs.account || '' }}
       INGEST_DRY_RUN: ${{ inputs.dry_run || false }}
       INGEST_RETRY: ${{ inputs.retry_failed || false }}
+      INGEST_REFRESH_MEDIA: ${{ inputs.refresh_media || false }}
       APIFY_MAX_RUN_USD: ${{ vars.APIFY_MAX_RUN_USD || '0.50' }}
       APIFY_MAX_MONTH_USD: ${{ vars.APIFY_MAX_MONTH_USD || '15' }}
       EVENT_IMAGES_BUCKET: event-images
@@ -51,6 +56,10 @@ jobs:
       - name: Check worker configuration
         shell: bash
         run: |
+          if [ "$INGEST_REFRESH_MEDIA" = "true" ] && { [ -z "$INGEST_ACCOUNT" ] || [ "$INGEST_DRY_RUN" = "true" ] || [ "$INGEST_RETRY" = "true" ]; }; then
+            echo "::error::Media refresh requires one account, dry_run off, and retry_failed off."
+            exit 1
+          fi
           names=(DATABASE_URL)
           if [ "$INGEST_DRY_RUN" != "true" ]; then
             names+=(OPENAI_API_KEY NEXT_PUBLIC_SUPABASE_URL SUPABASE_SERVICE_ROLE_KEY)
@@ -65,5 +74,6 @@ jobs:
           args=()
           if [ "$INGEST_DRY_RUN" = "true" ]; then args+=(--dry-run); fi
           if [ "$INGEST_RETRY" = "true" ]; then args+=(--retry); fi
+          if [ "$INGEST_REFRESH_MEDIA" = "true" ]; then args+=(--refresh-media); fi
           if [ -n "$INGEST_ACCOUNT" ]; then args+=(--account "$INGEST_ACCOUNT"); fi
           npm run ingest:events -- "${args[@]}"

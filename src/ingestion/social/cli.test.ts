@@ -5,6 +5,12 @@ import { backfillLocations } from "../geocode-events";
 import { backfillImages, createWorkerBudget, parseWorkerArgs, runWorkerCli, workerEventScope, workerExitCode } from "./cli";
 
 describe("worker arguments", () => {
+  it("requires a single live account for fresh media recovery", () => {
+    expect(parseWorkerArgs(["--account", "yourstudentsunion", "--refresh-media"])).toMatchObject({ account: "yourstudentsunion", refreshMedia: true, socialOnly: true });
+    for (const args of [["--refresh-media"], ["--account", "club", "--refresh-media", "--dry-run"], ["--account", "club", "--refresh-media", "--retry"], ["--account", "club", "--refresh-media", "--inspect"], ["--account", "club", "--refresh-media", "--reextract"], ["--account", "club", "--refresh-media", "--reclassify"]]) {
+      expect(() => parseWorkerArgs(args)).toThrow("refresh-media-requires-live-account-collection");
+    }
+  });
   it("supports scoped location backfill and rejects conflicting operations", () => {
     expect(parseWorkerArgs(["--backfill-locations", "--official", "--dry-run"])).toMatchObject({ backfillLocations: true, officialOnly: true, dryRun: true });
     expect(() => parseWorkerArgs(["--backfill-locations", "--backfill-images"])).toThrow();
@@ -70,9 +76,16 @@ const classificationResult = { attemptedCount: 2, classifiedCount: 1, fallbackCo
 const env = () => { vi.stubEnv("DATABASE_URL", "postgresql://test"); vi.stubEnv("GITHUB_STEP_SUMMARY", ""); vi.spyOn(console, "log").mockImplementation(() => {}); };
 afterEach(() => { vi.clearAllMocks(); vi.restoreAllMocks(); vi.unstubAllEnvs(); });
 function fakeClient() {
-  return { socialPost: { updateMany: vi.fn(), findMany: vi.fn().mockResolvedValue([]) }, socialEventMapping: { findMany: vi.fn().mockResolvedValue([{ eventId: "mapped-event" }]) }, event: { findMany: vi.fn().mockResolvedValue([]), updateMany: vi.fn().mockResolvedValue({ count: 1 }) }, $disconnect: vi.fn() };
+  return { socialPost: { updateMany: vi.fn(), findMany: vi.fn().mockResolvedValue([]), count: vi.fn().mockResolvedValue(0) }, socialEventMapping: { findMany: vi.fn().mockResolvedValue([{ eventId: "mapped-event" }]) }, event: { findMany: vi.fn().mockResolvedValue([]), updateMany: vi.fn().mockResolvedValue({ count: 1 }) }, $disconnect: vi.fn() };
 }
 describe("CLI orchestration", () => {
+  it("does not report recovered media when fresh collection misses a failed post", async () => {
+    env(); vi.spyOn(console, "warn").mockImplementation(() => {}); const client = fakeClient(); client.socialPost.count.mockResolvedValue(1);
+    const runSocial = vi.fn(async () => emptySocial);
+    expect(await runWorkerCli(["--account", "yourstudentsunion", "--refresh-media"], { createClient: () => client as unknown as PrismaClient, loadEnv: vi.fn(), runSocial })).toBe(1);
+    expect(client.socialPost.count).toHaveBeenCalledWith({ where: { accountHandle: "yourstudentsunion", status: { in: ["pending", "failed"] }, lastError: { in: ["image-preparation-failed", "image-storage-pending"] } } });
+    expect(console.log).toHaveBeenCalledWith(expect.stringContaining('"remainingPosts": 1'));
+  });
   it("backfills stored locations without collection, uploads, or classification", async () => {
     env(); const client = fakeClient(); const runOfficial = vi.fn(), runSocial = vi.fn(), classify = vi.fn();
     expect(await runWorkerCli(["--backfill-locations", "--official"], { createClient: () => client as unknown as PrismaClient, loadEnv: vi.fn(), runOfficial, runSocial, classify })).toBe(0);

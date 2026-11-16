@@ -21,7 +21,7 @@ export function collectionWindow(lastSuccessAt: Date | null, lastReviewAt: Date 
 
 export function createIncrementalCollector(client: PrismaClient, options: {
   deadline: number; nowMs?: () => number; fetchCollection?: typeof fetchApifyCollection; readRun?: typeof getApifyRun;
-  runBudgetUsd?: string; monthBudgetUsd?: string;
+  runBudgetUsd?: string; monthBudgetUsd?: string; refreshMedia?: boolean;
 }) {
   const nowMs = options.nowMs ?? Date.now;
   const workflowId = randomUUID();
@@ -54,7 +54,7 @@ export function createIncrementalCollector(client: PrismaClient, options: {
       // work inside it. Split by billing account only if throughput warrants it.
       await tx.$executeRaw`SELECT pg_advisory_xact_lock(80411235)`;
       const state = await tx.socialCollectionState.upsert({ where: { accountHandle: account.instagramHandle }, create: { accountHandle: account.instagramHandle }, update: {} });
-      if (+state.nextCheckAt > +now) throw new ApifyCollectionDeferredError("not-due");
+      if (!options.refreshMedia && +state.nextCheckAt > +now) throw new ApifyCollectionDeferredError("not-due");
       if (state.leaseUntil && +state.leaseUntil > +now) throw new ApifyCollectionDeferredError("collection-busy");
       const previous = await tx.apifyCollectionRun.findFirst({ where: { accountHandle: account.instagramHandle, processedAt: null, providerRunId: { not: null } }, orderBy: { createdAt: "desc" } });
       if (previous) {
@@ -68,9 +68,10 @@ export function createIncrementalCollector(client: PrismaClient, options: {
       const runSpent = rows.filter(row => row.workflowId === workflowId).reduce((sum, row) => sum + cost(row), 0);
       // Conservative allowance for detailed posts; provider-side caps remain
       // authoritative if prices change. No subscription/other-actor charges here.
-      const micros = Math.max(5000, Math.ceil(state.resultsLimit * 0.0027 * 1.15 * 1_000_000));
+      const resultsLimit = options.refreshMedia ? 96 : state.resultsLimit;
+      const micros = Math.max(5000, Math.ceil(resultsLimit * 0.0027 * 1.15 * 1_000_000));
       if (micros > runLimit - runSpent || micros > monthLimit - monthSpent) { summary.budgetDeferred++; throw new ApifyCollectionDeferredError("budget-limit"); }
-      const row = await tx.apifyCollectionRun.create({ data: { id: randomUUID(), workflowId, accountHandle: account.instagramHandle, reservedMicros: micros, resultsLimit: state.resultsLimit, createdAt: now } });
+      const row = await tx.apifyCollectionRun.create({ data: { id: randomUUID(), workflowId, accountHandle: account.instagramHandle, reservedMicros: micros, resultsLimit, createdAt: now } });
       await tx.socialCollectionState.update({ where: { accountHandle: account.instagramHandle }, data: { leaseUntil: new Date(+now + 5 * 60_000) } });
       return { state, row, micros };
     });
@@ -82,6 +83,11 @@ export function createIncrementalCollector(client: PrismaClient, options: {
       await client.socialCollectionState.update({ where: { accountHandle: account.instagramHandle }, data: { ...data, leaseUntil: null } });
     };
     try {
+      if (options.refreshMedia) {
+        const failed = await client.socialPost.findFirst({ where: { accountHandle: account.instagramHandle, status: { in: ["pending", "failed"] }, lastError: { in: ["image-preparation-failed", "image-storage-pending"] }, postedAt: { not: null } }, orderBy: { postedAt: "asc" }, select: { postedAt: true } });
+        // Include the failed post even when it predates the incremental checkpoint.
+        window.since = new Date(Math.min(+window.since, +coveredUntil - 7 * 24 * HOUR, failed?.postedAt ? +failed.postedAt - 6 * HOUR : Infinity));
+      }
       const result = await (options.fetchCollection ?? fetchApifyCollection)(createInstagramSource(account), {
         runId: row.providerRunId ?? undefined, resultsLimit: row.resultsLimit, onlyPostsNewerThan: window.since.toISOString(), maxTotalChargeUsd: micros / 1_000_000, deadline: options.deadline,
         onStarted: async run => { await client.apifyCollectionRun.update({ where: { id: row.id }, data: { providerRunId: run.id } }); },

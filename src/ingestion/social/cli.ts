@@ -15,10 +15,10 @@ import { EXTRACTION_VERSION } from "./extraction";
 import { createIncrementalCollector } from "./collection";
 import { backfillLocations } from "../geocode-events";
 
-export interface WorkerArgs { account?: string; dryRun: boolean; inspect: boolean; retry: boolean; reextract: boolean; reclassify: boolean; backfillImages: boolean; backfillLocations: boolean; setupStorage: boolean; socialOnly: boolean; officialOnly: boolean; help: boolean }
+export interface WorkerArgs { account?: string; refreshMedia: boolean; dryRun: boolean; inspect: boolean; retry: boolean; reextract: boolean; reclassify: boolean; backfillImages: boolean; backfillLocations: boolean; setupStorage: boolean; socialOnly: boolean; officialOnly: boolean; help: boolean }
 export function parseWorkerArgs(args: string[]): WorkerArgs {
-  const result: WorkerArgs = { dryRun: false, inspect: false, retry: false, reextract: false, reclassify: false, backfillImages: false, backfillLocations: false, setupStorage: false, socialOnly: false, officialOnly: false, help: false };
-  const flags: Record<string, keyof WorkerArgs> = { "--dry-run": "dryRun", "--inspect": "inspect", "--retry": "retry", "--reextract": "reextract", "--reclassify": "reclassify", "--backfill-images": "backfillImages", "--backfill-locations": "backfillLocations", "--setup-storage": "setupStorage", "--social": "socialOnly", "--official": "officialOnly", "--help": "help" };
+  const result: WorkerArgs = { refreshMedia: false, dryRun: false, inspect: false, retry: false, reextract: false, reclassify: false, backfillImages: false, backfillLocations: false, setupStorage: false, socialOnly: false, officialOnly: false, help: false };
+  const flags: Record<string, keyof WorkerArgs> = { "--refresh-media": "refreshMedia", "--dry-run": "dryRun", "--inspect": "inspect", "--retry": "retry", "--reextract": "reextract", "--reclassify": "reclassify", "--backfill-images": "backfillImages", "--backfill-locations": "backfillLocations", "--setup-storage": "setupStorage", "--social": "socialOnly", "--official": "officialOnly", "--help": "help" };
   for (let i = 0; i < args.length; i++) {
     if (args[i] === "--account") {
       if (result.account) throw new Error("duplicate-account-option");
@@ -28,6 +28,7 @@ export function parseWorkerArgs(args: string[]): WorkerArgs {
     } else if (flags[args[i]]) Object.assign(result, { [flags[args[i]]]: true });
     else throw new Error(`unknown-option:${args[i]}`);
   }
+  if (result.refreshMedia && (!result.account || result.dryRun || result.retry || result.reextract || result.reclassify || result.inspect || result.backfillImages || result.backfillLocations || result.setupStorage || result.officialOnly)) throw new Error("refresh-media-requires-live-account-collection");
   if (result.socialOnly && result.officialOnly) throw new Error("conflicting-source-options");
   if (result.account && result.officialOnly) throw new Error("account-requires-social-source");
   if ([result.inspect, result.backfillImages, result.backfillLocations, result.setupStorage].filter(Boolean).length > 1) throw new Error("conflicting-operation-options");
@@ -124,7 +125,7 @@ function aggregateClassifications(results: ClassifyEventsResult[]): ClassifyEven
 export async function runWorkerCli(argv = process.argv.slice(2), dependencies: WorkerCliDependencies = {}): Promise<number> {
   const options = parseWorkerArgs(argv);
   if (options.help) {
-    console.log("Usage: npm run ingest:events -- [--social|--official] [--account HANDLE] [--dry-run] [--inspect] [--retry|--reextract] [--reclassify] [--backfill-images|--backfill-locations] [--setup-storage]");
+    console.log("Usage: npm run ingest:events -- [--social|--official] [--account HANDLE] [--dry-run] [--inspect] [--retry|--reextract|--refresh-media] [--reclassify] [--backfill-images|--backfill-locations] [--setup-storage]");
     return 0;
   }
   if (options.account && !instagramAccounts.some((account) => account.active && account.instagramHandle.toLowerCase() === options.account)) throw new Error("unknown-account");
@@ -180,7 +181,7 @@ export async function runWorkerCli(argv = process.argv.slice(2), dependencies: W
     let reconciled = 0;
     if (!options.dryRun && !options.account && !options.reclassify && budget.processingRemainingMs() > 0) reconciled = await (dependencies.reconcile ?? reconcileCanonicalEvents)(client);
     let social: SocialRunSummary | null = null;
-    const collector = !options.officialOnly && !options.reclassify && !options.dryRun && !options.retry && !options.reextract ? createIncrementalCollector(client, { nowMs, deadline: budget.processingDeadline }) : null;
+    const collector = !options.officialOnly && !options.reclassify && !options.dryRun && !options.retry && !options.reextract ? createIncrementalCollector(client, { nowMs, deadline: budget.processingDeadline, refreshMedia: options.refreshMedia }) : null;
     if (!options.officialOnly && !options.reclassify) {
       if (budget.processingRemainingMs() === 0) budgetExhausted = true;
       else {
@@ -215,12 +216,14 @@ export async function runWorkerCli(argv = process.argv.slice(2), dependencies: W
       if (budget.remainingMs() < 30_000) budgetExhausted = true;
     }
     const classification = aggregateClassifications(classificationResults);
-    const exitCode = workerExitCode({ officialFailed, imagesFailed, classificationFailed: classification?.failedCount, budgetExhausted, social }) || (locations?.failed ? 1 : 0);
+    const mediaRefresh = options.refreshMedia ? { remainingPosts: await client.socialPost.count({ where: { accountHandle: options.account, status: { in: ["pending", "failed"] }, lastError: { in: ["image-preparation-failed", "image-storage-pending"] } } }) } : null;
+    if (mediaRefresh?.remainingPosts) console.warn(`::warning::Media refresh incomplete: ${mediaRefresh.remainingPosts} posts still need usable source images for ${options.account}.`);
+    const exitCode = workerExitCode({ officialFailed, imagesFailed, classificationFailed: classification?.failedCount, budgetExhausted, social }) || (locations?.failed || mediaRefresh?.remainingPosts ? 1 : 0);
     const unavailable = social?.accounts.filter(account => account.skipped && !["not-due", "collection-busy"].includes(account.reason ?? "")) ?? [];
     const outcome = exitCode ? "incomplete" : (unavailable.length || collector?.summary.partial) ? "completed_with_warnings" : "completed";
     for (const account of unavailable) console.warn(`::warning::Instagram account ${account.handle}: ${account.reason}`);
-    console.log(JSON.stringify({ outcome, dryRun: options.dryRun, collection: collector?.summary ?? null, official, social, classification, locations, reconciled, budgetExhausted }, null, 2));
-    if (process.env.GITHUB_STEP_SUMMARY) await appendFile(process.env.GITHUB_STEP_SUMMARY, `## Event ingestion\n\n- Mode: ${options.dryRun ? "dry run (nothing published)" : "publish"}\n- Outcome: ${outcome}\n- Unavailable accounts: ${unavailable.map(account => `${account.handle} (${account.reason})`).join(", ") || "none"}\n- Budget exhausted: ${budgetExhausted}\n- Paid collection calls: ${collector?.summary.calls ?? 0}\n- Settled Apify cost: $${(collector?.summary.settledUsd ?? 0).toFixed(4)}\n- Partial collection windows: ${collector?.summary.partial ?? 0}\n- Processed social posts: ${social?.processed ?? 0}\n- Published/upserted events: ${social?.published ?? 0}\n- Held posts: ${social?.held ?? 0}\n- Failed posts: ${social?.failed ?? 0}\n- Uploaded images: ${social?.uploadedImages ?? 0}\n- Pending images: ${social?.imagePending ?? 0}\n- Classification failures: ${classification?.failedCount ?? 0}\n- Extraction tokens: ${(social?.inputTokens ?? 0) + (social?.outputTokens ?? 0)}\n- Result: ${exitCode ? "partial failure or unfinished work; inspect logs" : "success"}\n`);
+    console.log(JSON.stringify({ outcome, dryRun: options.dryRun, collection: collector?.summary ?? null, official, social, classification, locations, mediaRefresh, reconciled, budgetExhausted }, null, 2));
+    if (process.env.GITHUB_STEP_SUMMARY) await appendFile(process.env.GITHUB_STEP_SUMMARY, `## Event ingestion\n\n- Mode: ${options.dryRun ? "dry run (nothing published)" : "publish"}\n- Outcome: ${outcome}\n- Unavailable accounts: ${unavailable.map(account => `${account.handle} (${account.reason})`).join(", ") || "none"}\n- Budget exhausted: ${budgetExhausted}\n- Paid collection calls: ${collector?.summary.calls ?? 0}\n- Settled Apify cost: $${(collector?.summary.settledUsd ?? 0).toFixed(4)}\n- Partial collection windows: ${collector?.summary.partial ?? 0}\n- Processed social posts: ${social?.processed ?? 0}\n- Published/upserted events: ${social?.published ?? 0}\n- Held posts: ${social?.held ?? 0}\n- Failed posts: ${social?.failed ?? 0}\n- Uploaded images: ${social?.uploadedImages ?? 0}\n- Pending images: ${social?.imagePending ?? 0}\n- Media refresh unresolved posts: ${mediaRefresh?.remainingPosts ?? "not requested"}\n- Classification failures: ${classification?.failedCount ?? 0}\n- Extraction tokens: ${(social?.inputTokens ?? 0) + (social?.outputTokens ?? 0)}\n- Result: ${exitCode ? "partial failure or unfinished work; inspect logs" : "success"}\n`);
     return exitCode;
   } finally { await client.$disconnect(); }
 }

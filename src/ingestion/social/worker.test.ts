@@ -71,14 +71,14 @@ describe("durable social worker", () => {
     expect(repository.publish).toHaveBeenCalledOnce(); expect(repository.saveExtraction).not.toHaveBeenCalled();
     expect(repository.finish).toHaveBeenCalledWith(post, "pending", "image-storage-pending"); expect(result.imagePending).toBe(1);
   });
-  it("reports a safe per-post DNS diagnostic and preserves failures for retry", async () => {
+  it.each([["ENOTFOUND", "image-dns-failed"], ["ENETUNREACH", "image-enetunreach"], ["ERR_MODULE_NOT_FOUND", "image-err_module_not_found"]])("reports a safe per-post %s diagnostic and preserves failures for retry", async (code, reason) => {
     const { repository, post } = setup(); post.mediaUrls = ["https://cdn.example/broken.jpg?secret=token"];
     const onProgress = vi.fn();
     const result = await runSocialIngestion({ repository, accounts: [], onProgress,
-      prepareImage: async () => { throw Object.assign(new Error("getaddrinfo ENOTFOUND private-host"), { code: "ENOTFOUND" }); },
+      prepareImage: async () => { throw Object.assign(new Error("private-host?secret=token"), { code }); },
       extractor: { extract: async () => ({ status: "extracted", data: { disposition: "not-event", events: [], reason: null }, model: "test", inputTokens: 0, outputTokens: 0 }) },
     });
-    expect(onProgress).toHaveBeenCalledWith({ stage: "image-unavailable", account: "club", postId: "post", reason: "image-dns-failed" });
+    expect(onProgress).toHaveBeenCalledWith({ stage: "image-unavailable", account: "club", postId: "post", reason });
     expect(JSON.stringify(onProgress.mock.calls)).not.toMatch(/secret|private-host/);
     expect(result.failed).toBe(1);
     expect(repository.fail).toHaveBeenCalledWith(post, "image-preparation-failed", expect.any(Date));

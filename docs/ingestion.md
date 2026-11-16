@@ -58,6 +58,7 @@ npm run ingest:events -- --account uwcheeseclub     # One configured account
 npm run ingest:events -- --inspect                 # Status, evidence, held reasons
 npm run ingest:events -- --account uwcheeseclub --inspect
 npm run ingest:events -- --retry                    # Retry held/failed saved posts
+npm run ingest:events -- --account yourstudentsunion --refresh-media # Fetch fresh URLs, bypass schedule
 npm run ingest:events -- --reextract                # Explicitly re-extract saved posts
 npm run ingest:events -- --reclassify               # Classification only
 npm run ingest:events -- --backfill-images          # Upcoming event source images
@@ -68,12 +69,20 @@ npm run ingest:events -- --backfill-images --dry-run
 Retry/re-extraction work from saved posts without another Apify collection.
 If an `image-unavailable` progress entry reports `image-dns-failed`, the saved
 image hostname could not resolve. `not-due` is a normal collection scheduling
-skip, not a failure. Retrying saved posts cannot refresh expired CDN URLs: use
-normal collection with `retry_failed` off when the account is due. If collection
+skip, not a failure. Retrying saved posts cannot refresh expired CDN URLs. For
+recovery now, select one `account`, turn `dry_run` and `retry_failed` off, and turn
+`refresh_media` on in the manual workflow (CLI: `--account HANDLE --refresh-media`).
+This bypasses only the schedule, expands the window to include dated media
+failures, and fetches up to 96 posts under the existing run/month spending caps
+and account lease. It does not change global schedules or raise budgets. If the
+source omits the post or still supplies unusable URLs, `mediaRefresh.remainingPosts`
+reports unresolved media failures and the run remains unsuccessful. If collection
 returns changed media URLs for a pending/failed image error, the worker resets
 its retry allowance while preserving saved extraction. Completed posts remain
-cached. Older posts outside the collection window still require an explicit
-backfill; a fresh URL must come from the source, not a guessed CDN hostname.
+cached. Normal collection keeps its existing incremental window; a fresh URL
+must come from the source, not a guessed CDN hostname. Recovery requires a dated
+post within the bounded returned results; deleted, undated, or older omitted
+posts can require separate source review.
 `--reclassify` runs classification only. These three state-changing operations
 cannot be combined with dry-run. Inspection does not start ingestion.
 Account/source scopes also constrain image backfill and classification recovery.

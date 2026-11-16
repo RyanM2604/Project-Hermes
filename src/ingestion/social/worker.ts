@@ -49,6 +49,7 @@ export async function runSocialIngestion(options: SocialWorkerOptions): Promise<
     const message = error instanceof Error ? error.message : "";
     // Do not log signed CDN URLs, raw transport messages, or credentials.
     const reason = code === "ENOTFOUND" || code === "EAI_AGAIN" ? "image-dns-failed"
+      : typeof code === "string" && ["ENETUNREACH", "EHOSTUNREACH", "ECONNRESET", "ECONNREFUSED", "ETIMEDOUT", "ERR_MODULE_NOT_FOUND", "MODULE_NOT_FOUND", "ERR_DLOPEN_FAILED"].includes(code) ? `image-${code.toLowerCase()}`
       : ["image-http-error", "image-timeout", "image-too-large", "invalid-image", "unsupported-image-format", "unsafe-image-url", "unsafe-image-address"].includes(message) ? message : "image-preparation-failed";
     options.onProgress?.({ stage: "image-unavailable", account, postId, reason });
   }
